@@ -1,0 +1,101 @@
+import express from 'express';
+import { verifyToken, verifyTokenNotStrict } from '../middleware/auth.js';
+import Post from '../models/Post.js';
+import User from '../models/User.js';
+import Comment from '../models/Comment.js';
+import { formatComment, formatPost } from '../tools/formater.js';
+
+const router = express.Router();
+
+// Post
+router.post('/', verifyToken, async (req, res) => {
+  const newPost = new Post({ author: req.user._id, text: req.body.text });
+  try {
+    const savedPost = await newPost.save();
+    res.status(201).json(savedPost);
+  } catch (err) {
+    res.status(500).json({ message: err.messege });
+  }
+});
+
+// Comment
+router.post('/comment/', verifyToken, async (req, res) => {
+  const newComment = new Comment({ author: req.user._id, text: req.body.text, parent: req.body.parent });
+  try {
+    const saveComment = await newComment.save();
+    res.status(201).json(await formatComment(saveComment));
+  } catch (err) {
+    res.status(500).json({ message: err.messege });
+  }
+})
+
+// Like post
+router.patch('/:post/like', verifyToken, async (req, res) => {
+  const postId = req.params.post;
+  const post = await Post.findById(postId);
+  const userId = req.user._id;
+
+  if (!post) return res.status(404).json({message: "Post not found"});
+
+  const hasLiked = post.likes.includes(userId);
+
+  if (!hasLiked) post.likes.push(userId);
+  else post.likes.pull(userId);
+
+  await post.save();
+  res.json({ likes: post.likes.length, liked: !hasLiked });
+})
+
+// Like comment
+router.patch('/comment/:comment/like', verifyToken, async (req, res) => {
+  const commentId = req.params.comment;
+  const comment = await Comment.findById(commentId);
+  const userId = req.user._id;
+
+  if (!comment) return res.status(404).json({message: "Comment not found"});
+
+  const hasLiked = comment.likes.includes(userId);
+
+  if (!hasLiked) comment.likes.push(userId);
+  else comment.likes.pull(userId);
+
+  await comment.save();
+  res.json({ likes: comment.likes.length, liked: !hasLiked });
+})
+
+// Get post
+router.get('/:post', verifyTokenNotStrict, async (req, res) => {
+  const postId = req.params.post;
+
+  const unpost = await Post.findById(postId);
+  if (!unpost) return res.status(404).json({message: "Post not found"});
+
+  res.json(await formatPost(unpost, req.user?._id));
+})
+
+// Get comments
+router.get('/:id/comments', verifyTokenNotStrict, async (req, res) => {
+  const id = req.params.id;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 3;
+  const skip = (page - 1) * limit;
+  
+  try {
+    const comments = await Comment.find({parent: id}).sort({ createdAt: -1 }).skip(skip).limit(limit);
+    const total = await Comment.countDocuments({parent: id});
+    
+    const commentsWithAuthors = await Promise.all(
+      comments.map(async (uncomment) => await formatComment(uncomment, req.user?._id))
+    );
+
+    res.json({
+      comments: commentsWithAuthors,
+      hasMore: skip + comments.length < total,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+    console.log(err);
+  }
+})
+
+export default router;
