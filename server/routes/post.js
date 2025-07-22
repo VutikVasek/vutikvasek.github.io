@@ -3,7 +3,8 @@ import { verifyToken, verifyTokenNotStrict } from '../middleware/auth.js';
 import Post from '../models/Post.js';
 import User from '../models/User.js';
 import Comment from '../models/Comment.js';
-import { formatComment, formatPost } from '../tools/formater.js';
+import { formatComment, formatPopularComment, formatPost } from '../tools/formater.js';
+import { Types } from 'mongoose';
 
 const router = express.Router();
 
@@ -79,19 +80,68 @@ router.get('/:id/comments', verifyTokenNotStrict, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 3;
   const skip = (page - 1) * limit;
+  const sortByPopularity = req.query.sort == "popular";
   
   try {
-    const comments = await Comment.find({parent: id}).sort({ createdAt: -1 }).skip(skip).limit(limit);
-    const total = await Comment.countDocuments({parent: id});
-    
-    const commentsWithAuthors = await Promise.all(
-      comments.map(async (uncomment) => await formatComment(uncomment, req.user?._id))
-    );
+    if (!sortByPopularity) {
+      const comments = await Comment.find({parent: id}).sort({ createdAt: -1 }).skip(skip).limit(limit);
+      const total = await Comment.countDocuments({parent: id});
+      
+      const commentsWithAuthors = await Promise.all(
+        comments.map(async (uncomment) => await formatComment(uncomment, req.user?._id))
+      );
 
-    res.json({
-      comments: commentsWithAuthors,
-      hasMore: skip + comments.length < total,
-    });
+      res.json({
+        comments: commentsWithAuthors,
+        hasMore: skip + comments.length < total,
+      });
+    } else {
+      const comments = await Comment.aggregate([
+        { $match: { parent: new Types.ObjectId(id) } },
+        { $addFields: {
+            likesCount: { $size: { $ifNull: ["$likes", []] } }
+          }
+        },
+        { $lookup: {
+            from: "users",
+            localField: "author",
+            foreignField: "_id",
+            as: "author"
+          }
+        },
+        { $addFields: {
+            author: {
+              $cond: {
+                if: { $gt: [{ $size: "$author" }, 0] },
+                then: {
+                  _id: { $arrayElemAt: ["$author._id", 0] },
+                  username: { $arrayElemAt: ["$author.username", 0] }
+                },
+                else: {
+                  _id: "<deleted>",
+                  username: "<deleted>"
+                }
+              }
+            }
+          }
+        },
+        { $unwind: "$author" },
+        { $sort:  { likesCount: -1, createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit }
+      ]);
+  
+      const total = await Comment.countDocuments({parent: id});
+      
+      const commentsWithAuthors = await Promise.all(
+        comments.map(async (unpost) => await formatPopularComment(unpost, req.user?._id))
+      );
+  
+      res.json({
+        comments: commentsWithAuthors,
+        hasMore: skip + comments.length < total,
+      });
+    }
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
     console.log(err);

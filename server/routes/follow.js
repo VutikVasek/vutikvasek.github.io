@@ -1,0 +1,37 @@
+import express from 'express';
+import { verifyToken } from '../middleware/auth.js';
+import User from '../models/User.js';
+import Follow from '../models/Follow.js';
+
+const router = express.Router();
+
+router.post('/', verifyToken, async (req, res) => {
+  const user  = await User.findById(req.body.following);
+  if (!user) return res.status(404).json({ message: "Trying to follow non-existent user"});
+  try {
+    const follow = await Follow.create({ follower: req.user._id, following: req.body.following });
+    res.status(201).json({ message: "User succesfuly followed" });
+  } catch (err) {
+    res.status(500).json({ message: err || "Server error" });
+  } 
+})
+
+router.delete('/delete', verifyToken, async (req, res) => {
+  try {
+    await Follow.findOneAndDelete({ follower: req.user._id, following: req.body.following });
+    res.status(201).json({ message: "User succesfuly unfollowed" });
+  } catch (err) {
+    res.status(500).json({ message: err || "Server error" });
+  } 
+});
+
+router.patch('/change', verifyToken, async (req, res) => {
+  try {
+    await Follow.findOneAndUpdate({ follower: req.user._id, following: req.body.following }, { notify: req.body.notify });
+    res.status(201).json({ message: "Notification changed" });
+  } catch (err) {
+    res.status(500).json({ message: err || "Server error" });
+  } 
+})
+
+export default router;

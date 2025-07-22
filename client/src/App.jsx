@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
-import Feed from './pages/Feed';
+import FeedPage from './pages/FeedPage';
 import Account from './pages/Account';
 import PostPage from './pages/PostPage';
 import Credentials from './pages/Credentials';
@@ -52,11 +52,11 @@ function App() {
         </div>
       </nav>
       <Routes>
-        <Route path="/" element={<Feed />} />
+        <Route path="/" element={<FeedPage />} />
+        <Route path="/feed" element={<FeedPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/verify" element={<Verified />} />
-        <Route path="/feed" element={<Feed />} />
         <Route path="/post" element={<PostPage />} />
         <Route path="/account">
           <Route index element={<Account />} />

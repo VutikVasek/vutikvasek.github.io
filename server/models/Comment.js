@@ -5,7 +5,6 @@ const CommentSchema = new mongoose.Schema({
   parent: { type: mongoose.Schema.Types.ObjectId, required: true},
   text: { type: String, required: true },
   likes: [{type: mongoose.Schema.Types.ObjectId}],
-  comments: [{type: mongoose.Schema.Types.ObjectId}],
   createdAt: { type: Date, default: Date.now }
 });
 

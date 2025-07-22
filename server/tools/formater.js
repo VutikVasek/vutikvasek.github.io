@@ -1,35 +1,58 @@
 import Comment from "../models/Comment.js";
 
-export const formatPost = async (unpost, userId) => {
-  const post = (await unpost.populate('author', 'username _id')).toObject();
-  if (!post.author) 
-    post.author = { username: "<deleted>", _id: "<deleted>" };
-  else post.author._id = post.author._id.toString();
+export const formatFeedPost = async (unpost, userId) => {
+  const post = {...unpost};
+  try {
+    if (userId && post.likes) post.liked = post.likes.some(id => id.toString() === userId.toString());
 
-  // if (post.author.username == username) post.liked = post.likes.some(id => id.toString() === post.author._id.toString());
-  if (userId) post.liked = post.likes.some(id => id.toString() === userId.toString());
+    post.likes = post.likesCount;
+    post.comments = (await Comment.find({parent: post._id})).length;
 
-  post.likes = post.likes.length;
-  post.comments = (await Comment.find({parent: post._id})).length;
-
-  return {
-    ...post,
-    author: {username: post.author.username, pfp: post.author._id},
-  };
+    return {
+      ...post,
+      author: {username: post.author.username, pfp: post.author._id},
+    };
+  } catch (err) {
+    console.log(err);
+  }
 }
 
-export const formatPostWithUser = async (unpost, user) => {
-  const post = unpost.toObject();
+export const formatPost = async (unpost, userId) => {
+  try {
+    const post = (await unpost.populate('author', 'username _id')).toObject();
+    if (!post.author) 
+      post.author = { username: "<deleted>", _id: "<deleted>" };
+    else post.author._id = post.author._id.toString();
 
-  if (user) post.liked = post.likes.some(id => id.toString() === user._id.toString());
+    if (userId && post.likes) post.liked = post.likes.some(id => id.toString() === userId.toString());
 
-  post.likes = post.likes.length;
-  post.comments = (await Comment.find({parent: post._id})).length;
+    post.likes = post.likes.length;
+    post.comments = (await Comment.find({parent: post._id})).length;
 
-  return {
-    ...post,
-    author: {username: user.username, pfp: user._id},
-  };
+    return {
+      ...post,
+      author: {username: post.author.username, pfp: post.author._id},
+    };
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export const formatPopularComment = async (uncomment, userId) => {
+  const comment = {...uncomment};
+  try {
+    if (userId && comment.likes) comment.liked = comment.likes.some(id => id.toString() === userId.toString());
+
+    comment.likes = comment.likesCount;
+    comment.comments = (await Comment.find({parent: comment._id})).length;
+
+    return {
+      ...comment,
+      author: {username: comment.author.username, pfp: comment.author._id},
+    };
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 export const formatComment = async (uncomment, userId) => {
@@ -38,7 +61,6 @@ export const formatComment = async (uncomment, userId) => {
     comment.author = { username: "<deleted>", _id: "<deleted>" };
   else comment.author._id = comment.author._id.toString();
 
-  // if (comment.author.username == username) comment.liked = comment.likes.some(id => id.toString() === comment.author._id.toString());
   if (userId) comment.liked = comment.likes.some(id => id.toString() === userId.toString());
 
   comment.likes = comment.likes.length

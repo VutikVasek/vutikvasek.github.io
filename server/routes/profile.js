@@ -1,43 +1,40 @@
 import express from 'express';
 import User from '../models/User.js';
-import Post from '../models/Post.js';
-import { formatPostWithUser } from '../tools/formater.js';
+import Follow from '../models/Follow.js';
+import { getFeed } from './feed.js';
+import { verifyTokenNotStrict } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get("/user/:username", async (req, res) => {
+router.get("/user/:username",  verifyTokenNotStrict, async (req, res) => {
   const username = req.params.username;
   const user = await User.findOne({username: username});
   if (!user) return res.status(404).json({ message: `No user with username ${username} was found`});
 
-  res.json({ username: user.username, bio: user.bio, pfp: user._id.toString(), createdAt: user.createdAt });
+  const followers = await Follow.countDocuments({following: user._id});
+  const following = await Follow.countDocuments({follower: user._id});
+
+  const follow = await Follow.findOne({follower: req.user._id, following: user._id});
+
+  res.json({username: user.username, 
+            bio: user.bio, 
+            pfp: user._id.toString(), 
+            createdAt: user.createdAt, 
+            logged: !!req.user, 
+            logFollows: !!follow, 
+            notify: follow?.notify,
+            followers,
+            following,
+            itsme: user._id == req.user?._id });
 })
 
-router.get("/posts/:username", async (req, res) => {
+router.get("/posts/:username", verifyTokenNotStrict, async (req, res) => {
   const username = req.params.username;
   const user = await User.findOne({username});
 
   if (!user) return res.status(404).json({ message: `No user with username ${username} was found`});
   
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
-
-  try {
-    const posts = await Post.find({author: user._id}).sort({ createdAt: -1 }).skip(skip).limit(limit);
-    const total = await Post.countDocuments();
-    
-    const postsWithAuthors = await Promise.all(
-      posts.map(async (postDB) => await formatPostWithUser(postDB, user))
-    );
-
-    res.json({
-      posts: postsWithAuthors,
-      hasMore: skip + posts.length < total,
-    });
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
-  }
+  getFeed(req, res, {author: user._id});
 })
 
 export default router;

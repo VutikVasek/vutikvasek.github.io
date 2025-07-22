@@ -10,6 +10,7 @@ export default function PostFull() {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [reply, setReply] = useState('');
+  const [sortByPopular, setSortByPopular] = useState(false);
 
   const loadPost = async () => {
     const res = await fetch(`http://localhost:5000/api/post/${postId}`, {
@@ -83,7 +84,11 @@ export default function PostFull() {
             ></textarea>
             <button className="bg-green-300 px-4 h-10" onClick={handleReply}>Reply</button>
         </div>
-        <CommentThread parentId={post._id} comments={comments} setComments={setComments} infiniteScroll={true} />
+        <div className='flex gap-4'>
+          <button onClick={() => setSortByPopular(false)} className={!sortByPopular ? 'font-semibold' : ''}>Newest</button>
+          <button onClick={() => setSortByPopular(true)} className={sortByPopular ? 'font-semibold' : ''}>Best</button>
+        </div>
+        <CommentThread parentId={post._id} comments={comments} setComments={setComments} infiniteScroll={true} sortByPopular={sortByPopular} />
       </div>
     </>
   )

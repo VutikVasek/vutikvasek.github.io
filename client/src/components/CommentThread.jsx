@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 import Comment from "./Comment";
 
-export default function CommentThread({ parentId, comments, setComments, infiniteScroll }) {
+export default function CommentThread({ parentId, comments, setComments, infiniteScroll, sortByPopular }) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const infinite = !!infiniteScroll;
+  const popular = !!sortByPopular;
   var observer = useRef();
 
-  const loadComments = async () => {
-    const res = await fetch(`http://localhost:5000/api/post/${parentId}/comments?page=${page}&limit=3}`, {
+  const loadComments = async (reload) => {
+    const res = await fetch(`http://localhost:5000/api/post/${parentId}/comments?page=${reload ? 1 : page}&limit=3${popular && "&sort=popular"}`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
@@ -18,8 +19,11 @@ export default function CommentThread({ parentId, comments, setComments, infinit
     const data = await res.json();
 
     if (res.ok) {
-      setComments(old => [...old, ...data.comments].filter(
-          (comment, index, self) => index === self.findIndex(p => p._id === comment._id)));
+      if (reload) {
+        setComments(data.comments);
+        setPage(1);
+      } else setComments(old => [...old, ...data.comments].filter(
+                (comment, index, self) => index === self.findIndex(p => p._id === comment._id)));
       setHasMore(data.hasMore);
     } else console.log(data.message);
   }
@@ -29,8 +33,13 @@ export default function CommentThread({ parentId, comments, setComments, infinit
   }, []);
 
   useEffect(() => {
-    loadComments();
+    if (page != 1)
+      loadComments();
   }, [page])
+
+  useEffect(() => {
+    loadComments(true);
+  }, [sortByPopular]);
 
   const handleMore = async () => {
     setPage(val => val+1);

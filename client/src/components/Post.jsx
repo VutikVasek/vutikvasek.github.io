@@ -28,7 +28,7 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
   }
 
   return (
-    <div className="w-full max-w-3xl p-4 m-2 shadow whitespace-pre-wrap flex" ref={ref}>
+    <div className="w-full p-4 m-2 shadow whitespace-pre-wrap flex" ref={ref}>
       <div className='gap-2 flex flex-col'>
         <Link to={`/u/${post.author.username}`} className='flex items-center gap-2 w-fit'>
           <img src={`http://localhost:5000/media/pfp/${post.author.pfp}.jpeg`} alt="pfp" className='rounded-full w-10'

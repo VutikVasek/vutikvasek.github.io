@@ -1,71 +1,124 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import Post from "../components/Post";
+import { Link, useParams } from "react-router-dom";
+import { MdKeyboardArrowDown, MdNotificationsActive, MdNotificationsOff } from "react-icons/md";
+import { RiUserUnfollowLine } from "react-icons/ri";
+import Feed from "../components/Feed";
 
 export default function Profile() {
   const { username } = useParams();
   const [userData, setUserData] = useState({});
-  const [posts, setPosts] = useState([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-
-  const observer = useRef();
-  const navigate = useNavigate();
-    
-  const loadPosts = async () => {
-
-    const res = await fetch(`http://localhost:5000/api/profile/posts/${username}?page=${page}&limit=5`, {
-      method: 'GET',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      }
-    });
-    const data = await res.json();
-
-    if (!res.ok) return;
-
-    setPosts((prev) => [...prev, ...data.posts]);
-    setHasMore(data.hasMore);
-  };
-  
-  useEffect(() => {
-    loadPosts();
-  }, [page]);
-  
-  const lastPostRef = useCallback((node) => {
-    if (!hasMore) return;
-
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setPage((prev) => prev + 1);
-      }
-    });
-
-    if (node) observer.current.observe(node);
-  }, [hasMore]);
+  const [following, setFollowing] = useState(FollowType.silent);
+  const [changingFollowing, setChangingFollowing] = useState(false);
 
   useEffect(() => {
     if (username == "<deleted>") {
       setUserData({username: "This account was deleted"});
       return;
     }
-    fetch(`http://localhost:5000/api/profile/user/${username}`)
+    fetch(`http://localhost:5000/api/profile/user/${username}`, {
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      }})
       .then(res => res.json())
       .then(data => setUserData(data))
       .catch(err => console.log(err));
   }, [username]);
 
   useEffect(() => {
-    userData.createdAt = new Date(userData.createdAt).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'long',
-    });
+    // console.log(userData);
+    setUserData(data => {
+      data.createdAt = new Date(data.createdAt).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'long',
+      });
+      return data;
+    })
+    if (!userData.logged) setFollowing(FollowType.login);
+    else if (userData.itsme) setFollowing(FollowType.me);
+    else if (!userData.logFollows) setFollowing(FollowType.follow);
+    else if (userData.notify) setFollowing(FollowType.notify);
+    else setFollowing(FollowType.silent)
   }, [userData]);
 
   if (!userData) return <p>Loading...</p>;
+
+  const handleFollow = async () => {
+    const res = await fetch('http://localhost:5000/api/follow', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`},
+      body: JSON.stringify({ following: userData.pfp })
+    });
+
+    const data = await res.json();
+    if (!res.ok) return console.log(data.message);
+    setFollowing(FollowType.silent);
+  }
+
+  const handleChangeFollow = async (notify) => {
+    if (notify == (following == FollowType.notify)) return setChangingFollowing(false);
+
+    const res = await fetch('http://localhost:5000/api/follow/change', {
+      method: 'PATCH',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`},
+      body: JSON.stringify({ following: userData.pfp, notify: notify})
+    });
+
+    const data = await res.json();
+    if (!res.ok) return console.log(data.message);
+
+    setFollowing(notify ? FollowType.notify : FollowType.silent);
+    setChangingFollowing(false);
+  }
+
+  const handleUnfollow = async () => {
+    const res = await fetch('http://localhost:5000/api/follow/delete', {
+      method: 'DELETE',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`},
+      body: JSON.stringify({ following: userData.pfp })
+    });
+
+    const data = await res.json();
+    if (!res.ok) return console.log(data.message);
+
+    setFollowing(FollowType.follow);
+    setChangingFollowing(false);
+  }
+
+  const getFollowButton = () => {
+    switch (following) {
+      case FollowType.login:
+        return (<Link to="/login">Login to follow</Link>);
+      case FollowType.me:
+        return (<Link to="/account">Edit profile</Link>);
+      case FollowType.follow:
+        return (<button onClick={handleFollow}>Follow</button>);
+      default:
+        return (
+          <>
+            <button onClick={() => setChangingFollowing(val => !val)} className="flex items-center gap-1">
+              {following == FollowType.notify ? (<MdNotificationsActive />) : (<MdNotificationsOff />)}
+              Following <MdKeyboardArrowDown />
+            </button>
+            {changingFollowing && (
+              <div className="w-0 h-0 overflow-visible">
+                <div className="bg-gray-300 w-fit p-2 relative flex flex-col whitespace-nowrap">
+                  <button className="flex w-fit items-center gap-1" onClick={() => handleChangeFollow(true)}><MdNotificationsActive />All</button>
+                  <button className="flex w-fit items-center gap-1" onClick={() => handleChangeFollow(false)}><MdNotificationsOff />Silent</button>
+                  <button className="flex w-fit items-center gap-1" onClick={handleUnfollow}><RiUserUnfollowLine />Unfollow</button>
+                </div>
+              </div>)}
+          </>
+        )
+    }
+  }
 
   return (
     <>
@@ -73,17 +126,20 @@ export default function Profile() {
         onError={(e) => {e.target.onError = null;e.target.src="http://localhost:5000/media/pfp/default.jpeg"}} />
       <p>{userData.username}</p>
       <p>{userData.bio}</p>
+      <p>Followers: {userData.followers}</p>
+      <p>Following: {userData.following}</p>
       <p>{userData.pfp ? "Since" : ""} {userData.createdAt}</p>
+      {getFollowButton()}
 
-
-      <div className="flex flex-col items-center">
-        {posts.map((post, index) => (
-          <Post 
-            post={post} 
-            key={post._id}
-            ref={index === posts.length - 1 ? lastPostRef : null}/>
-        ))}
-      </div>
+      <Feed url={`http://localhost:5000/api/profile/posts/${username}`} />
     </>
   );
+}
+
+const FollowType = {
+  follow: 0,
+  notify: 1,
+  silent: 2,
+  login: 3,
+  me: 4
 }
