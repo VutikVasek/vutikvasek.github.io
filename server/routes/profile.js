@@ -16,7 +16,7 @@ router.get("/user/:username",  verifyTokenNotStrict, async (req, res) => {
   const followers = await Follow.countDocuments({following: user._id});
   const following = await Follow.countDocuments({follower: user._id});
 
-  const follow = await Follow.findOne({follower: req.user._id, following: user._id});
+  const follow = await Follow.findOne({follower: req.user?._id, following: user._id});
 
   res.json({username: user.username, 
             bio: user.bio, 
@@ -41,6 +41,56 @@ router.get("/posts/:username", verifyTokenNotStrict, async (req, res) => {
 
 router.get("/comments/:id", verifyTokenNotStrict, async (req, res) => {
   getComments(req, res, { author: new Types.ObjectId(req.params.id) })
+})
+
+router.get("/user/:username/following", verifyTokenNotStrict, async (req, res) => {
+  try {
+    const username = req.params.username;
+    const user = await User.findOne({username: username});
+    if (!user) return res.status(404).json({ message: `No user with username ${username} was found`});
+
+    const following = await Follow.find({ follower: user._id }).populate('following');
+    const users = await Promise.all(following.map(async follow => {
+      const follows = await Follow.findOne({ follower: req.user?._id, following: follow.following });
+      return {
+        username: follow.following.username,
+        pfp: follow.following._id.toString(),
+        follows: !!follows,
+        notify: follows?.notify,
+        itsme: req.user?._id == follow.following._id
+      }
+    }))
+    const followingList = {userList: users, logged: !!req.user}
+    res.json(followingList);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: err});
+  }
+})
+
+router.get("/user/:username/followers", verifyTokenNotStrict, async (req, res) => {
+  try {
+    const username = req.params.username;
+    const user = await User.findOne({username: username});
+    if (!user) return res.status(404).json({ message: `No user with username ${username} was found`});
+
+    const followers = await Follow.find({ following: user._id }).populate('follower');
+    const users = await Promise.all(followers.map(async follow => {
+      const follows = await Follow.findOne({ follower: req.user?._id, following: follow.following });
+      return {
+        username: follow.follower.username,
+        pfp: follow.follower._id.toString(),
+        follows: !!follows,
+        notify: follows?.notify,
+        itsme: req.user?._id == follow.follower._id
+      }
+    }))
+    const followerList = {userList: users, logged: !!req.user}
+    res.json(followerList);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: err});
+  }
 })
 
 export default router;

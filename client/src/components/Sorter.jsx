@@ -1,16 +1,39 @@
 import { useEffect, useState } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
-export default function Sorter({sort, setSort, timeframe, setTimeframe}) {
+export default function Sorter({url, sortBy, time, defaultSort, defaultTime}) {
+  const [sort, setSort] = useState(sortBy);
+  const [timeframe, setTimeframe] = useState(time);
   const [showSort, setShowSort] = useState(false);
   const [showTimeframe, setShowTimeframe] = useState(false);
+
+  const navigate = useNavigate();
   
   useEffect(() => {
     setShowSort(false);
+    navigateQuery();
   }, [sort])
   useEffect(() => {
     setShowTimeframe(false);
+    navigateQuery();
   }, [timeframe])
+  useEffect(() => {
+    setSort(sortBy);
+    setTimeframe(time);
+  }, [sortBy, time])
+
+  const navigateQuery = () => {
+    if (defaultSort != "popular")
+      if (sort == SortType.popular) navigate(`${url}?sort=popular&time=${timeframe}`)
+      else navigate(url);
+    else {
+      if (sort == SortType.popular) {
+        if (timeframe == defaultTime) navigate(url);
+        else navigate(`${url}?sort=popular&time=${timeframe}`);
+      } else navigate(`${url}?sort=newest`)
+    }
+  }
   
   const getTimeframe = (frame) => {
     switch (frame || timeframe) {

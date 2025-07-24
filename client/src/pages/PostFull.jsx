@@ -1,19 +1,24 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom"
+import { useLocation, useParams, useSearchParams } from "react-router-dom"
 import Post from "../components/Post";
 import CommentThread from "../components/CommentThread";
 import { validateComment } from "../tools/validate";
 import Sorter from "../components/Sorter";
 
 export default function PostFull() {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const sort = queryParams.get('sort') || "popular"
+  const timeframe = queryParams.get('time') || "all"
+  
   const { postId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [reply, setReply] = useState('');
-  
-  const [sort, setSort] = useState("popular");
-  const [timeframe, setTimeframe] = useState("all");
+  const [replyError, setReplyError] = useState('');
+
+  if (postId == "<deleted>") return "This post was deleted";
 
   const loadPost = async () => {
     const res = await fetch(`http://localhost:5000/api/post/${postId}`, {
@@ -26,7 +31,10 @@ export default function PostFull() {
     const data = await res.json();
 
     if (res.ok) setPost(data);
-    else console.log(data.message);
+    else {
+      console.log(data.message);
+      setReplyError("Post not found");
+    };
   }
 
   
@@ -43,7 +51,7 @@ export default function PostFull() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify({ text: reply, parent: postId }),
+      body: JSON.stringify({ text: reply.trim(), parent: postId }),
     });
     const data = await res.json();
 
@@ -59,7 +67,7 @@ export default function PostFull() {
     loadPost();
   }, []);
 
-  if (!post) return "Loading...";
+  if (!post) return (replyError || "Loading...");
 
   const focus = (node) => {
     if (searchParams.get('focus')) {
@@ -86,10 +94,11 @@ export default function PostFull() {
             ref={focus}
             ></textarea>
             <button className="bg-green-300 px-4 h-10" onClick={handleReply}>Reply</button>
+            {replyError}
         </div>
         <div style={{width: '80%'}}>
           <div className="flex justify-end">
-            <Sorter sort={sort} setSort={setSort} timeframe={timeframe} setTimeframe={setTimeframe} />
+            <Sorter url={location.pathname} sortBy={sort} time={timeframe} defaultSort={"popular"} defaultTime={"all"} />
           </div>
           <CommentThread parentId={post._id} comments={comments} setComments={setComments} infiniteScroll={true} sort={sort} timeframe={timeframe} />
         </div>

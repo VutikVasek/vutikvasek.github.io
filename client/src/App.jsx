@@ -53,7 +53,9 @@ function App() {
       </nav>
       <Routes>
         <Route path="/" element={<FeedPage />} />
+        <Route path="/:following" element={<FeedPage />} />
         <Route path="/feed" element={<FeedPage />} />
+        <Route path="/feed/:following" element={<FeedPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/verify" element={<Verified />} />

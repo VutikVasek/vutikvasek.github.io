@@ -41,15 +41,42 @@ export const formatPost = async (unpost, userId) => {
 
 export const formatPopularComment = async (uncomment, userId, linkParent) => {
   const comment = {...uncomment};
+  if (userId && comment.likes) comment.liked = comment.likes.some(id => id.toString() === userId.toString());
+
+  return formatCommentObject(comment, linkParent)
+}
+
+export const formatComment = async (uncomment, userId, linkParent) => {
+  const comment = (await uncomment.populate('author', 'username _id')).toObject();
+  if (!comment.author) 
+    comment.author = { username: "<deleted>", _id: "<deleted>" };
+  else comment.author._id = comment.author._id.toString();
+
+  if (userId) comment.liked = comment.likes.some(id => id.toString() === userId.toString());
+
+  return formatCommentObject(comment, linkParent)
+}
+
+const formatCommentObject = async (comment, linkParent) => {
   try {
-    if (userId && comment.likes) comment.liked = comment.likes.some(id => id.toString() === userId.toString());
-
-    comment.likes = comment.likesCount;
+    comment.likes = comment.likes.length
     comment.comments = (await Comment.find({parent: comment._id})).length;
-
+    
     if (linkParent) {
       let parent = await Post.findById(comment.parent).select('parent').populate('author', 'username');
-      if (!parent) parent = await Comment.findById(comment.parent).select('parent').populate('author', 'username');
+      if (!parent) {
+        const directParent = await Comment.findById(comment.parent).select('parent').populate('author', 'username');
+        if (!directParent) parent = {_id: "<deleted>"} 
+        else {
+          parent = directParent;
+          let postParent;
+          do {
+            postParent = await Post.findById(parent.parent).select('parent').populate('author', 'username');
+            if (!postParent) parent = await Comment.findById(parent.parent).select('parent').populate('author', 'username');
+            else parent = {...(postParent.toObject()), directParent};
+          } while (!postParent)
+        } 
+      } 
       if (!parent.author) parent.author = { _id: "<deleted>", username: "<deleted>"};
       comment.parent = parent;
     }
@@ -61,39 +88,6 @@ export const formatPopularComment = async (uncomment, userId, linkParent) => {
   } catch (err) {
     console.log(err);
   }
-}
-
-export const formatComment = async (uncomment, userId, linkParent) => {
-  const comment = (await uncomment.populate('author', 'username _id')).toObject();
-  if (!comment.author) 
-    comment.author = { username: "<deleted>", _id: "<deleted>" };
-  else comment.author._id = comment.author._id.toString();
-
-  if (userId) comment.liked = comment.likes.some(id => id.toString() === userId.toString());
-
-  comment.likes = comment.likes.length
-  comment.comments = (await Comment.find({parent: comment._id})).length;
-  
-  if (linkParent) {
-    let parent = await Post.findById(comment.parent).select('parent').populate('author', 'username');
-    if (!parent) {
-      const directParent = await Comment.findById(comment.parent).select('parent').populate('author', 'username');
-      parent = directParent;
-      let postParent;
-      do {
-        postParent = await Post.findById(parent.parent).select('parent').populate('author', 'username');
-        if (!postParent) parent = await Comment.findById(parent.parent).select('parent').populate('author', 'username');
-        else parent = {...(postParent.toObject()), directParent};
-      } while (!postParent)
-    } 
-    if (!parent.author) parent.author = { _id: "<deleted>", username: "<deleted>"};
-    comment.parent = parent;
-  }
-
-  return {
-    ...comment,
-    author: {username: comment.author.username, pfp: comment.author._id},
-  };
 }
 
 export const formatDate = (index) => {

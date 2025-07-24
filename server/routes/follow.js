@@ -8,6 +8,7 @@ const router = express.Router();
 router.post('/', verifyToken, async (req, res) => {
   const user  = await User.findById(req.body.following);
   if (!user) return res.status(404).json({ message: "Trying to follow non-existent user"});
+  if (user._id == req.user._id) return res.status(400).json({ message: "You cannot follow yourself" });
   try {
     const follow = await Follow.create({ follower: req.user._id, following: req.body.following });
     res.status(201).json({ message: "User succesfuly followed" });

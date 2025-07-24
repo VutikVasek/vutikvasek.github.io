@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Post from "./Post";
 import Sorter from "./Sorter";
+import { useLocation } from "react-router-dom";
 
 export default function Feed({url, reloadState}) {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const sort = queryParams.get('sort') || "newest"
+  const timeframe = queryParams.get('time') || "week"
 
   const observer = useRef();
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState('');
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
-  const [sort, setSort] = useState("newest");
-  const [timeframe, setTimeframe] = useState("week");
   
   const loadPosts = async (reload) => {
     const res = await fetch(url + `?page=${reload ? 1 : page}&limit=5&sort=${sort}&time=${timeframe}`, {
@@ -70,7 +73,7 @@ export default function Feed({url, reloadState}) {
 
   return (
     <div className="flex flex-col items-center" style={{width: '50rem'}}>
-      <Sorter sort={sort} setSort={setSort} timeframe={timeframe} setTimeframe={setTimeframe} />
+      <Sorter url={location.pathname} sortBy={sort} time={timeframe} />
       {posts.map((post, index) => (
         <Post 
           post={post} 

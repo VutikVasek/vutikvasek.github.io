@@ -1,18 +1,20 @@
-import { useState } from 'react';
 import Feed from '../components/Feed';
+import { Link, useParams } from 'react-router-dom';
 
 export default function FeedPage() {
-  const [onlyFollowing, setOnlyFollowing] = useState(false);
+  const { following } = useParams();
 
   return (
     <>
       <h1 className="text-2xl p-4">Welcome to the feed!</h1>
-      <div className='flex gap-4'>
-        <button onClick={() => setOnlyFollowing(false)} className={!onlyFollowing ? 'font-semibold' : ''}>Explore</button>
-        <button onClick={() => setOnlyFollowing(true)} className={onlyFollowing ? 'font-semibold' : ''}>Following</button>
-      </div>
+      { localStorage.getItem('token') &&
+        <div className='flex gap-4'>
+          <Link to="/feed" className={!following ? 'font-semibold' : ''}>Explore</Link>
+          <Link to="/feed/following" className={following=="following" ? 'font-semibold' : ''}>Following</Link>
+        </div>
+      }
       <div className='flex justify-center'>
-        <Feed url={`http://localhost:5000/api/feed${onlyFollowing ? '/following' : ''}`} reloadState={onlyFollowing} />
+        <Feed url={`http://localhost:5000/api/feed${following ? ("/" + following) : ''}`} reloadState={following} />
       </div>
     </>
   );

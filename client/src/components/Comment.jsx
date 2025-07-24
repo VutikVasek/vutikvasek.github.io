@@ -43,6 +43,8 @@ export default function Comment({ comment, link }) {
       setReplyError(validated);
       return;
     }
+
+    console.log(reply.trim());
     
     const res = await fetch('http://localhost:5000/api/post/comment/', {
       method: 'POST',
@@ -50,7 +52,7 @@ export default function Comment({ comment, link }) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify({ text: reply, parent: comment._id }),
+      body: JSON.stringify({ text: reply.trim(), parent: comment._id }),
     });
     const data = await res.json();
 
