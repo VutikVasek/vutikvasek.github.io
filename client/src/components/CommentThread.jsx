@@ -1,15 +1,19 @@
 import { use, useCallback, useEffect, useRef, useState } from "react";
 import Comment from "./Comment";
 
-export default function CommentThread({ parentId, comments, setComments, infiniteScroll, sortByPopular }) {
+export default function CommentThread({ parentId, userId, comments, setComments, infiniteScroll, sort, timeframe }) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const infinite = !!infiniteScroll;
-  const popular = !!sortByPopular;
+  const linkParent = !!userId;
   var observer = useRef();
 
   const loadComments = async (reload) => {
-    const res = await fetch(`http://localhost:5000/api/post/${parentId}/comments?page=${reload ? 1 : page}&limit=3${popular && "&sort=popular"}`, {
+    const url = "http://localhost:5000/api/" + 
+      (userId ? `profile/comments/${userId}` : `post/${parentId}/comments`) + 
+      `?page=${reload ? 1 : page}&limit=3${sort && "&sort=" + sort}${timeframe && "&time=" + timeframe}&link=${linkParent}`;
+    // console.log(url, userId, parentId);
+    const res = await fetch(url, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
@@ -39,7 +43,7 @@ export default function CommentThread({ parentId, comments, setComments, infinit
 
   useEffect(() => {
     loadComments(true);
-  }, [sortByPopular]);
+  }, [sort, timeframe, userId]);
 
   const handleMore = async () => {
     setPage(val => val+1);
@@ -62,12 +66,13 @@ export default function CommentThread({ parentId, comments, setComments, infinit
     <>
       {comments.map((comment, index) => (
         <div ref={infinite && index === comments.length - 1 ? lastPostRef : null} key={comment._id}>
-          <Comment comment={comment} key={comment._id} />
+          <Comment comment={comment} key={comment._id} link={linkParent} />
         </div>
       ))}
       {hasMore ? (
         <button onClick={handleMore}>Load more</button>
       ) : ('')}
+      {infinite && !hasMore && <p className="text-gray-400 mt-4">No more posts</p>}
     </>
   )
 }

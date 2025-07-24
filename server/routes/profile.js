@@ -3,6 +3,8 @@ import User from '../models/User.js';
 import Follow from '../models/Follow.js';
 import { getFeed } from './feed.js';
 import { verifyTokenNotStrict } from '../middleware/auth.js';
+import { getComments } from './post.js';
+import { Types } from 'mongoose';
 
 const router = express.Router();
 
@@ -35,6 +37,10 @@ router.get("/posts/:username", verifyTokenNotStrict, async (req, res) => {
   if (!user) return res.status(404).json({ message: `No user with username ${username} was found`});
   
   getFeed(req, res, {author: user._id});
+})
+
+router.get("/comments/:id", verifyTokenNotStrict, async (req, res) => {
+  getComments(req, res, { author: new Types.ObjectId(req.params.id) })
 })
 
 export default router;

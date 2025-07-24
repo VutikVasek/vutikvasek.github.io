@@ -3,7 +3,7 @@ import { verifyToken, verifyTokenNotStrict } from '../middleware/auth.js';
 import Post from '../models/Post.js';
 import User from '../models/User.js';
 import Comment from '../models/Comment.js';
-import { formatComment, formatPopularComment, formatPost } from '../tools/formater.js';
+import { formatComment, formatDate, formatPopularComment, formatPost } from '../tools/formater.js';
 import { Types } from 'mongoose';
 
 const router = express.Router();
@@ -76,19 +76,25 @@ router.get('/:post', verifyTokenNotStrict, async (req, res) => {
 
 // Get comments
 router.get('/:id/comments', verifyTokenNotStrict, async (req, res) => {
-  const id = req.params.id;
+  getComments(req, res, { parent: new Types.ObjectId(req.params.id) });
+})
+
+export const getComments = async (req, res, filter) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 3;
   const skip = (page - 1) * limit;
   const sortByPopularity = req.query.sort == "popular";
+  const time = req.query.time;
+  const linkParent = req.query.link;
+  if (sortByPopularity && time != "all") filter = {...filter, createdAt: {$gt: formatDate(time)}};
   
   try {
     if (!sortByPopularity) {
-      const comments = await Comment.find({parent: id}).sort({ createdAt: -1 }).skip(skip).limit(limit);
-      const total = await Comment.countDocuments({parent: id});
+      const comments = await Comment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit);
+      const total = await Comment.countDocuments(filter);
       
       const commentsWithAuthors = await Promise.all(
-        comments.map(async (uncomment) => await formatComment(uncomment, req.user?._id))
+        comments.map(async (uncomment) => await formatComment(uncomment, req.user?._id, linkParent))
       );
 
       res.json({
@@ -97,7 +103,7 @@ router.get('/:id/comments', verifyTokenNotStrict, async (req, res) => {
       });
     } else {
       const comments = await Comment.aggregate([
-        { $match: { parent: new Types.ObjectId(id) } },
+        { $match: filter },
         { $addFields: {
             likesCount: { $size: { $ifNull: ["$likes", []] } }
           }
@@ -131,10 +137,10 @@ router.get('/:id/comments', verifyTokenNotStrict, async (req, res) => {
         { $limit: limit }
       ]);
   
-      const total = await Comment.countDocuments({parent: id});
+      const total = await Comment.countDocuments(filter);
       
       const commentsWithAuthors = await Promise.all(
-        comments.map(async (unpost) => await formatPopularComment(unpost, req.user?._id))
+        comments.map(async (unpost) => await formatPopularComment(unpost, req.user?._id, linkParent))
       );
   
       res.json({
@@ -146,6 +152,6 @@ router.get('/:id/comments', verifyTokenNotStrict, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
     console.log(err);
   }
-})
+}
 
 export default router;

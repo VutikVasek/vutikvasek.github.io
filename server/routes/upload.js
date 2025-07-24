@@ -12,7 +12,6 @@ const upload = multer({ storage: multer.memoryStorage() });
 router.post('/pfp', verifyToken, upload.single('pfp'), async (req, res) => {
   try {
     const userId = req.user._id.toString();
-    console.log(req.user._id, userId);
     const outputPath = path.join('media', 'pfp', `${userId}.jpeg`);
 
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });

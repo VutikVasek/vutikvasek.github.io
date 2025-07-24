@@ -1,14 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MdKeyboardArrowDown, MdNotificationsActive, MdNotificationsOff } from "react-icons/md";
 import { RiUserUnfollowLine } from "react-icons/ri";
 import Feed from "../components/Feed";
+import CommentThread from "../components/CommentThread";
+import Sorter from "../components/Sorter";
 
 export default function Profile() {
-  const { username } = useParams();
+  const { username, show } = useParams();
   const [userData, setUserData] = useState({});
   const [following, setFollowing] = useState(FollowType.silent);
   const [changingFollowing, setChangingFollowing] = useState(false);
+
+  const [sort, setSort] = useState("newest");
+  const [timeframe, setTimeframe] = useState("week");
+  const [comments, setComments] = useState([]);
+  const showPosts = !(show=="replies");
 
   useEffect(() => {
     if (username == "<deleted>") {
@@ -131,7 +138,23 @@ export default function Profile() {
       <p>{userData.pfp ? "Since" : ""} {userData.createdAt}</p>
       {getFollowButton()}
 
-      <Feed url={`http://localhost:5000/api/profile/posts/${username}`} />
+      <div className='flex gap-4'>
+        <Link to={"/u/" + username} className={showPosts ? 'font-semibold' : ''}>Posts</Link>
+        <Link to={"/u/" + username + "/replies"} className={!showPosts ? 'font-semibold' : ''}>Replies</Link>
+      </div>
+      {showPosts ? (
+        <Feed url={`http://localhost:5000/api/profile/posts/${username}`} />
+      ) : (userData.pfp &&
+        <>
+          <div style={{width: '80%'}}>
+            <div className="flex justify-end">
+              <Sorter sort={sort} setSort={setSort} timeframe={timeframe} setTimeframe={setTimeframe} />
+            </div>
+            <CommentThread userId={userData.pfp} comments={comments} setComments={setComments} infiniteScroll={true} reload={userData.pfp} sort={sort} timeframe={timeframe} />
+          </div>
+      </> )}
+      
+      
     </>
   );
 }

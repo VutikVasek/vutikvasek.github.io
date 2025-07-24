@@ -63,6 +63,7 @@ function App() {
           <Route path="/account/credentials" element={<Credentials />} />
         </Route>
         <Route path="/u/:username" element={<Profile />} />
+        <Route path="/u/:username/:show" element={<Profile />} />
         <Route path="/p/:postId" element={<PostFull />} />.
 
         <Route path="*" element={<NotFound />}></Route>

@@ -1,7 +1,7 @@
 import express from 'express';
 import Post from '../models/Post.js';
 import { verifyToken, verifyTokenNotStrict } from '../middleware/auth.js';
-import { formatFeedPost, formatPost } from '../tools/formater.js';
+import { formatDate, formatFeedPost, formatPost } from '../tools/formater.js';
 import Follow from '../models/Follow.js';
 
 const router = express.Router();
@@ -26,7 +26,7 @@ export const getFeed = async (req, res, filter) => {
 
   const sortByPopularity = req.query.sort == "popular";
   const time = req.query.time;
-  if (sortByPopularity && time != "all") filter = {...filter, createdAt: {$gt: getDate(time)}};
+  if (sortByPopularity && time != "all") filter = {...filter, createdAt: {$gt: formatDate(time)}};
   const sortStage = sortByPopularity ? { likesCount: -1, createdAt: -1 } : { createdAt: -1 };
 
   try {
@@ -79,25 +79,6 @@ export const getFeed = async (req, res, filter) => {
     res.status(500).json({ message: 'Server error' });
     console.log(err);
   }
-}
-
-export const getDate = (index) => {
-  const date = new Date();
-  switch (index) {
-    case "day":
-      date.setDate(date.getDate() - 1);
-      break;
-    case "week":
-      date.setDate(date.getDate() - 7);
-      break;
-    case "month":
-      date.setMonth(date.getMonth() - 1);
-      break;
-    case "year":
-      date.setFullYear(date.getFullYear() - 1);
-      break;
-  }
-  return date;
 }
 
 export default router;

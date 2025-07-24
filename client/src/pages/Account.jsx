@@ -7,8 +7,7 @@ import PfpUpload from '../components/PfpUpload';
 export default function Feed() {
   const [user, setUser] = useState({});
   const [date, setDate] = useState('');
-
-  const [changingBio, setChangingBio] = useState(false);
+  
   const [bio, setBio] = useState('');
   const [bioError, setBioError] = useState('');
 

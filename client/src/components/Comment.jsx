@@ -6,7 +6,7 @@ import { formatRelativeTime } from "../tools/time";
 import { validateComment } from "../tools/validate";
 import CommentThread from "./CommentThread";
 
-export default function Comment({ comment }) {
+export default function Comment({ comment, link }) {
   const [hovered, setHovered] = useState(comment.liked);
   const [likes, setLikes] = useState(comment.likes);
   const [liked, setLiked] = useState(comment.liked);
@@ -16,6 +16,8 @@ export default function Comment({ comment }) {
   const [replying, setReplying] = useState(false);
   const [reply, setReply] = useState('');
   const [replyError, setReplyError] = useState('');
+
+  const linkParent = !!link;
   
   const handleLike = async () => {
     const res = await fetch(`http://localhost:5000/api/post/comment/${comment._id}/like`, {
@@ -31,10 +33,6 @@ export default function Comment({ comment }) {
 
     setLikes(data.likes);
     setLiked(data.liked);
-  }
-
-  const handleShowReplies = async () => {
-    console.log("getting replies");
   }
 
   const focus = node => node?.focus();
@@ -69,6 +67,9 @@ export default function Comment({ comment }) {
 
   return (
     <div className="whitespace-pre-wrap">
+      { link && (<Link to={"/p/" + comment.parent._id} className="p-4">
+          Replying to {comment.parent.directParent && `${comment.parent.directParent.author.username} on a post from `}<div className="inline font-semibold">{comment.parent.author.username}:</div>
+        </Link>)}
       <div className="w-full p-4 m-2 shadow flex">
         <div className="flex gap-2">
           <Link to={`/u/${comment.author.username}`} className='flex items-start w-fit min-w-10'>
@@ -88,10 +89,12 @@ export default function Comment({ comment }) {
                 {hovered ? <FaHeart /> : <FaRegHeart />}
                 <p className='text-black'>{likes}</p>
               </div>
-              <div className='cursor-pointer flex gap-2 items-center' onClick={() => setShowComments(val => !val)}>
-                <FaCommentMedical className='text-gray-500 hover:text-black' />
-                <p className='text-black'>{commentCount}</p>
-              </div>
+              { !linkParent && (
+                <div className='cursor-pointer flex gap-2 items-center' onClick={() => setShowComments(val => !val)}>
+                  <FaCommentMedical className='text-gray-500 hover:text-black' />
+                  <p className='text-black'>{commentCount}</p>
+                </div>
+              )}
               <div className='cursor-pointer items-center' onClick={() => setReplying(val => !val)}>
                 <FaReply className='text-gray-500 hover:text-black' />
               </div>
