@@ -23,7 +23,7 @@ export default function Feed() {
   const handleDeletion = async (e) => {
     e.preventDefault();
     const res = await fetch('http://localhost:5000/api/account/delete', {
-      method: 'POST',
+      method: 'DELETE',
       headers: { 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`,

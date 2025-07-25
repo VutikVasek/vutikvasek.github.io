@@ -4,6 +4,7 @@ import User from '../models/User.js';
 import { sendEmail } from '../tools/mailer.js';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import Follow from '../models/Follow.js';
 
 const router = express.Router();
 
@@ -111,11 +112,16 @@ router.patch('/changebio', verifyToken, async (req, res) => {
 
 // Account deletion
 router.delete('/delete', verifyToken, async (req, res) =>  {
-  const user = await User.findByIdAndDelete(req.user._id);
-  if (!user) {
-    res.status(404).json({ message: 'User not found' });
-  } else {
+  try {
+    const userId = req.user._id;
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    await Follow.deleteMany({follower: userId});
+    await Follow.deleteMany({following: userId});
     res.json({ message: 'Account deleted' });
+  } catch (err) {
+    res.status(500).json({message: err});
   }
 });
 

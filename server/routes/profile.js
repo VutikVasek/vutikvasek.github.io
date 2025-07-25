@@ -4,7 +4,7 @@ import Follow from '../models/Follow.js';
 import { getFeed } from './feed.js';
 import { verifyTokenNotStrict } from '../middleware/auth.js';
 import { getComments } from './post.js';
-import { Types } from 'mongoose';
+import { SchemaType, SchemaTypes, Types } from 'mongoose';
 
 const router = express.Router();
 
@@ -44,53 +44,54 @@ router.get("/comments/:id", verifyTokenNotStrict, async (req, res) => {
 })
 
 router.get("/user/:username/following", verifyTokenNotStrict, async (req, res) => {
-  try {
-    const username = req.params.username;
-    const user = await User.findOne({username: username});
-    if (!user) return res.status(404).json({ message: `No user with username ${username} was found`});
-
-    const following = await Follow.find({ follower: user._id }).populate('following');
-    const users = await Promise.all(following.map(async follow => {
-      const follows = await Follow.findOne({ follower: req.user?._id, following: follow.following });
-      return {
-        username: follow.following.username,
-        pfp: follow.following._id.toString(),
-        follows: !!follows,
-        notify: follows?.notify,
-        itsme: req.user?._id == follow.following._id
-      }
-    }))
-    const followingList = {userList: users, logged: !!req.user}
-    res.json(followingList);
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({ message: err});
-  }
+  formatUserList(req, res, 'following')
 })
 
 router.get("/user/:username/followers", verifyTokenNotStrict, async (req, res) => {
+  formatUserList(req, res, 'follower')
+})
+
+const formatUserList = async (req, res, populate) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     const username = req.params.username;
     const user = await User.findOne({username: username});
     if (!user) return res.status(404).json({ message: `No user with username ${username} was found`});
 
-    const followers = await Follow.find({ following: user._id }).populate('follower');
-    const users = await Promise.all(followers.map(async follow => {
+    const find = ( populate == 'following' ? { follower: user._id } : { following: user._id });
+    const userFollow = await Follow.find(find).skip(skip).limit(limit).populate(populate);
+    const total = await Follow.countDocuments(find);
+    const users = await Promise.all(userFollow.map(async follow => {
       const follows = await Follow.findOne({ follower: req.user?._id, following: follow.following });
+      let userInList = populate == "following" ? follow.following : follow.follower;
+      if (!userInList) return returnDeleted();
       return {
-        username: follow.follower.username,
-        pfp: follow.follower._id.toString(),
+        username: userInList.username,
+        pfp: userInList._id.toString(),
         follows: !!follows,
         notify: follows?.notify,
-        itsme: req.user?._id == follow.follower._id
+        itsme: req.user?._id == userInList._id
       }
     }))
-    const followerList = {userList: users, logged: !!req.user}
-    res.json(followerList);
+    const followList = {userList: users, logged: !!req.user, hasMore: skip + users.length < total}
+    res.json(followList);
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: err});
   }
-})
+}
+
+const returnDeleted = () => {
+  return {
+    username: "<deleted>",
+    pfp: "<deleted>",
+    follows: false,
+    notify: false,
+    itsme: true
+  }
+}
 
 export default router;
