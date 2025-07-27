@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import Post from "./Post";
-import Sorter from "./Sorter";
+import Post from "../post/Post";
+import Sorter from "../basic/Sorter";
 import { useLocation } from "react-router-dom";
 
 export default function Feed({url, reloadState}) {

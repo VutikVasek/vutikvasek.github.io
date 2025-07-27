@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LogWall from '../components/LogWall';
+import LogWall from '../components/auth/LogWall';
 import { validatePost } from '../tools/validate';
 
 

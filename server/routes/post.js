@@ -47,23 +47,6 @@ router.patch('/:post/like', verifyToken, async (req, res) => {
   res.json({ likes: post.likes.length, liked: !hasLiked });
 })
 
-// Like comment
-router.patch('/comment/:comment/like', verifyToken, async (req, res) => {
-  const commentId = req.params.comment;
-  const comment = await Comment.findById(commentId);
-  const userId = req.user._id;
-
-  if (!comment) return res.status(404).json({message: "Comment not found"});
-
-  const hasLiked = comment.likes.includes(userId);
-
-  if (!hasLiked) comment.likes.push(userId);
-  else comment.likes.pull(userId);
-
-  await comment.save();
-  res.json({ likes: comment.likes.length, liked: !hasLiked });
-})
-
 // Get post
 router.get('/:post', verifyTokenNotStrict, async (req, res) => {
   const postId = req.params.post;
@@ -73,6 +56,18 @@ router.get('/:post', verifyTokenNotStrict, async (req, res) => {
 
   res.json(await formatPost(unpost, req.user?._id));
 })
+
+// Delete post
+router.delete('/:post', verifyToken, async (req, res) => {
+  const postId = req.params.post;
+  try {
+    await Post.findByIdAndDelete(postId);
+    res.json({message: "Post deleted"})
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+});
 
 // Get comments
 router.get('/:id/comments', verifyTokenNotStrict, async (req, res) => {

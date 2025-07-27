@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams, useSearchParams } from "react-router-dom"
-import Post from "../components/Post";
-import CommentThread from "../components/CommentThread";
+import Post from "../components/post/Post";
+import CommentThread from "../components/comment/CommentThread";
 import { validateComment } from "../tools/validate";
-import Sorter from "../components/Sorter";
+import Sorter from "../components/basic/Sorter";
 
 export default function PostFull() {
   const location = useLocation();

@@ -1,6 +1,6 @@
 import { useState } from "react"
-import Sorter from "./Sorter";
-import CommentThread from "./CommentThread";
+import Sorter from "../basic/Sorter";
+import CommentThread from "../comment/CommentThread";
 import { useLocation } from "react-router-dom";
 
 export default function Replies({userData}) {

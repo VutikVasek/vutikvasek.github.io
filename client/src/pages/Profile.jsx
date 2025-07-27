@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import Feed from "../components/Feed";
-import FollowButton from "../components/FollowButton";
-import UserList from "../components/UserList";
-import Replies from "../components/Replies";
+import Feed from "../components/feed/Feed";
+import FollowButton from "../components/profile/FollowButton";
+import UserList from "../components/profile/UserList";
+import Replies from "../components/profile/Replies";
 
 export default function Profile() {
   const { username, show } = useParams();

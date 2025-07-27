@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import LogWall from '../components/LogWall';
+import LogWall from '../components/auth/LogWall';
 import { validatePassword, validateUsername } from '../tools/validate';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';

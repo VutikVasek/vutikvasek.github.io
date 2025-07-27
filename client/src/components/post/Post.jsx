@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { FaRegHeart, FaHeart, FaRegComments } from "react-icons/fa";
-import { formatRelativeTime } from '../tools/time';
+import { formatRelativeTime } from '../../tools/time';
 import { Link } from 'react-router-dom';
+import More from '../basic/More';
+import DeleteButton from '../basic/DeleteButton';
 
 const Post = React.forwardRef(({ post, cut }, ref) => {
   const [hovered, setHovered] = useState(post.liked);
@@ -60,6 +62,9 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
               <p className='text-black'>{comments}</p>
             </Link>
           ):("")}
+          <More>
+            {post.itsme && <DeleteButton url={`http://localhost:5000/api/post/${post._id}`} word="post" />}
+          </More>
         </div>
       </div>
       {shouldLink ? (

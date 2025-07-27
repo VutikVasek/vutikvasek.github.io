@@ -4,15 +4,7 @@ import Post from "../models/Post.js";
 export const formatFeedPost = async (unpost, userId) => {
   const post = {...unpost};
   try {
-    if (userId && post.likes) post.liked = post.likes.some(id => id.toString() === userId.toString());
-
-    post.likes = post.likesCount;
-    post.comments = (await Comment.find({parent: post._id})).length;
-
-    return {
-      ...post,
-      author: {username: post.author.username, pfp: post.author._id},
-    };
+    return await formatAuthorPost(post, userId);
   } catch (err) {
     console.log(err);
   }
@@ -25,25 +17,30 @@ export const formatPost = async (unpost, userId) => {
       post.author = { username: "<deleted>", _id: "<deleted>" };
     else post.author._id = post.author._id.toString();
 
-    if (userId && post.likes) post.liked = post.likes.some(id => id.toString() === userId.toString());
-
-    post.likes = post.likes.length;
-    post.comments = (await Comment.find({parent: post._id})).length;
-
-    return {
-      ...post,
-      author: {username: post.author.username, pfp: post.author._id},
-    };
+    return await formatAuthorPost(post, userId);
   } catch (err) {
     console.log(err);
   }
 }
 
+const formatAuthorPost = async (post, userId) => {
+  if (userId && post.likes) post.liked = post.likes.some(id => id.toString() === userId.toString());
+
+  post.likes = post.likes?.length || post.likesCount;
+  post.comments = (await Comment.find({parent: post._id})).length;
+  post.itsme = post.author._id == userId;
+
+  return {
+    ...post,
+    author: {username: post.author.username, pfp: post.author._id},
+  };
+};
+
 export const formatPopularComment = async (uncomment, userId, linkParent) => {
   const comment = {...uncomment};
   if (userId && comment.likes) comment.liked = comment.likes.some(id => id.toString() === userId.toString());
 
-  return formatCommentObject(comment, linkParent)
+  return formatCommentObject(comment, linkParent, userId)
 }
 
 export const formatComment = async (uncomment, userId, linkParent) => {
@@ -54,13 +51,14 @@ export const formatComment = async (uncomment, userId, linkParent) => {
 
   if (userId) comment.liked = comment.likes.some(id => id.toString() === userId.toString());
 
-  return formatCommentObject(comment, linkParent)
+  return formatCommentObject(comment, linkParent, userId)
 }
 
-const formatCommentObject = async (comment, linkParent) => {
+const formatCommentObject = async (comment, linkParent, userId) => {
   try {
     comment.likes = comment.likes.length
     comment.comments = (await Comment.find({parent: comment._id})).length;
+    comment.itsme = comment.author._id == userId;
     
     if (linkParent) {
       let parent = await Post.findById(comment.parent).select('parent').populate('author', 'username');

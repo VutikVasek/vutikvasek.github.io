@@ -1,7 +1,6 @@
-import { GoogleLogin } from '@react-oauth/google';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import GoogleLoginButton from '../components/GoogleLogin';
+import GoogleLoginButton from '../components/auth/GoogleLogin';
 import { validatePassword, validateUsername } from '../tools/validate';
 
 export default function Signup() {

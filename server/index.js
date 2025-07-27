@@ -10,6 +10,7 @@ import accountRoutes from './routes/account.js';
 import uploadRoutes from './routes/upload.js';
 import profileRoutes from './routes/profile.js';
 import postRoutes from './routes/post.js';
+import commentRoutes from './routes/comment.js';
 import followRoutes from './routes/follow.js';
 import feedRoutes from './routes/feed.js';
 
@@ -25,6 +26,7 @@ app.use('/api/account', accountRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/post', postRoutes);
+app.use('/api/comment', commentRoutes);
 app.use('/api/follow', followRoutes);
 app.use('/api/feed', feedRoutes);
 

@@ -1,4 +1,4 @@
-import Feed from '../components/Feed';
+import Feed from '../components/feed/Feed';
 import { Link, useParams } from 'react-router-dom';
 
 export default function FeedPage() {

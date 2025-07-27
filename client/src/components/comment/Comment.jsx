@@ -1,10 +1,11 @@
 import { FaCommentMedical, FaHeart, FaRegHeart, FaReply } from "react-icons/fa";
-import Post from "./Post";
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { formatRelativeTime } from "../tools/time";
-import { validateComment } from "../tools/validate";
+import { formatRelativeTime } from "../../tools/time";
+import { validateComment } from "../../tools/validate";
 import CommentThread from "./CommentThread";
+import More from "../basic/More";
+import DeleteButton from "../basic/DeleteButton";
 
 export default function Comment({ comment, link }) {
   const [hovered, setHovered] = useState(comment.liked);
@@ -20,7 +21,7 @@ export default function Comment({ comment, link }) {
   const linkParent = !!link;
   
   const handleLike = async () => {
-    const res = await fetch(`http://localhost:5000/api/post/comment/${comment._id}/like`, {
+    const res = await fetch(`http://localhost:5000/api/comment/${comment._id}/like`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
@@ -70,7 +71,7 @@ export default function Comment({ comment, link }) {
   return (
     <div className="whitespace-pre-wrap">
       { link && (<Link to={"/p/" + comment.parent._id} className="p-4">
-          Replying to {comment.parent.directParent && `${comment.parent.directParent.author.username} on a post from `}<div className="inline font-semibold">{comment.parent.author.username}:</div>
+          Replying to {comment.parent.directParent && `${comment.parent.directParent.author?.username || "<deleted>"} on a post from `}<div className="inline font-semibold">{comment.parent.author.username}:</div>
         </Link>)}
       <div className="w-full p-4 m-2 shadow flex">
         <div className="flex gap-2">
@@ -100,6 +101,9 @@ export default function Comment({ comment, link }) {
               <div className='cursor-pointer items-center' onClick={() => setReplying(val => !val)}>
                 <FaReply className='text-gray-500 hover:text-black' />
               </div>
+              <More>
+                {comment.itsme && <DeleteButton url={`http://localhost:5000/api/comment/${comment._id}`} word="comment" />}
+              </More>
             </div>
           </div>
         </div>

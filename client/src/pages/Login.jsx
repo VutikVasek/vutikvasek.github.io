@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import GoogleLoginButton from '../components/GoogleLogin';
+import GoogleLoginButton from '../components/auth/GoogleLogin';
 
 export default function Login() {
   const [username, setUsername] = useState('');

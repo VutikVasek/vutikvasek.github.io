@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
-import LogWall from '../components/LogWall';
-import PfpUpload from '../components/PfpUpload';
+import LogWall from '../components/auth/LogWall';
+import PfpUpload from '../components/profile/PfpUpload';
+import DeleteButton from '../components/basic/DeleteButton';
 
 export default function Feed() {
   const [user, setUser] = useState({});
@@ -108,7 +109,8 @@ export default function Feed() {
         <p>Email: {user.email}</p>
         <button onClick={() => navigate("/account/credentials")} className="text-left">Change credentials</button>
         <button onClick={handleLogout} className="text-left">Logout</button>
-        <button onClick={handleDeletion} className="text-left">Delete Account</button>
+        {/* <button onClick={handleDeletion} className="text-left">Delete Account</button> */}
+        <DeleteButton url="http://localhost:5000/api/account/delete" word="account" />
       </div>
     </> 
   );
