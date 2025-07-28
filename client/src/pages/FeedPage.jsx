@@ -1,5 +1,6 @@
+import SmartLink from '@/components/basic/SmartLink';
 import Feed from '../components/feed/Feed';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 export default function FeedPage() {
   const { following } = useParams();
@@ -9,8 +10,8 @@ export default function FeedPage() {
       <h1 className="text-2xl p-4">Welcome to the feed!</h1>
       { localStorage.getItem('token') &&
         <div className='flex gap-4'>
-          <Link to="/feed" className={!following ? 'font-semibold' : ''}>Explore</Link>
-          <Link to="/feed/following" className={following=="following" ? 'font-semibold' : ''}>Following</Link>
+          <SmartLink to="/feed" className={!following ? 'font-semibold' : ''}>Explore</SmartLink>
+          <SmartLink to="/feed/following" className={following=="following" ? 'font-semibold' : ''}>Following</SmartLink>
         </div>
       }
       <div className='flex justify-center'>

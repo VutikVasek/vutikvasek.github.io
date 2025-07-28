@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -11,6 +11,7 @@ import Verified from './pages/Verified';
 import Profile from './pages/Profile';
 import PostFull from './pages/PostFull';
 import NotFound from './pages/NotFound';
+import SmartLink from './components/basic/SmartLink';
 
 function App() {
   const { isLoggedIn, user } = useAuth();
@@ -24,29 +25,29 @@ function App() {
           VUTINK
         </h1>
         <div className="panel flex items-middle gap-6">
-          <Link to="/" className='px-4 py-2 rounded-md hover:bg-slate-600'>
+          <SmartLink to="/" className='px-4 py-2 rounded-md hover:bg-slate-600'>
             <h3>Feed</h3>
-          </Link>
+          </SmartLink>
           {isLoggedIn ? (
             <>
-              <Link to="/post" className='px-4 py-2 rounded-md bg-slate-700 hover:bg-slate-600'>
+              <SmartLink to="/post" className='px-4 py-2 rounded-md bg-slate-700 hover:bg-slate-600'>
                 <h3>New Post</h3>
-              </Link>
-              <Link to={profile}  className='px-4 py-2 rounded-md hover:bg-slate-600'>
+              </SmartLink>
+              <SmartLink to={profile}  className='px-4 py-2 rounded-md hover:bg-slate-600'>
                 <h3>Profile</h3>
-              </Link>
-              <Link to="/account" className='px-4 py-2 rounded-md hover:bg-slate-600'>
+              </SmartLink>
+              <SmartLink to="/account" className='px-4 py-2 rounded-md hover:bg-slate-600'>
                 <h3>Account</h3>
-              </Link>
+              </SmartLink>
             </>
           ) : (
             <>
-              <Link to="/login" className='px-4 py-2 rounded-md hover:bg-slate-600'>
+              <SmartLink to="/login" className='px-4 py-2 rounded-md hover:bg-slate-600'>
                 <h3>Login</h3>
-              </Link>
-              <Link to="/signup" className='px-4 py-2 rounded-md hover:bg-slate-600'>
+              </SmartLink>
+              <SmartLink to="/signup" className='px-4 py-2 rounded-md hover:bg-slate-600'>
                 <h3>Signup</h3>
-              </Link>
+              </SmartLink>
             </>
           )}
         </div>

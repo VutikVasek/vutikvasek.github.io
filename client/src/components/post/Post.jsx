@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { FaRegHeart, FaHeart, FaRegComments } from "react-icons/fa";
 import { formatRelativeTime } from '../../tools/time';
-import { Link } from 'react-router-dom';
 import More from '../basic/More';
 import DeleteButton from '../basic/DeleteButton';
+import SmartLink from '../basic/SmartLink';
 
 const Post = React.forwardRef(({ post, cut }, ref) => {
   const [hovered, setHovered] = useState(post.liked);
@@ -32,7 +32,7 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
   return (
     <div className="w-full p-4 m-2 shadow whitespace-pre-wrap flex" ref={ref}>
       <div className='gap-2 flex flex-col'>
-        <Link to={`/u/${post.author.username}`} className='flex items-center gap-2 w-fit'>
+        <SmartLink to={`/u/${post.author.username}`} className='flex items-center gap-2 w-fit'>
           <img src={`http://localhost:5000/media/pfp/${post.author.pfp}.jpeg`} alt="pfp" className='rounded-full w-10'
             onError={(e) => {e.target.onError = null;e.target.src="http://localhost:5000/media/pfp/default.jpeg"}}
             onDragStart={e => e.preventDefault()} />
@@ -40,11 +40,11 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
             <p className="text-md font-semibold">{post.author.username}</p>
             <p className='text-xs text-gray-600'>{formatRelativeTime(post.createdAt)}</p>
           </div>
-        </Link>
+        </SmartLink>
         {shouldLink ? (
-          <Link to={`/p/${post._id}`}>
+          <SmartLink to={`/p/${post._id}`}>
             <p>{post.text}</p>
-          </Link>
+          </SmartLink>
         ):(
           <div>
             <p>{post.text}</p>
@@ -57,10 +57,10 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
             <p className='text-black'>{likes}</p>
           </div>
           {shouldLink ? (
-            <Link to={`/p/${post._id}?focus=true`} className='flex gap-2 items-center'>
+            <SmartLink to={`/p/${post._id}?focus=true`} className='flex gap-2 items-center'>
               <FaRegComments className='text-gray-500 hover:text-black' />
               <p className='text-black'>{comments}</p>
-            </Link>
+            </SmartLink>
           ):("")}
           <More>
             {post.itsme && <DeleteButton url={`http://localhost:5000/api/post/${post._id}`} word="post" />}
@@ -68,7 +68,7 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
         </div>
       </div>
       {shouldLink ? (
-        <Link to={`/p/${post._id}`} className='flex flex-1'></Link>
+        <SmartLink to={`/p/${post._id}`} className='flex flex-1'></SmartLink>
       ):(
         <div></div>
       )}

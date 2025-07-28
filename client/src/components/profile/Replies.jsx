@@ -15,7 +15,7 @@ export default function Replies({userData}) {
     <>
       <div style={{width: '80%'}}>
         <div className="flex justify-end">
-          <Sorter url={location.pathname} sortBy={sort} time={timeframe} />
+          <Sorter url={location.pathname} sortBy={sort} time={timeframe} defaultTime="all" />
         </div>
         <CommentThread userId={userData.pfp} comments={comments} setComments={setComments} infiniteScroll={true} reload={userData.pfp} sort={sort} timeframe={timeframe} />
       </div>

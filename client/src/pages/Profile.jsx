@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Feed from "../components/feed/Feed";
 import FollowButton from "../components/profile/FollowButton";
 import UserList from "../components/profile/UserList";
 import Replies from "../components/profile/Replies";
+import SmartLink from "../components/basic/SmartLink";
 
 export default function Profile() {
   const { username, show } = useParams();
   const [userData, setUserData] = useState({});
+  const [date, setDate] = useState('1846');
 
   useEffect(() => {
     if (username == "<deleted>") {
@@ -25,15 +27,12 @@ export default function Profile() {
       .catch(err => console.log(err));
   }, [username]);
 
-  useEffect(() => {
-    setUserData(data => {
-      data.createdAt = new Date(data.createdAt).toLocaleDateString(undefined, {
+  useEffect(() => 
+      setDate(new Date(userData.createdAt).toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'long',
-      });
-      return data;
-    })
-  }, [userData]);
+      }))
+    , [userData]);
 
   if (!userData) return <p>Loading...</p>;
 
@@ -44,19 +43,19 @@ export default function Profile() {
           onError={(e) => {e.target.onError = null;e.target.src="http://localhost:5000/media/pfp/default.jpeg"}} />
         <p>{userData.username}</p>
         <p>{userData.bio}</p>
-        <Link to={`/u/${username}/followers`}>Followers: {userData.followers}</Link>
-        <Link to={`/u/${username}/following`}>Following: {userData.following}</Link>
-        <p>{userData.pfp ? "Since" : ""} {userData.createdAt}</p>
+        <SmartLink to={`/u/${username}/followers`}>Followers: {userData.followers}</SmartLink>
+        <SmartLink to={`/u/${username}/following`}>Following: {userData.following}</SmartLink>
+        <p>{userData.pfp ? "Since" : ""} {date}</p>
         <div><FollowButton userData={userData} /></div>
       </div>
 
       {(show == "followers" || show == "following") && (
-        <UserList url={`http://localhost:5000/api/profile/user/${username}/${show}`} />
+        <UserList url={`http://localhost:5000/api/profile/user/${username}/${show}`} source={`/u/${username}`} />
       )}
       {(!show || show == "replies") &&
       <div className='flex gap-4'>
-        <Link to={"/u/" + username} className={!show ? 'font-semibold' : ''}>Posts</Link>
-        <Link to={"/u/" + username + "/replies"} className={show=="replies" ? 'font-semibold' : ''}>Replies</Link>
+        <SmartLink to={"/u/" + username} className={!show ? 'font-semibold' : ''}>Posts</SmartLink>
+        <SmartLink to={`/u/${username}/replies`} className={show=="replies" ? 'font-semibold' : ''}>Replies</SmartLink>
       </div>}
       {!show && (
         <Feed url={`http://localhost:5000/api/profile/posts/${username}`} />

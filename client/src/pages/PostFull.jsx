@@ -10,9 +10,9 @@ export default function PostFull() {
   const queryParams = new URLSearchParams(location.search);
   const sort = queryParams.get('sort') || "popular"
   const timeframe = queryParams.get('time') || "all"
+  const shouldFocus = queryParams.get('focus') == "true" || false;
   
   const { postId } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [reply, setReply] = useState('');
@@ -70,10 +70,7 @@ export default function PostFull() {
   if (!post) return (replyError || "Loading...");
 
   const focus = (node) => {
-    if (searchParams.get('focus')) {
-      node?.focus();
-      setSearchParams({});
-    }
+    if (shouldFocus) node?.focus();
   }
 
   return (

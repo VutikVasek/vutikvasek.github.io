@@ -1,11 +1,11 @@
 import { FaCommentMedical, FaHeart, FaRegHeart, FaReply } from "react-icons/fa";
 import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { formatRelativeTime } from "../../tools/time";
 import { validateComment } from "../../tools/validate";
 import CommentThread from "./CommentThread";
 import More from "../basic/More";
 import DeleteButton from "../basic/DeleteButton";
+import SmartLink from "../basic/SmartLink";
 
 export default function Comment({ comment, link }) {
   const [hovered, setHovered] = useState(comment.liked);
@@ -70,19 +70,19 @@ export default function Comment({ comment, link }) {
 
   return (
     <div className="whitespace-pre-wrap">
-      { link && (<Link to={"/p/" + comment.parent._id} className="p-4">
+      { link && (<SmartLink to={"/p/" + comment.parent._id} className="p-4">
           Replying to {comment.parent.directParent && `${comment.parent.directParent.author?.username || "<deleted>"} on a post from `}<div className="inline font-semibold">{comment.parent.author.username}:</div>
-        </Link>)}
+        </SmartLink>)}
       <div className="w-full p-4 m-2 shadow flex">
         <div className="flex gap-2">
-          <Link to={`/u/${comment.author.username}`} className='flex items-start w-fit min-w-10'>
+          <SmartLink to={`/u/${comment.author.username}`} className='flex items-start w-fit min-w-10'>
             <img src={`http://localhost:5000/media/pfp/${comment.author.pfp}.jpeg`} alt="pfp" className='rounded-full w-10 h-10'
               onError={(e) => {e.target.onError = null;e.target.src="http://localhost:5000/media/pfp/default.jpeg"}}
               onDragStart={e => e.preventDefault()} />
-          </Link>
+          </SmartLink>
           <div>
             <div className="flex items-center gap-2">
-              <Link to={`/u/${comment.author.username}`} className="text-md font-semibold">{comment.author.username}</Link>
+              <SmartLink to={`/u/${comment.author.username}`} className="text-md font-semibold">{comment.author.username}</SmartLink>
               <p className='text-xs text-gray-600'>{formatRelativeTime(comment.createdAt)}</p>
             </div>
             <p>{comment.text}</p>

@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
-export default function Sorter({url, sortBy, time, defaultSort, defaultTime}) {
+export default function Sorter({url, sortBy, time, defaultSort = SortType.newest, defaultTime = TimeUnit.week}) {
   const [sort, setSort] = useState(sortBy);
   const [timeframe, setTimeframe] = useState(time);
   const [showSort, setShowSort] = useState(false);
   const [showTimeframe, setShowTimeframe] = useState(false);
+  const location = useLocation();
 
-  const navigate = useNavigate();
+  const navigateHook = useNavigate();
+  const queryParams = new URLSearchParams(location.search);
   
   useEffect(() => {
     setShowSort(false);
@@ -33,6 +35,11 @@ export default function Sorter({url, sortBy, time, defaultSort, defaultTime}) {
         else navigate(`${url}?sort=popular&time=${timeframe}`);
       } else navigate(`${url}?sort=newest`)
     }
+  }
+
+  const navigate = (urln) => {
+    if ((sort != queryParams.get('sort') && sort != defaultSort) || 
+        (timeframe != queryParams.get('time') && timeframe != defaultTime)) navigateHook(urln);
   }
   
   const getTimeframe = (frame) => {

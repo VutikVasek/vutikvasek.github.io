@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { MdKeyboardArrowDown, MdNotificationsActive, MdNotificationsOff } from "react-icons/md";
 import { RiUserUnfollowLine } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import SmartLink from "../basic/SmartLink";
 
 export default function FollowButton({ userData, simple, logged }) {
   const [following, setFollowing] = useState(FollowType.silent);
@@ -75,9 +75,9 @@ export default function FollowButton({ userData, simple, logged }) {
       case FollowType.hidden:
         return '';
       case FollowType.login:
-        return (<Link to="/login">Login to follow</Link>);
+        return (<SmartLink to="/login">Login to follow</SmartLink>);
       case FollowType.me:
-        return (<Link to="/account">Edit profile</Link>);
+        return (<SmartLink to="/account">Edit profile</SmartLink>);
       case FollowType.follow:
         return (<button onClick={handleFollow}>Follow</button>);
       default:
