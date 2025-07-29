@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LogWall from '../components/auth/LogWall';
 import { validatePost } from '../tools/validate';
-
+import { IoClose } from "react-icons/io5";
 
 export default function PostPage() {
   const [text, setText] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const fileInputRef = useRef();
+  const [files, setFiles] = useState([]);
 
   const maxLength = 512;
 
@@ -23,6 +25,9 @@ export default function PostPage() {
       return;
     }
 
+    const img1 = files[0];
+    const img2 = files[1];
+
     const res = await fetch('http://localhost:5000/api/post', {
       method: 'POST',
       headers: { 
@@ -32,12 +37,58 @@ export default function PostPage() {
       body: JSON.stringify({ text }),
     });
 
-    if (res.ok) {
-      navigate('/');
-    } else {
-      const data = await res.json();
-      alert(data.message || 'Posting failed.');
+    const data = await res.json();
+    if (!res.ok) alert(data.message || 'Posting failed.');
+    
+    if (img1) await uploadImage(img1, data._id, 0);
+    if (img2) await uploadImage(img2, data._id, 1);
+
+    navigate('/');
+  }
+
+  const uploadImage = async (file, postId, index) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('index', index);
+    formData.append('postId', postId);
+
+    const res = await fetch('http://localhost:5000/api/upload/image', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    const data = await res.json();
+    if (!res.ok) alert(data.message || 'Upload failed');
+  }
+
+  const addToFiles = (arr) => {
+    if (arr.length + files.length > 2) alert("You can only upload up to 2 images");
+    setFiles((prev) => [...prev, ...arr].slice(0, 2));
+  }
+
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    addToFiles(selectedFiles);
+    e.target.value = null;
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      addToFiles(Array.from(e.dataTransfer.files));
+      e.dataTransfer.clearData();
     }
+  }
+
+  const handleRemoveFile = (index) => {
+    setFiles((prev) => {
+      let arr = [...prev];
+      arr.splice(index, 1);
+      return arr; 
+    })
   }
 
   return (
@@ -55,6 +106,28 @@ export default function PostPage() {
           cols='100'
           rows='10'
         ></textarea>
+        <div className='flex gap-4'>
+          <div>
+            <label htmlFor="image" className='block cursor-pointer p-20 border border-black w-fit'
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleDrop}>Click or drag images</label>
+            <input type="file" name="image" id="image" accept="image/*" multiple 
+              onChange={handleFileChange} 
+              ref={fileInputRef}
+              className='hidden'
+              />
+          </div>
+          <div className='p-6'>
+            {files.map((file, index) => (
+              <div className='flex items-center gap-2'>
+                {file.name}
+                <div className='cursor-pointer' onClick={() => handleRemoveFile(index)}>
+                  <IoClose />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
         <p className="whitespace-pre-wrap">{error}</p>
         <button type="submit" onClick={handleSubmitingPost}>Post</button>
       </form>

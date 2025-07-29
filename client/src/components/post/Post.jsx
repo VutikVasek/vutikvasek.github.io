@@ -4,6 +4,7 @@ import { formatRelativeTime } from '../../tools/time';
 import More from '../basic/More';
 import DeleteButton from '../basic/DeleteButton';
 import SmartLink from '../basic/SmartLink';
+import Gallery from './Gallery';
 
 const Post = React.forwardRef(({ post, cut }, ref) => {
   const [hovered, setHovered] = useState(post.liked);
@@ -50,6 +51,7 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
             <p>{post.text}</p>
           </div>
         )}
+        <Gallery images={[0, 1].map(num => `http://localhost:5000/media/image/${post._id + num}.webp`)} link={`/p/${post._id}`} />
         <div className='flex gap-6 items-center'>
           <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 
               className={'w-fit flex gap-2 items-center cursor-pointer' + (liked ? ' text-red-600': '')}>

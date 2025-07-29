@@ -34,5 +34,29 @@ router.post('/pfp', verifyToken, upload.single('pfp'), async (req, res) => {
   }
 });
 
+router.post('/image', verifyToken, upload.single('image'), async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const outputPath = path.join('media', 'image', `${req.body.postId + req.body.index}.webp`);
+
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+
+    await sharp(req.file.buffer)
+      .resize({
+        width: 1920,
+        height: 1920,
+        fit: sharp.fit.inside,
+        withoutEnlargement: true
+      })
+      .webp()
+      .toFile(outputPath);
+
+    res.json({ message: 'Image uploaded successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to upload image' });
+  }
+});
+
 
 export default router;
