@@ -6,6 +6,8 @@ import { formatComment, formatDate, formatPopularComment, formatPost } from '../
 import { Types } from 'mongoose';
 import fs from 'fs/promises';
 import User from '../models/User.js';
+import { NotificationType } from '../../shared.js';
+import Notification from '../models/Notification.js';
 
 const router = express.Router();
 
@@ -28,16 +30,38 @@ router.post('/', verifyToken, async (req, res) => {
 // Comment
 router.post('/comment/', verifyToken, async (req, res) => {
   try {
+    const parentId = req.body.parent;
+
     const user = await User.findById(req.user._id);
     user.commentTimes = getTimes(user.commentTimes);
     if (user.commentTimes.length > 60) return res.status(400).json({message: "You can only comment up to 60 times per half an hour."})
     await user.save();
 
-    const newComment = new Comment({ author: req.user._id, text: req.body.text.trim(), parent: req.body.parent });
+    const newComment = new Comment({ author: req.user._id, text: req.body.text.trim(), parent: parentId });
     const saveComment = await newComment.save();
+
+    
+    let parent = await Post.findById(parentId).select('author').populate('author', 'username _id');
+    if (!parent) {
+      let commentParent = await Comment.findById(parentId).select('parent');
+      
+      while (commentParent) {
+        const next = await Comment.findById(commentParent.parent).select('parent');
+        if (!next) break;
+        commentParent = next;
+      }
+
+      parent = await Post.findById(commentParent.parent).select('author').populate('author', 'username _id');
+    }
+    if (parent) {
+      const notification = new Notification({ for: parent.author._id, type: NotificationType.NEW_REPLY, context: [parent._id, newComment._id] });
+      await notification.save();
+    }
+
     res.status(201).json(await formatComment(saveComment));
   } catch (err) {
-    res.status(500).json({ message: err.messege });
+    console.log(err);
+    res.status(500).json({ message: "Server error" });
   }
 })
 
@@ -103,11 +127,12 @@ export const getComments = async (req, res, filter) => {
   const sortByPopularity = req.query.sort == "popular";
   const time = req.query.time;
   const linkParent = req.query.link;
+  const pinnedId = req.query.pinned;
   if (sortByPopularity && time != "all") filter = {...filter, createdAt: {$gt: formatDate(time)}};
   
   try {
     if (!sortByPopularity) {
-      const comments = await Comment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit);
+      const comments = await getUncomments(filter, pinnedId, skip, limit);
       const total = await Comment.countDocuments(filter);
       
       const commentsWithAuthors = await Promise.all(
@@ -175,6 +200,14 @@ const getTimes = (times) => {
   const halfAnHourAgo = new Date();
   halfAnHourAgo.setMinutes(halfAnHourAgo.getMinutes() - 30);
   return [...times, new Date()].filter(val => val > halfAnHourAgo);
+}
+
+const getUncomments = async (filter, pinnedId, skip, limit) => {
+  if (!pinnedId) return await Comment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit);
+
+  const pinned = await Comment.findById(pinnedId);
+  const comments = await Comment.find({ ...filter, _id: { $ne: pinnedId } }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+  return [pinned, ...comments];
 }
 
 export default router;

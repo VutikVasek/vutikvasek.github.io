@@ -2,7 +2,7 @@ import { use, useCallback, useEffect, useRef, useState } from "react";
 import Comment from "./Comment";
 const API = import.meta.env.VITE_API_BASE_URL;
 
-export default function CommentThread({ parentId, userId, comments, setComments, infiniteScroll, sort, timeframe }) {
+export default function CommentThread({ parentId, userId, comments, setComments, infiniteScroll, sort, timeframe, pinned, pinnedTree }) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const infinite = !!infiniteScroll;
@@ -10,8 +10,9 @@ export default function CommentThread({ parentId, userId, comments, setComments,
   var observer = useRef();
 
   const loadComments = async (reload) => {
+    if (pinned === "wait") return;
     const url = API + (userId ? `/profile/comments/${userId}` : `/post/${parentId}/comments`) + 
-      `?page=${reload ? 1 : page}&limit=3${sort && "&sort=" + sort}${timeframe && "&time=" + timeframe}&link=${linkParent}`;
+      `?page=${reload ? 1 : page}&limit=3${sort && "&sort=" + sort}${timeframe && "&time=" + timeframe}&link=${linkParent}${pinned && `&pinned=${pinned}`}`;
     const res = await fetch(url, {
       method: 'GET',
       headers: { 
@@ -32,17 +33,13 @@ export default function CommentThread({ parentId, userId, comments, setComments,
   }
 
   useEffect(() => {
-    loadComments();
-  }, []);
-
-  useEffect(() => {
     if (page != 1)
       loadComments();
   }, [page])
 
   useEffect(() => {
     loadComments(true);
-  }, [sort, timeframe, userId]);
+  }, [sort, timeframe, userId, pinned]);
 
   const handleMore = async () => {
     setPage(val => val+1);
@@ -65,7 +62,7 @@ export default function CommentThread({ parentId, userId, comments, setComments,
     <>
       {comments.map((comment, index) => (
         <div ref={infinite && index === comments.length - 1 ? lastPostRef : null} key={comment._id}>
-          <Comment comment={comment} key={comment._id} link={linkParent} />
+          <Comment comment={comment} key={comment._id} link={linkParent} pinnedTree={(comment._id == pinned && comments) ? pinnedTree : null} />
         </div>
       ))}
       {hasMore ? (

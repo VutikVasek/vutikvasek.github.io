@@ -10,13 +10,13 @@ import SmartLink from "../basic/SmartLink";
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
-export default function Comment({ comment, link }) {
+export default function Comment({ comment, link, pinnedTree }) {
   const [hovered, setHovered] = useState(comment.liked);
   const [likes, setLikes] = useState(comment.likes);
   const [liked, setLiked] = useState(comment.liked);
   const [commentCount, setCommentCount] = useState(comment.comments);
   const [comments, setComments] = useState([]);
-  const [showComments, setShowComments] = useState(false);
+  const [showComments, setShowComments] = useState(!!pinnedTree || false);
   const [replying, setReplying] = useState(false);
   const [reply, setReply] = useState('');
   const [replyError, setReplyError] = useState('');
@@ -47,8 +47,6 @@ export default function Comment({ comment, link }) {
       setReplyError(validated);
       return;
     }
-
-    console.log(reply.trim());
     
     const res = await fetch(`${API}/post/comment/`, {
       method: 'POST',
@@ -123,7 +121,8 @@ export default function Comment({ comment, link }) {
           </div>
         ):('')}
         {showComments ? (
-          <CommentThread parentId={comment._id} comments={comments} setComments={setComments} />
+          <CommentThread parentId={comment._id} comments={comments} setComments={setComments} sort={"newest"} 
+            pinned={pinnedTree && [...pinnedTree].pop()} pinnedTree={pinnedTree && [...pinnedTree].slice(0, -1)} />
         ):('')}
       </div>
     </div>

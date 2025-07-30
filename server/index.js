@@ -13,6 +13,7 @@ import postRoutes from './routes/post.js';
 import commentRoutes from './routes/comment.js';
 import followRoutes from './routes/follow.js';
 import feedRoutes from './routes/feed.js';
+import notificationRoutes from './routes/notification.js';
 
 
 const app = express();
@@ -29,6 +30,7 @@ app.use('/api/post', postRoutes);
 app.use('/api/comment', commentRoutes);
 app.use('/api/follow', followRoutes);
 app.use('/api/feed', feedRoutes);
+app.use('/api/notification', notificationRoutes);
 
 app.use('/media', express.static(path.join(process.cwd(), 'media')));
 

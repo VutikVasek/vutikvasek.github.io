@@ -12,12 +12,16 @@ export default function PostFull() {
   const sort = queryParams.get('sort') || "popular"
   const timeframe = queryParams.get('time') || "all"
   const shouldFocus = queryParams.get('focus') == "true" || false;
+  const pinned = queryParams.get('c');
   
   const { postId } = useParams();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
+  const [pinnedTree, setPinnedTree] = useState();
   const [reply, setReply] = useState('');
   const [replyError, setReplyError] = useState('');
+
+  const canExpand = (pinnedTree && sort == "newest");
 
   if (postId == "<deleted>") return "This post was deleted";
 
@@ -64,8 +68,16 @@ export default function PostFull() {
     loadPost();
   }
 
+  const loadPinnedTree = async () => {
+    await fetch(`${API}/comment/${pinned}/tree`).then((res) => res.json()).then((data) => {
+      setPinnedTree(data.pinnedTree)
+    }).catch(err => console.log(err, "teedoo"));
+  }
+
   useEffect(() => {
     loadPost();
+    if (pinned)
+      loadPinnedTree();
   }, []);
 
   if (!post) return (replyError || "Loading...");
@@ -98,7 +110,8 @@ export default function PostFull() {
           <div className="flex justify-end">
             <Sorter url={location.pathname} sortBy={sort} time={timeframe} defaultSort={"popular"} defaultTime={"all"} />
           </div>
-          <CommentThread parentId={post._id} comments={comments} setComments={setComments} infiniteScroll={true} sort={sort} timeframe={timeframe} />
+          <CommentThread parentId={post._id} comments={comments} setComments={setComments} infiniteScroll={true} sort={sort} timeframe={timeframe} 
+            pinned={pinned ? (canExpand ? [...pinnedTree].pop() : "wait") : null} pinnedTree={canExpand && [...pinnedTree].slice(0, -1)} />
         </div>
       </div>
     </>

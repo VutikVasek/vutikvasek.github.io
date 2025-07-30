@@ -12,6 +12,7 @@ import Verified from './pages/Verified';
 import Profile from './pages/Profile';
 import PostFull from './pages/PostFull';
 import NotFound from './pages/NotFound';
+import Notifications from './pages/Notifications';
 
 import SmartLink from './components/basic/SmartLink';
 
@@ -34,6 +35,9 @@ function App() {
             <>
               <SmartLink to="/post" className='px-4 py-2 rounded-md bg-slate-700 hover:bg-slate-600'>
                 <h3>New Post</h3>
+              </SmartLink>
+              <SmartLink to="/notifications" className='px-4 py-2 rounded-md hover:bg-slate-600'>
+                <h3>Notifications</h3>
               </SmartLink>
               <SmartLink to={profile}  className='px-4 py-2 rounded-md hover:bg-slate-600'>
                 <h3>Profile</h3>
@@ -63,6 +67,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/verify" element={<Verified />} />
         <Route path="/post" element={<PostPage />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="/account">
           <Route index element={<Account />} />
           <Route path="/account/credentials" element={<Credentials />} />
