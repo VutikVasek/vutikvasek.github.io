@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Verified() {
   const [verState, setVerState] = useState('Loading');
@@ -17,7 +18,7 @@ export default function Verified() {
       const token = queryParams.get('token');
       const email = queryParams.get('email');
 
-      const res = await fetch(`http://localhost:5000/api/auth/verify?token=${token}${email ? (`&email=${email}`) : (``)}`);
+      const res = await fetch(`${API}/auth/verify?token=${token}${email ? (`&email=${email}`) : (``)}`);
 
       const data = await res.json();
       setVerState(data.message);

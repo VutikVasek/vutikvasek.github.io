@@ -4,6 +4,8 @@ import { jwtDecode } from 'jwt-decode';
 import { useAuth } from '../../context/AuthContext';
 import { useEffect } from 'react';
 
+const API = import.meta.env.VITE_API_BASE_URL;
+
 export default function GoogleLoginButton() {
   const navigate = useNavigate();
   const { login, isLoggedIn } = useAuth();
@@ -14,7 +16,7 @@ export default function GoogleLoginButton() {
     const { credential } = credentialResponse;
     const decoded = jwtDecode(credential);
 
-    const res = await fetch('http://localhost:5000/api/auth/google', {
+    const res = await fetch(`${API}/auth/google`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: credential }),

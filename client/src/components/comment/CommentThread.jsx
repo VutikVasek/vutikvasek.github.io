@@ -1,5 +1,6 @@
 import { use, useCallback, useEffect, useRef, useState } from "react";
 import Comment from "./Comment";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function CommentThread({ parentId, userId, comments, setComments, infiniteScroll, sort, timeframe }) {
   const [page, setPage] = useState(1);
@@ -9,10 +10,8 @@ export default function CommentThread({ parentId, userId, comments, setComments,
   var observer = useRef();
 
   const loadComments = async (reload) => {
-    const url = "http://localhost:5000/api/" + 
-      (userId ? `profile/comments/${userId}` : `post/${parentId}/comments`) + 
+    const url = API + (userId ? `/profile/comments/${userId}` : `/post/${parentId}/comments`) + 
       `?page=${reload ? 1 : page}&limit=3${sort && "&sort=" + sort}${timeframe && "&time=" + timeframe}&link=${linkParent}`;
-    // console.log(url, userId, parentId);
     const res = await fetch(url, {
       method: 'GET',
       headers: { 

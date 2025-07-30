@@ -10,7 +10,8 @@ const UserSchema = new mongoose.Schema({
   googleId: { type: String },
   createdAt: { type: Date, default: Date.now },
   bio: { type: String },
-  liked: [{type: mongoose.Schema.Types.ObjectId}]
+  postTimes: { type: [Date]},
+  commentTimes: { type: [Date]},
 });
 
 export default mongoose.model('User', UserSchema);

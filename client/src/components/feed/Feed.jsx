@@ -16,7 +16,7 @@ export default function Feed({url, reloadState}) {
   const [page, setPage] = useState(1);
   
   const loadPosts = async (reload) => {
-    const res = await fetch(url + `?page=${reload ? 1 : page}&limit=5&sort=${sort}&time=${timeframe}`, {
+    const res = await fetch(url + `?page=${reload ? 1 : page}&limit=7&sort=${sort}&time=${timeframe}`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',

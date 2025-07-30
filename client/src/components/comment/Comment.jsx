@@ -7,6 +7,9 @@ import More from "../basic/More";
 import DeleteButton from "../basic/DeleteButton";
 import SmartLink from "../basic/SmartLink";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
+
 export default function Comment({ comment, link }) {
   const [hovered, setHovered] = useState(comment.liked);
   const [likes, setLikes] = useState(comment.likes);
@@ -21,7 +24,7 @@ export default function Comment({ comment, link }) {
   const linkParent = !!link;
   
   const handleLike = async () => {
-    const res = await fetch(`http://localhost:5000/api/comment/${comment._id}/like`, {
+    const res = await fetch(`${API}/comment/${comment._id}/like`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
@@ -47,7 +50,7 @@ export default function Comment({ comment, link }) {
 
     console.log(reply.trim());
     
-    const res = await fetch('http://localhost:5000/api/post/comment/', {
+    const res = await fetch(`${API}/post/comment/`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -76,8 +79,8 @@ export default function Comment({ comment, link }) {
       <div className="w-full p-4 m-2 shadow flex">
         <div className="flex gap-2">
           <SmartLink to={`/u/${comment.author.username}`} className='flex items-start w-fit min-w-10'>
-            <img src={`http://localhost:5000/media/pfp/${comment.author.pfp}.jpeg`} alt="pfp" className='rounded-full w-10 h-10'
-              onError={(e) => {e.target.onError = null;e.target.src="http://localhost:5000/media/pfp/default.jpeg"}}
+            <img src={`${MEDIA}/pfp/${comment.author.pfp}.jpeg`} alt="pfp" className='rounded-full w-10 h-10'
+              onError={(e) => {e.target.onError = null;e.target.src=`${MEDIA}/pfp/default.jpeg`}}
               onDragStart={e => e.preventDefault()} />
           </SmartLink>
           <div>
@@ -102,7 +105,7 @@ export default function Comment({ comment, link }) {
                 <FaReply className='text-gray-500 hover:text-black' />
               </div>
               <More>
-                {comment.itsme && <DeleteButton url={`http://localhost:5000/api/comment/${comment._id}`} word="comment" />}
+                {comment.itsme && <DeleteButton url={`${API}/comment/${comment._id}`} word="comment" />}
               </More>
             </div>
           </div>

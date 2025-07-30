@@ -2,6 +2,8 @@ import SmartLink from '@/components/basic/SmartLink';
 import Feed from '../components/feed/Feed';
 import { useParams } from 'react-router-dom';
 
+const API = import.meta.env.VITE_API_BASE_URL;
+
 export default function FeedPage() {
   const { following } = useParams();
 
@@ -15,7 +17,7 @@ export default function FeedPage() {
         </div>
       }
       <div className='flex justify-center'>
-        <Feed url={`http://localhost:5000/api/feed${following ? ("/" + following) : ''}`} reloadState={following} />
+        <Feed url={`${API}/feed${following ? ("/" + following) : ''}`} reloadState={following} />
       </div>
     </>
   );

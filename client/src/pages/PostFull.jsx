@@ -4,6 +4,7 @@ import Post from "../components/post/Post";
 import CommentThread from "../components/comment/CommentThread";
 import { validateComment } from "../tools/validate";
 import Sorter from "../components/basic/Sorter";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function PostFull() {
   const location = useLocation();
@@ -21,7 +22,7 @@ export default function PostFull() {
   if (postId == "<deleted>") return "This post was deleted";
 
   const loadPost = async () => {
-    const res = await fetch(`http://localhost:5000/api/post/${postId}`, {
+    const res = await fetch(`${API}/post/${postId}`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
@@ -45,7 +46,7 @@ export default function PostFull() {
       return;
     }
     
-    const res = await fetch('http://localhost:5000/api/post/comment/', {
+    const res = await fetch(`${API}/post/comment/`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -55,7 +56,7 @@ export default function PostFull() {
     });
     const data = await res.json();
 
-    if (!res.ok) return console.log(data.message);
+    if (!res.ok) return alert(data.message);
 
     await setComments(comments => [data, ...comments]);
 

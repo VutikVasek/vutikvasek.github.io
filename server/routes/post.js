@@ -1,18 +1,23 @@
 import express from 'express';
 import { verifyToken, verifyTokenNotStrict } from '../middleware/auth.js';
 import Post from '../models/Post.js';
-import User from '../models/User.js';
 import Comment from '../models/Comment.js';
 import { formatComment, formatDate, formatPopularComment, formatPost } from '../tools/formater.js';
 import { Types } from 'mongoose';
+import fs from 'fs/promises';
+import User from '../models/User.js';
 
 const router = express.Router();
 
 // Post
 router.post('/', verifyToken, async (req, res) => {
-  const newPost = new Post({ author: req.user._id, text: req.body.text });
-
   try {
+    const user = await User.findById(req.user._id);
+    user.postTimes = getTimes(user.postTimes);
+    if (user.postTimes.length > 30) return res.status(400).json({message: "You can only post up to 30 times per half an hour."})
+    await user.save();
+
+    const newPost = new Post({ author: req.user._id, text: req.body.text.trim() });
     const savedPost = await newPost.save();
     res.status(201).json(savedPost);
   } catch (err) {
@@ -22,8 +27,13 @@ router.post('/', verifyToken, async (req, res) => {
 
 // Comment
 router.post('/comment/', verifyToken, async (req, res) => {
-  const newComment = new Comment({ author: req.user._id, text: req.body.text, parent: req.body.parent });
   try {
+    const user = await User.findById(req.user._id);
+    user.commentTimes = getTimes(user.commentTimes);
+    if (user.commentTimes.length > 60) return res.status(400).json({message: "You can only comment up to 60 times per half an hour."})
+    await user.save();
+
+    const newComment = new Comment({ author: req.user._id, text: req.body.text.trim(), parent: req.body.parent });
     const saveComment = await newComment.save();
     res.status(201).json(await formatComment(saveComment));
   } catch (err) {
@@ -63,6 +73,17 @@ router.delete('/:post', verifyToken, async (req, res) => {
   const postId = req.params.post;
   try {
     await Post.findByIdAndDelete(postId);
+    try {
+      const path = `media/image/${postId}`;
+      const img1 = path + "0.webp";
+      const img2 = path + "1.webp";
+      await fs.access(img1);
+      await fs.unlink(img1);
+      await fs.access(img2);
+      await fs.unlink(img2);
+    } catch (err) {
+      if (err.code !== 'ENOENT') console.log(err);
+    }
     res.json({message: "Post deleted"})
   } catch (err) {
     console.log(err);
@@ -148,6 +169,12 @@ export const getComments = async (req, res, filter) => {
     res.status(500).json({ message: 'Server error' });
     console.log(err);
   }
+}
+
+const getTimes = (times) => {
+  const halfAnHourAgo = new Date();
+  halfAnHourAgo.setMinutes(halfAnHourAgo.getMinutes() - 30);
+  return [...times, new Date()].filter(val => val > halfAnHourAgo);
 }
 
 export default router;

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function PfpUpload() {
   const fileInputRef = useRef();
@@ -17,7 +18,7 @@ export default function PfpUpload() {
     const formData = new FormData();
     formData.append('pfp', file);
 
-    const res = await fetch('http://localhost:5000/api/upload/pfp', {
+    const res = await fetch(`${API}/upload/pfp`, {
       method: 'POST',
       body: formData,
       headers: {

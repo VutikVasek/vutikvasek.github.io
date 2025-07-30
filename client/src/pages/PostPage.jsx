@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import LogWall from '../components/auth/LogWall';
 import { validatePost } from '../tools/validate';
 import { IoClose } from "react-icons/io5";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function PostPage() {
   const [text, setText] = useState('');
@@ -28,13 +29,13 @@ export default function PostPage() {
     const img1 = files[0];
     const img2 = files[1];
 
-    const res = await fetch('http://localhost:5000/api/post', {
+    const res = await fetch(`${API}/post`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text: text.trim() }),
     });
 
     const data = await res.json();
@@ -52,7 +53,7 @@ export default function PostPage() {
     formData.append('index', index);
     formData.append('postId', postId);
 
-    const res = await fetch('http://localhost:5000/api/upload/image', {
+    const res = await fetch(`${API}/upload/image`, {
       method: 'POST',
       body: formData,
       headers: {

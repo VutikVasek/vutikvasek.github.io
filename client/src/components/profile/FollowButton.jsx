@@ -3,6 +3,8 @@ import { MdKeyboardArrowDown, MdNotificationsActive, MdNotificationsOff } from "
 import { RiUserUnfollowLine } from "react-icons/ri";
 import SmartLink from "../basic/SmartLink";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+
 export default function FollowButton({ userData, simple, logged }) {
   const [following, setFollowing] = useState(FollowType.silent);
   const [changingFollowing, setChangingFollowing] = useState(false);
@@ -23,7 +25,7 @@ export default function FollowButton({ userData, simple, logged }) {
   }, [userData]);
 
   const handleFollow = async () => {
-    const res = await fetch('http://localhost:5000/api/follow', {
+    const res = await fetch(`${API}/follow`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -39,7 +41,7 @@ export default function FollowButton({ userData, simple, logged }) {
   const handleChangeFollow = async (notify) => {
     if (notify == (following == FollowType.notify)) return setChangingFollowing(false);
 
-    const res = await fetch('http://localhost:5000/api/follow/change', {
+    const res = await fetch(`${API}/follow/change`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
@@ -55,7 +57,7 @@ export default function FollowButton({ userData, simple, logged }) {
   }
 
   const handleUnfollow = async () => {
-    const res = await fetch('http://localhost:5000/api/follow/delete', {
+    const res = await fetch(`${API}/follow/delete`, {
       method: 'DELETE',
       headers: { 
         'Content-Type': 'application/json',

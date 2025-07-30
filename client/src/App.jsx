@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import FeedPage from './pages/FeedPage';
@@ -11,6 +12,7 @@ import Verified from './pages/Verified';
 import Profile from './pages/Profile';
 import PostFull from './pages/PostFull';
 import NotFound from './pages/NotFound';
+
 import SmartLink from './components/basic/SmartLink';
 
 function App() {

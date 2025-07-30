@@ -5,6 +5,8 @@ import FollowButton from "../components/profile/FollowButton";
 import UserList from "../components/profile/UserList";
 import Replies from "../components/profile/Replies";
 import SmartLink from "../components/basic/SmartLink";
+const API = import.meta.env.VITE_API_BASE_URL;
+const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
 export default function Profile() {
   const { username, show } = useParams();
@@ -18,7 +20,7 @@ export default function Profile() {
       setDeleted(true);
       return;
     }
-    fetch(`http://localhost:5000/api/profile/user/${username}`, {
+    fetch(`${API}/profile/user/${username}`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
@@ -41,8 +43,8 @@ export default function Profile() {
   return (
     <>
       <div className="flex flex-col">
-        <img src={`http://localhost:5000/media/pfp/${userData.pfp}.jpeg`} alt="pfp" className='rounded-full' style={{width: '9rem'}}
-          onError={(e) => {e.target.onError = null;e.target.src="http://localhost:5000/media/pfp/default.jpeg"}} />
+        <img src={`${MEDIA}/pfp/${userData.pfp}.jpeg`} alt="pfp" className='rounded-full' style={{width: '9rem'}}
+          onError={(e) => {e.target.onError = null;e.target.src=`${MEDIA}/pfp/default.jpeg`}} />
         <p>{userData.username}</p>
         <p>{userData.bio}</p>
         {!deleted && (<>
@@ -56,7 +58,7 @@ export default function Profile() {
       {!deleted && (
         <>
           {(show == "followers" || show == "following") && (
-            <UserList url={`http://localhost:5000/api/profile/user/${username}/${show}`} source={`/u/${username}`} />
+            <UserList url={`${API}/profile/user/${username}/${show}`} source={`/u/${username}`} />
           )}
           {(!show || show == "replies") &&
           <div className='flex gap-4'>
@@ -64,7 +66,7 @@ export default function Profile() {
             <SmartLink to={`/u/${username}/replies`} className={show=="replies" ? 'font-semibold' : ''}>Replies</SmartLink>
           </div>}
           {!show && (
-            <Feed url={`http://localhost:5000/api/profile/posts/${username}`} />
+            <Feed url={`${API}/profile/posts/${username}`} />
           )}
           {show == "replies" && userData.pfp &&
             <Replies userData={userData} /> }

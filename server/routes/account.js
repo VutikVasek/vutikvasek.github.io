@@ -5,6 +5,7 @@ import { sendEmail } from '../tools/mailer.js';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import Follow from '../models/Follow.js';
+import fs from 'fs/promises';
 
 const router = express.Router();
 
@@ -116,7 +117,13 @@ router.delete('/delete', verifyToken, async (req, res) =>  {
     const userId = req.user._id;
     const user = await User.findByIdAndDelete(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
-
+    try {
+      const path = `media/pfp/${userId}.jpeg`;
+      await fs.access(path);
+      await fs.unlink(path);
+    } catch (err) {
+      if (err.code !== 'ENOENT') console.log(err);
+    }
     await Follow.deleteMany({follower: userId});
     await Follow.deleteMany({following: userId});
     res.json({ message: 'Account deleted' });

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GoogleLoginButton from '../components/auth/GoogleLogin';
 import { validatePassword, validateUsername } from '../tools/validate';
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -37,7 +38,7 @@ export default function Signup() {
       return;
     }
 
-    const res = await fetch('http://localhost:5000/api/auth/signup', {
+    const res = await fetch(`${API}/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password }),

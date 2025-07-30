@@ -6,6 +6,9 @@ import DeleteButton from '../basic/DeleteButton';
 import SmartLink from '../basic/SmartLink';
 import Gallery from './Gallery';
 
+const API = import.meta.env.VITE_API_BASE_URL;
+const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
+
 const Post = React.forwardRef(({ post, cut }, ref) => {
   const [hovered, setHovered] = useState(post.liked);
   const [likes, setLikes] = useState(post.likes);
@@ -15,7 +18,7 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
   const shouldLink = !cut;
   
   const handleLike = async () => {
-    const res = await fetch(`http://localhost:5000/api/post/${post._id}/like`, {
+    const res = await fetch(`${API}/post/${post._id}/like`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
@@ -34,8 +37,8 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
     <div className="w-full p-4 m-2 shadow whitespace-pre-wrap flex" ref={ref}>
       <div className='gap-2 flex flex-col'>
         <SmartLink to={`/u/${post.author.username}`} className='flex items-center gap-2 w-fit'>
-          <img src={`http://localhost:5000/media/pfp/${post.author.pfp}.jpeg`} alt="pfp" className='rounded-full w-10'
-            onError={(e) => {e.target.onError = null;e.target.src="http://localhost:5000/media/pfp/default.jpeg"}}
+          <img src={`${MEDIA}/pfp/${post.author.pfp}.jpeg`} alt="pfp" className='rounded-full w-10'
+            onError={(e) => {e.target.onError = null;e.target.src=`${MEDIA}/pfp/default.jpeg`}}
             onDragStart={e => e.preventDefault()} />
           <div>
             <p className="text-md font-semibold">{post.author.username}</p>
@@ -51,12 +54,12 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
             <p>{post.text}</p>
           </div>
         )}
-        <Gallery images={[0, 1].map(num => `http://localhost:5000/media/image/${post._id + num}.webp`)} link={`/p/${post._id}`} />
+        <Gallery images={[0, 1].map(num => `${MEDIA}/image/${post._id + num}.webp`)} link={`/p/${post._id}`} />
         <div className='flex gap-6 items-center'>
           <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 
               className={'w-fit flex gap-2 items-center cursor-pointer' + (liked ? ' text-red-600': '')}>
             {hovered ? <FaHeart /> : <FaRegHeart />}
-            <p className='text-black'>{likes}</p>
+            <p className='text-black'>{likes || '0'}</p>
           </div>
           {shouldLink ? (
             <SmartLink to={`/p/${post._id}?focus=true`} className='flex gap-2 items-center'>
@@ -65,7 +68,7 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
             </SmartLink>
           ):("")}
           <More>
-            {post.itsme && <DeleteButton url={`http://localhost:5000/api/post/${post._id}`} word="post" />}
+            {post.itsme && <DeleteButton url={`${API}/post/${post._id}`} word="post" />}
           </More>
         </div>
       </div>

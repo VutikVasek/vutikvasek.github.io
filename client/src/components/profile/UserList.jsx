@@ -3,6 +3,7 @@ import FollowButton from "./FollowButton";
 import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import SmartLink from "../basic/SmartLink";
+const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
 export default function UserList({url, source}) {
   const [users, setUsers] = useState([]);
@@ -63,8 +64,8 @@ export default function UserList({url, source}) {
       {users.map((user, index) => (
         <div className="flex items-center gap-4" ref={index === users.length - 1 ? lastPostRef : null} key={user._id}>
           <SmartLink to={"/u/" + user.username} className="flex w-full items-center gap-4">
-            <img src={`http://localhost:5000/media/pfp/${user.pfp}.jpeg`} alt="pfp" className='rounded-full w-10'
-              onError={(e) => {e.target.onError = null;e.target.src="http://localhost:5000/media/pfp/default.jpeg"}} />
+            <img src={`${MEDIA}/pfp/${user.pfp}.jpeg`} alt="pfp" className='rounded-full w-10'
+              onError={(e) => {e.target.onError = null;e.target.src=`${MEDIA}/pfp/default.jpeg`}} />
             <p className="w-full">{user.username}</p>
           </SmartLink>
           <FollowButton userData={user} simple={true} logged={logged} />

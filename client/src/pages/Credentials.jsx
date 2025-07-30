@@ -3,6 +3,7 @@ import LogWall from '../components/auth/LogWall';
 import { validatePassword, validateUsername } from '../tools/validate';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Credentials() {
   const [user, setUser] = useState({});
@@ -25,7 +26,7 @@ export default function Credentials() {
   const navigate = useNavigate();
 
   const loadAccountInfo = async () => {
-    const res = await fetch('http://localhost:5000/api/account/get', {
+    const res = await fetch(`${API}/account/get`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -52,7 +53,7 @@ export default function Credentials() {
       return;
     }
 
-    const res = await fetch('http://localhost:5000/api/account/changeusername', {
+    const res = await fetch(`${API}/account/changeusername`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
@@ -85,7 +86,7 @@ export default function Credentials() {
 
     const email = newEmail.toLowerCase();
 
-    const res = await fetch('http://localhost:5000/api/account/changeemail', {
+    const res = await fetch(`${API}/account/changeemail`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
@@ -114,7 +115,7 @@ export default function Credentials() {
       return;
     }
 
-    const res = await fetch('http://localhost:5000/api/account/changepassword', {
+    const res = await fetch(`${API}/account/changepassword`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',

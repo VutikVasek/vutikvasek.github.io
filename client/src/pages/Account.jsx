@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import LogWall from '../components/auth/LogWall';
 import PfpUpload from '../components/profile/PfpUpload';
 import DeleteButton from '../components/basic/DeleteButton';
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Feed() {
   const [user, setUser] = useState({});
@@ -21,27 +22,8 @@ export default function Feed() {
     navigate("/feed");
   }
 
-  const handleDeletion = async (e) => {
-    e.preventDefault();
-    const res = await fetch('http://localhost:5000/api/account/delete', {
-      method: 'DELETE',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-
-    if (res.ok) {
-      logout();
-      navigate('/feed');
-    } else {
-    const data = await res.json();
-      alert(data.message || 'Deletion failed.');
-    }
-  }
-
   const loadAccountInfo = async () => {
-    const res = await fetch('http://localhost:5000/api/account/get', {
+    const res = await fetch(`${API}/account/get`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -59,7 +41,7 @@ export default function Feed() {
   }
 
   const handleUpdateBio = async () => {
-    const res = await fetch('http://localhost:5000/api/account/changebio', {
+    const res = await fetch(`${API}/account/changebio`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
@@ -110,7 +92,7 @@ export default function Feed() {
         <button onClick={() => navigate("/account/credentials")} className="text-left">Change credentials</button>
         <button onClick={handleLogout} className="text-left">Logout</button>
         {/* <button onClick={handleDeletion} className="text-left">Delete Account</button> */}
-        <DeleteButton url="http://localhost:5000/api/account/delete" word="account" />
+        <DeleteButton url={`${API}/account/delete`} word="account" />
       </div>
     </> 
   );
