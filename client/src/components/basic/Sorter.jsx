@@ -9,7 +9,7 @@ export default function Sorter({url, sortBy, time, defaultSort = SortType.newest
   const [showTimeframe, setShowTimeframe] = useState(false);
   const location = useLocation();
 
-  const navigateHook = useNavigate();
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   
   useEffect(() => {
@@ -26,20 +26,18 @@ export default function Sorter({url, sortBy, time, defaultSort = SortType.newest
   }, [sortBy, time])
 
   const navigateQuery = () => {
-    if (defaultSort != "popular")
-      if (sort == SortType.popular) navigate(`${url}?sort=popular&time=${timeframe}`)
-      else navigate(url);
-    else {
-      if (sort == SortType.popular) {
-        if (timeframe == defaultTime) navigate(url);
-        else navigate(`${url}?sort=popular&time=${timeframe}`);
-      } else navigate(`${url}?sort=newest`)
-    }
-  }
+    const currSort = queryParams.get('sort') || defaultSort;
+    const currTime = queryParams.get('time') || defaultTime;
+    const sameTime = currTime == timeframe || sort == SortType.newest;
 
-  const navigate = (urln) => {
-    if ((sort != queryParams.get('sort') && sort != defaultSort) || 
-        (timeframe != queryParams.get('time') && timeframe != defaultTime)) navigateHook(urln);
+    if (currSort == sort && sameTime) return;
+
+    const query = [];
+
+    if (sort != defaultSort)  query.push("sort=" + sort);
+    if (sort == SortType.popular && timeframe != defaultTime) query.push("time=" + timeframe);
+
+    navigate(query.length ? `${url}?${query.join('&')}` : url);
   }
   
   const getTimeframe = (frame) => {

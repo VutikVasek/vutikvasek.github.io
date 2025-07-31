@@ -111,7 +111,7 @@ export default function PostFull() {
             <Sorter url={location.pathname} sortBy={sort} time={timeframe} defaultSort={"popular"} defaultTime={"all"} />
           </div>
           <CommentThread parentId={post._id} comments={comments} setComments={setComments} infiniteScroll={true} sort={sort} timeframe={timeframe} 
-            pinned={pinned ? (canExpand ? [...pinnedTree].pop() : "wait") : null} pinnedTree={canExpand && [...pinnedTree].slice(0, -1)} />
+            pinned={pinned ? (canExpand ? [...pinnedTree].pop() : "wait") : null} pinnedTree={canExpand && [...pinnedTree].slice(0, -1)} postId={post._id} />
         </div>
       </div>
     </>

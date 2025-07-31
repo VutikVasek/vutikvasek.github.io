@@ -2,7 +2,7 @@ import { use, useCallback, useEffect, useRef, useState } from "react";
 import Comment from "./Comment";
 const API = import.meta.env.VITE_API_BASE_URL;
 
-export default function CommentThread({ parentId, userId, comments, setComments, infiniteScroll, sort, timeframe, pinned, pinnedTree }) {
+export default function CommentThread({ parentId, userId, comments, setComments, infiniteScroll, sort, timeframe, pinned, pinnedTree, postId }) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const infinite = !!infiniteScroll;
@@ -62,7 +62,8 @@ export default function CommentThread({ parentId, userId, comments, setComments,
     <>
       {comments.map((comment, index) => (
         <div ref={infinite && index === comments.length - 1 ? lastPostRef : null} key={comment._id}>
-          <Comment comment={comment} key={comment._id} link={linkParent} pinnedTree={(comment._id == pinned && comments) ? pinnedTree : null} />
+          <Comment comment={comment} key={comment._id} link={linkParent} pinnedTree={(comment._id == pinned && comments) ? pinnedTree : null} 
+            postId={postId} pinned={pinned === comment._id} />
         </div>
       ))}
       {hasMore ? (

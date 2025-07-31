@@ -6,9 +6,12 @@ import DeleteButton from '../basic/DeleteButton';
 import SmartLink from '../basic/SmartLink';
 import Gallery from './Gallery';
 import ProfilePicture from '../basic/ProfilePicture';
+import ShareButton from '../basic/ShareButton';
+import Descriptor from '../basic/Descriptor';
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
+const BASE = import.meta.env.VITE_BASE_URL;
 
 const Post = React.forwardRef(({ post, cut }, ref) => {
   const [hovered, setHovered] = useState(post.liked);
@@ -54,17 +57,22 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
         )}
         <Gallery images={[0, 1].map(num => `${MEDIA}/image/${post._id + num}.webp`)} link={`/p/${post._id}`} />
         <div className='flex gap-6 items-center'>
-          <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 
-              className={'w-fit flex gap-2 items-center cursor-pointer' + (liked ? ' text-red-600': '')}>
-            {hovered ? <FaHeart /> : <FaRegHeart />}
-            <p className='text-black'>{likes || '0'}</p>
-          </div>
+          <Descriptor text={liked ? "Unlike" : "Like"}>
+            <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 
+                className={'w-fit flex gap-2 items-center cursor-pointer' + (liked ? ' text-red-600': '')}>
+              {hovered ? <FaHeart /> : <FaRegHeart />}
+              <p className='text-black'>{likes || '0'}</p>
+            </div>
+          </Descriptor>
           {shouldLink ? (
-            <SmartLink to={`/p/${post._id}?focus=true`} className='flex gap-2 items-center'>
-              <FaRegComments className='text-gray-500 hover:text-black' />
-              <p className='text-black'>{post.comments}</p>
-            </SmartLink>
+            <Descriptor text="Comment">
+              <SmartLink to={`/p/${post._id}?focus=true`} className='flex gap-2 items-center'>
+                <FaRegComments className='text-gray-500 hover:text-black' />
+                <p className='text-black'>{post.comments}</p>
+              </SmartLink>
+            </Descriptor>
           ):("")}
+          <ShareButton url={`${BASE}/p/${post._id}`} />
           <More>
             {post.itsme && <DeleteButton url={`${API}/post/${post._id}`} word="post" />}
           </More>

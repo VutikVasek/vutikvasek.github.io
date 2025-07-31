@@ -6,11 +6,14 @@ import CommentThread from "./CommentThread";
 import More from "../basic/More";
 import DeleteButton from "../basic/DeleteButton";
 import SmartLink from "../basic/SmartLink";
+import ShareButton from "../basic/ShareButton";
+import Descriptor from "../basic/Descriptor";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
+const BASE = import.meta.env.VITE_BASE_URL;
 
-export default function Comment({ comment, link, pinnedTree }) {
+export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
   const [hovered, setHovered] = useState(comment.liked);
   const [likes, setLikes] = useState(comment.likes);
   const [liked, setLiked] = useState(comment.liked);
@@ -74,7 +77,7 @@ export default function Comment({ comment, link, pinnedTree }) {
       { link && (<SmartLink to={"/p/" + comment.parent._id} className="p-4">
           Replying to {comment.parent.directParent && `${comment.parent.directParent.author?.username || "<deleted>"} on a post from `}<div className="inline font-semibold">{comment.parent.author.username}:</div>
         </SmartLink>)}
-      <div className="w-full p-4 m-2 shadow flex">
+      <div className={"w-full p-4 m-2 shadow flex" + ((pinned && pinnedTree?.length === 0) ? "  bg-cyan-200" : "")}>
         <div className="flex gap-2">
           <SmartLink to={`/u/${comment.author.username}`} className='flex items-start w-fit min-w-10'>
             <img src={`${MEDIA}/pfp/${comment.author.pfp}.jpeg`} alt="pfp" className='rounded-full w-10 h-10'
@@ -88,20 +91,29 @@ export default function Comment({ comment, link, pinnedTree }) {
             </div>
             <p>{comment.text}</p>
             <div className='flex gap-6 items-center mt-2'>
-              <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 
-                  className={'w-fit flex gap-2 items-center cursor-pointer' + (liked ? ' text-red-600': '')}>
-                {hovered ? <FaHeart /> : <FaRegHeart />}
-                <p className='text-black'>{likes}</p>
-              </div>
-              { !linkParent && (
-                <div className='cursor-pointer flex gap-2 items-center' onClick={() => setShowComments(val => !val)}>
-                  <FaCommentMedical className='text-gray-500 hover:text-black' />
-                  <p className='text-black'>{commentCount}</p>
+              <Descriptor text={liked ? "Unlike" : "Like"}>
+                <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 
+                    className={'w-fit flex gap-2 items-center cursor-pointer' + (liked ? ' text-red-600': '')}>
+                  {hovered ? <FaHeart /> : <FaRegHeart />}
+                  <p className='text-black'>{likes}</p>
                 </div>
+              </Descriptor>
+              { !linkParent && (
+                <Descriptor text={showComments ? "Hide comments" : "Comments"}>
+                  <div className='cursor-pointer flex gap-2 items-center' onClick={() => setShowComments(val => !val)}>
+                    <FaCommentMedical className='text-gray-500 hover:text-black' />
+                    <p className='text-black'>{commentCount}</p>
+                  </div>
+                </Descriptor>
               )}
-              <div className='cursor-pointer items-center' onClick={() => setReplying(val => !val)}>
-                <FaReply className='text-gray-500 hover:text-black' />
-              </div>
+              <Descriptor text={!replying && "reply"}>
+                <div className='cursor-pointer items-center' onClick={() => setReplying(val => !val)}>
+                  <FaReply className='text-gray-500 hover:text-black' />
+                </div>
+              </Descriptor>
+              {postId && (
+                <ShareButton url={`${BASE}/p/${postId}?sort=newest&c=${comment._id}`} />
+              )}
               <More>
                 {comment.itsme && <DeleteButton url={`${API}/comment/${comment._id}`} word="comment" />}
               </More>
@@ -122,7 +134,7 @@ export default function Comment({ comment, link, pinnedTree }) {
         ):('')}
         {showComments ? (
           <CommentThread parentId={comment._id} comments={comments} setComments={setComments} sort={"newest"} 
-            pinned={pinnedTree && [...pinnedTree].pop()} pinnedTree={pinnedTree && [...pinnedTree].slice(0, -1)} />
+            pinned={pinnedTree && [...pinnedTree].pop()} pinnedTree={pinnedTree && [...pinnedTree].slice(0, -1)} postId={postId} />
         ):('')}
       </div>
     </div>
