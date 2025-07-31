@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import LogWall from '../components/auth/LogWall';
-import { validatePassword, validateUsername } from '../tools/validate';
-import { useAuth } from '../context/AuthContext';
+import LogWall from '@/components/auth/LogWall';
+import { validatePassword, validateUsername } from '@/tools/validate';
+import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 const API = import.meta.env.VITE_API_BASE_URL;
 

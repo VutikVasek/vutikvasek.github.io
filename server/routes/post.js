@@ -8,6 +8,7 @@ import fs from 'fs/promises';
 import User from '../models/User.js';
 import { NotificationType } from '../../shared.js';
 import Notification from '../models/Notification.js';
+import Follow from '../models/Follow.js';
 
 const router = express.Router();
 
@@ -21,11 +22,29 @@ router.post('/', verifyToken, async (req, res) => {
 
     const newPost = new Post({ author: req.user._id, text: req.body.text.trim() });
     const savedPost = await newPost.save();
+
+    notifyFollowers(req.user._id, savedPost._id);
+
     res.status(201).json(savedPost);
   } catch (err) {
     res.status(500).json({ message: err.messege });
   }
 });
+
+const notifyFollowers = async (userId, postId) => {
+    const followers = await Follow.find({ following: userId, notify: true });
+    followers.forEach(async (follow) => {
+      try {
+          const follower = await User.findById(follow.follower).select('notifications');
+          if (follower.notifications[NotificationType.NEW_POST]) {
+            const notif = new Notification({for: follow.follower, type: NotificationType.NEW_POST, context: [postId, userId] });
+            await notif.save();
+          }
+      } catch (err) {
+        console.log(err);
+      }
+    })
+}
 
 // Comment
 router.post('/comment/', verifyToken, async (req, res) => {
@@ -41,9 +60,11 @@ router.post('/comment/', verifyToken, async (req, res) => {
     const saveComment = await newComment.save();
 
     
-    let parent = await Post.findById(parentId).select('author').populate('author', 'username _id');
-    if (!parent) {
-      let commentParent = await Comment.findById(parentId).select('parent');
+    let postParent = await Post.findById(parentId).select('author').populate('author', 'notifications _id');
+    let diretctParent = postParent;
+    if (!postParent) {
+      let commentParent = await Comment.findById(parentId).select('parent author').populate('author', 'notifications _id');
+      diretctParent = commentParent;
       
       while (commentParent) {
         const next = await Comment.findById(commentParent.parent).select('parent');
@@ -51,11 +72,12 @@ router.post('/comment/', verifyToken, async (req, res) => {
         commentParent = next;
       }
 
-      parent = await Post.findById(commentParent.parent).select('author').populate('author', 'username _id');
+      postParent = await Post.findById(commentParent.parent).select('author').populate('author', 'notifications _id');
     }
-    if (parent) {
-      const notification = new Notification({ for: parent.author._id, type: NotificationType.NEW_REPLY, context: [parent._id, newComment._id] });
-      await notification.save();
+
+    if (diretctParent?.author.notifications[NotificationType.NEW_REPLY]) {
+      const notif = new Notification({ for: diretctParent.author._id, type: NotificationType.NEW_REPLY, context: [postParent._id, newComment._id] });
+      await notif.save();
     }
 
     res.status(201).json(await formatComment(saveComment));

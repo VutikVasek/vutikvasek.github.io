@@ -16,13 +16,29 @@ router.post('/get', verifyToken, async (req, res) => {
   if (!user) {
     res.status(404).json({ message: 'User not found' });
   } else {
-    // let hasPassword = !!user.password
-    // user.password = undefined;
-    // res.json({...user._doc, hasPassword});
-
     user._doc.isGoogle = !!user.googleId;
     user.googleId = undefined;
     res.json( { user } );
+  }
+})
+
+// Get notification settings
+router.post('/notifications', verifyToken, async (req, res) => {
+  const user = await User.findById(req.user._id).select('notifications');
+  if (!user) {
+    res.status(404).json({ message: 'User not found' });
+  } else {
+    res.json( { notifications: user.notifications } );
+  }
+})
+
+// Update notifications
+router.patch('/notifications', verifyToken, async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.user._id, {notifications: req.body.newSettings});
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"})
   }
 })
 

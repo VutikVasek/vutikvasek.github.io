@@ -1,9 +1,9 @@
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
-import LogWall from '../components/auth/LogWall';
-import PfpUpload from '../components/profile/PfpUpload';
-import DeleteButton from '../components/basic/DeleteButton';
+import LogWall from '@/components/auth/LogWall';
+import PfpUpload from '@/components/profile/PfpUpload';
+import DeleteButton from '@/components/basic/DeleteButton';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Feed() {
@@ -89,9 +89,9 @@ export default function Feed() {
         <PfpUpload />
         <p>Created in {date}</p>
         <p>Email: {user.email}</p>
-        <button onClick={() => navigate("/account/credentials")} className="text-left">Change credentials</button>
+        <Link to="credentials">Change credentials</Link>
+        <Link to="notification-settings">Manage notifications</Link> 
         <button onClick={handleLogout} className="text-left">Logout</button>
-        {/* <button onClick={handleDeletion} className="text-left">Delete Account</button> */}
         <DeleteButton url={`${API}/account/delete`} word="account" />
       </div>
     </> 

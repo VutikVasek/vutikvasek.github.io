@@ -12,6 +12,7 @@ const UserSchema = new mongoose.Schema({
   bio: { type: String },
   postTimes: { type: [Date]},
   commentTimes: { type: [Date]},
+  notifications: [{ type: Boolean, default: true }]
 });
 
 export default mongoose.model('User', UserSchema);

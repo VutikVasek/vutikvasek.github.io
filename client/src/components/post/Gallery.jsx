@@ -14,7 +14,7 @@ export default function Gallery({ images, link }) {
     <>
       <div className='flex w-full gap-2 max-h-96'>
         {images.map((url, i) => (
-          <div className='w-fit'>
+          <div className='w-fit' key={i}>
             <img
               key={i}
               src={url}

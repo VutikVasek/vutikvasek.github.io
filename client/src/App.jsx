@@ -5,14 +5,15 @@ import { useAuth } from './context/AuthContext';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import FeedPage from './pages/FeedPage';
-import Account from './pages/Account';
+import Account from './pages/account/Account';
 import PostPage from './pages/PostPage';
-import Credentials from './pages/Credentials';
+import Credentials from './pages/account/Credentials';
 import Verified from './pages/Verified';
 import Profile from './pages/Profile';
 import PostFull from './pages/PostFull';
 import NotFound from './pages/NotFound';
 import Notifications from './pages/Notifications';
+import NotificationSettings from './pages/account/NotificationSettings';
 
 import SmartLink from './components/basic/SmartLink';
 
@@ -71,6 +72,7 @@ function App() {
         <Route path="/account">
           <Route index element={<Account />} />
           <Route path="/account/credentials" element={<Credentials />} />
+          <Route path="/account/notification-settings" element={<NotificationSettings />} />
         </Route>
         <Route path="/u/:username" element={<Profile />} />
         <Route path="/u/:username/:show" element={<Profile />} />

@@ -5,6 +5,7 @@ import More from '../basic/More';
 import DeleteButton from '../basic/DeleteButton';
 import SmartLink from '../basic/SmartLink';
 import Gallery from './Gallery';
+import ProfilePicture from '../basic/ProfilePicture';
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
@@ -13,7 +14,6 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
   const [hovered, setHovered] = useState(post.liked);
   const [likes, setLikes] = useState(post.likes);
   const [liked, setLiked] = useState(post.liked);
-  const [comments, setComments] = useState(post.comments);
 
   const shouldLink = !cut;
   
@@ -34,12 +34,10 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
   }
 
   return (
-    <div className="w-full p-4 m-2 shadow whitespace-pre-wrap flex" ref={ref}>
+    <div className="w-[calc(100%-0.5rem)] p-4 m-2 shadow whitespace-pre-wrap flex" ref={ref}>
       <div className='gap-2 flex flex-col'>
         <SmartLink to={`/u/${post.author.username}`} className='flex items-center gap-2 w-fit'>
-          <img src={`${MEDIA}/pfp/${post.author.pfp}.jpeg`} alt="pfp" className='rounded-full w-10'
-            onError={(e) => {e.target.onError = null;e.target.src=`${MEDIA}/pfp/default.jpeg`}}
-            onDragStart={e => e.preventDefault()} />
+          <ProfilePicture pfp={post.author.pfp} className="w-10" />
           <div>
             <p className="text-md font-semibold">{post.author.username}</p>
             <p className='text-xs text-gray-600'>{formatRelativeTime(post.createdAt)}</p>
@@ -64,7 +62,7 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
           {shouldLink ? (
             <SmartLink to={`/p/${post._id}?focus=true`} className='flex gap-2 items-center'>
               <FaRegComments className='text-gray-500 hover:text-black' />
-              <p className='text-black'>{comments}</p>
+              <p className='text-black'>{post.comments}</p>
             </SmartLink>
           ):("")}
           <More>

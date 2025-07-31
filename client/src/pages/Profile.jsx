@@ -5,8 +5,8 @@ import FollowButton from "../components/profile/FollowButton";
 import UserList from "../components/profile/UserList";
 import Replies from "../components/profile/Replies";
 import SmartLink from "../components/basic/SmartLink";
+import ProfilePicture from "@/components/basic/ProfilePicture";
 const API = import.meta.env.VITE_API_BASE_URL;
-const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
 export default function Profile() {
   const { username, show } = useParams();
@@ -43,8 +43,7 @@ export default function Profile() {
   return (
     <>
       <div className="flex flex-col">
-        <img src={`${MEDIA}/pfp/${userData.pfp}.jpeg`} alt="pfp" className='rounded-full' style={{width: '9rem'}}
-          onError={(e) => {e.target.onError = null;e.target.src=`${MEDIA}/pfp/default.jpeg`}} />
+        <ProfilePicture pfp={userData.pfp} className="w-36" />
         <p>{userData.username}</p>
         <p>{userData.bio}</p>
         {!deleted && (<>
