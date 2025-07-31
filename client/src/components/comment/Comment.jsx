@@ -23,8 +23,6 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
   const [replying, setReplying] = useState(false);
   const [reply, setReply] = useState('');
   const [replyError, setReplyError] = useState('');
-
-  const linkParent = !!link;
   
   const handleLike = async () => {
     const res = await fetch(`${API}/comment/${comment._id}/like`, {
@@ -74,8 +72,10 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
 
   return (
     <div className="whitespace-pre-wrap">
-      { link && (<SmartLink to={"/p/" + comment.parent._id} className="p-4">
-          Replying to {comment.parent.directParent && `${comment.parent.directParent.author?.username || "<deleted>"} on a post from `}<div className="inline font-semibold">{comment.parent.author.username}:</div>
+      { link && (<SmartLink to={`/p/${comment.parent._id}?sort=newest&c=${comment._id}`} className="p-4">
+          Replying {comment.parent.author.username == "<deleted post>" ? "on " : "to "} 
+            {comment.parent.directParent && `${comment.parent.directParent.author?.username || "<deleted>"} on a post from `}
+            <div className="inline font-semibold">{comment.parent.author.username}:</div>
         </SmartLink>)}
       <div className={"w-full p-4 m-2 shadow flex" + ((pinned && pinnedTree?.length === 0) ? "  bg-cyan-200" : "")}>
         <div className="flex gap-2">
@@ -98,7 +98,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
                   <p className='text-black'>{likes}</p>
                 </div>
               </Descriptor>
-              { !linkParent && (
+              { !link && (
                 <Descriptor text={showComments ? "Hide comments" : "Comments"}>
                   <div className='cursor-pointer flex gap-2 items-center' onClick={() => setShowComments(val => !val)}>
                     <FaCommentMedical className='text-gray-500 hover:text-black' />

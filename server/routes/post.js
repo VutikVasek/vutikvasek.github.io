@@ -75,7 +75,7 @@ router.post('/comment/', verifyToken, async (req, res) => {
       postParent = await Post.findById(commentParent.parent).select('author').populate('author', 'notifications _id');
     }
 
-    if (diretctParent?.author.notifications[NotificationType.NEW_REPLY]) {
+    if (diretctParent?.author?.notifications[NotificationType.NEW_REPLY]) {
       const notif = new Notification({ for: diretctParent.author._id, type: NotificationType.NEW_REPLY, context: [postParent._id, newComment._id] });
       await notif.save();
     }

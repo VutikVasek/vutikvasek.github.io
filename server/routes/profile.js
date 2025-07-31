@@ -4,7 +4,7 @@ import Follow from '../models/Follow.js';
 import { getFeed } from './feed.js';
 import { verifyTokenNotStrict } from '../middleware/auth.js';
 import { getComments } from './post.js';
-import { SchemaType, SchemaTypes, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 const router = express.Router();
 

@@ -27,7 +27,7 @@ router.delete('/:comment', verifyToken, async (req, res) => {
   const commentId = req.params.comment;
   try {
     const replies = await Comment.exists({ parent: commentId })
-    if (replies) await Comment.findByIdAndUpdate(commentId, {author: null, text: "<deleted>"});
+    if (replies) await Comment.findByIdAndUpdate(commentId, {author: null, text: "<deleted comment>"});
     else await Comment.findByIdAndDelete(commentId);
     res.json({message: "Comment deleted"})
   } catch (err) {

@@ -64,18 +64,22 @@ const formatCommentObject = async (comment, linkParent, userId) => {
       let parent = await Post.findById(comment.parent).populate('author', 'username');
       if (!parent) {
         const directParent = await Comment.findById(comment.parent).select('parent').populate('author', 'username');
-        if (!directParent) parent = {_id: "<deleted>"} 
+        if (!directParent || !directParent.parent) parent = {_id: "<deleted>", author: { _id: "<deleted>", username: "<deleted post>"}} 
         else {
           parent = directParent;
           let postParent;
           do {
+            if (!parent) {
+              parent = {_id: "<deleted>", author: { _id: "<deleted>", username: "<deleted post>"}};
+              break;
+            };
             postParent = await Post.findById(parent.parent).select('parent').populate('author', 'username');
             if (!postParent) parent = await Comment.findById(parent.parent).select('parent').populate('author', 'username');
             else parent = {...(postParent.toObject()), directParent};
           } while (!postParent)
         } 
       } 
-      if (!parent.author) parent.author = { _id: "<deleted>", username: "<deleted>"};
+      if (!parent.author) parent.author = { _id: "<deleted>", username: "<deleted user>"};
       comment.parent = parent;
     }
 
