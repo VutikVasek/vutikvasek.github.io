@@ -4,6 +4,7 @@ import LogWall from '../components/auth/LogWall';
 import { validatePost } from '../tools/validate';
 import { IoClose } from "react-icons/io5";
 import { useAppContext } from '@/context/AppContext';
+import GifSelector from '@/components/basic/GifSelector';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function PostPage() {
@@ -12,7 +13,7 @@ export default function PostPage() {
   const navigate = useNavigate();
   const fileInputRef = useRef();
   const [files, setFiles] = useState([]);
-
+  const [loadingFiles, setLoadingFiles] = useState(0);
   const { showErrorToast } = useAppContext();
 
   const maxLength = 512;
@@ -66,6 +67,19 @@ export default function PostPage() {
 
     const data = await res.json();
     if (!res.ok) alert(data.message || 'Upload failed');
+  }
+
+  const handleGifClick = async (image) => {
+    const url = image?.url;
+    if (!url) return;
+
+    setLoadingFiles(prev => prev + 1);
+      
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const file = new File([blob], url.split('/').pop(), { type: blob.type });
+    setLoadingFiles(prev => Math.max(prev - 1, 0));
+    addToFiles([file]);
   }
 
   const addToFiles = (arr) => {
@@ -125,7 +139,13 @@ export default function PostPage() {
               className='hidden'
               />
           </div>
+          <GifSelector onSelect={handleGifClick} />
           <div className='p-6'>
+            {[...Array(loadingFiles).keys()].map((_, index) => (
+              <div className='flex items-center gap-2' key={index}>
+                {"Loading..."}
+              </div>
+            ))}
             {files.map((file, index) => (
               <div className='flex items-center gap-2' key={index}>
                 {file.name}
