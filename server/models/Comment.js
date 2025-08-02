@@ -5,6 +5,7 @@ const CommentSchema = new mongoose.Schema({
   parent: { type: mongoose.Schema.Types.ObjectId, required: true},
   text: { type: String, required: true },
   likes: [{type: mongoose.Schema.Types.ObjectId}],
+  mediaType: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 

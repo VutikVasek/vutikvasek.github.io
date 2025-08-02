@@ -2,6 +2,7 @@ import express from 'express';
 import { verifyToken } from '../middleware/auth.js';
 import Comment from '../models/Comment.js';
 import Post from '../models/Post.js';
+import fs from 'fs/promises';
 
 const router = express.Router();
 
@@ -27,8 +28,20 @@ router.delete('/:comment', verifyToken, async (req, res) => {
   const commentId = req.params.comment;
   try {
     const replies = await Comment.exists({ parent: commentId })
-    if (replies) await Comment.findByIdAndUpdate(commentId, {author: null, text: "<deleted comment>"});
-    else await Comment.findByIdAndDelete(commentId);
+    let comment;
+    if (replies) comment = await Comment.findByIdAndUpdate(commentId, {author: null, text: "<deleted comment>"});
+    else comment = await Comment.findByIdAndDelete(commentId);
+
+    if (comment.mediaType) {
+      const img = `media/image/${commentId}0.${comment.mediaType}`;
+      try {
+          await fs.access(img);
+          await fs.unlink(img);
+      } catch (err) {
+        if (err.code !== 'ENOENT') console.log(err);
+      }
+    }
+
     res.json({message: "Comment deleted"})
   } catch (err) {
     console.log(err);
@@ -36,6 +49,7 @@ router.delete('/:comment', verifyToken, async (req, res) => {
   }
 })
 
+// Get pinned tree
 router.get('/:comment/tree', async (req, res) => {
   const commentId = req.params.comment;
   const comment = await Comment.findById(commentId).select('parent');

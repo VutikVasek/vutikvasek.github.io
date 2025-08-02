@@ -8,6 +8,9 @@ import DeleteButton from "../basic/DeleteButton";
 import SmartLink from "../basic/SmartLink";
 import ShareButton from "../basic/ShareButton";
 import Descriptor from "../basic/Descriptor";
+import Gallery from "../post/Gallery";
+import MediaSelector from "../basic/MediaSelector";
+import { useAppContext } from "@/context/AppContext";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
@@ -23,6 +26,10 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
   const [replying, setReplying] = useState(false);
   const [reply, setReply] = useState('');
   const [replyError, setReplyError] = useState('');
+  const [rerenderState, setRerenderState] = useState(false);
+
+  const mediaSelector = useRef(null);
+  const { showErrorToast } = useAppContext();
   
   const handleLike = async () => {
     const res = await fetch(`${API}/comment/${comment._id}/like`, {
@@ -43,6 +50,9 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
   const focus = node => node?.focus();
 
   const handleReply = async () => {
+    if (mediaSelector.current?.stillLoading()) 
+      return showErrorToast("Please wait for all the media to upload") 
+
     const validated = validateComment(reply);
     if (validated) {
       setReplyError(validated);
@@ -61,7 +71,11 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
 
     if (!res.ok) return console.log(data.message);
 
-    await setComments(comments =>[ data, ...comments]);
+    const extensions = await mediaSelector.current?.upload(data._id);
+
+    data.mediaType = extensions;
+
+    await setComments(comments => [ data, ...comments]);
 
     // console.log(comments);
     setShowComments(true);
@@ -70,6 +84,8 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
     setReplying(false);
   }
 
+
+  const rerender = () => setRerenderState(val => !val);
   return (
     <div className="whitespace-pre-wrap">
       { link && (<SmartLink to={`/p/${comment.parent._id}?sort=newest&c=${comment._id}`} className="p-4">
@@ -90,6 +106,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
               <p className='text-xs text-gray-600'>{formatRelativeTime(comment.createdAt)}</p>
             </div>
             <p>{comment.text}</p>
+            <Gallery images={[`${MEDIA}/image/${comment._id}0.${comment.mediaType || "webp"}`]} />
             <div className='flex gap-6 items-center mt-2'>
               <Descriptor text={liked ? "Unlike" : "Like"}>
                 <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 
@@ -124,11 +141,19 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
       <div style={{marginLeft: 2.75 + 'rem'}}>
         {replying ? (
           <div className="flex gap-2 ml-7">
-            <textarea name="" id="" className="border border-black resize-y" rows={3} cols={50} value={reply} onChange={(e) => setReply(e.target.value)} ref={focus}></textarea>
+            <textarea name="" id="" className="border border-black resize-y" rows={3} cols={50} 
+              value={reply} 
+              onChange={(e) => setReply(e.target.value)} 
+              ref={focus} 
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={mediaSelector.current?.handleDrop}/>
             <div className="flex flex-col gap-2">
               <button className="bg-gray-300 px-4  h-10" onClick={() => setReplying(false)}>Cancel</button>
               <button className="bg-green-300 px-4 h-10" onClick={handleReply}>Reply</button>
             </div>
+            <MediaSelector ref={mediaSelector} rerender={rerender} />
+            {mediaSelector.current?.stillLoading() ? "Loading" : 
+              mediaSelector.current?.getFileCount() ? "1 file attached" : ""}
             {replyError}
           </div>
         ):('')}

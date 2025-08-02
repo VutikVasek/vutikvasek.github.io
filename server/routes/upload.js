@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import { verifyToken } from '../middleware/auth.js';
 import Post from '../models/Post.js';
+import Comment from '../models/Comment.js';
 
 const router = express.Router();
 
@@ -37,18 +38,22 @@ router.post('/pfp', verifyToken, upload.single('pfp'), async (req, res) => {
 
 router.post('/image', verifyToken, upload.single('image'), async (req, res) => {
   try {
-    const userId = req.user._id.toString();
     const isGif = req.file.mimetype === "image/gif";
     const extension = isGif ? "gif" : "webp";
-    const post = await Post.findById(req.body.postId).select('mediaType');
-    post.mediaType[req.body.index] = extension;
-    await post.save();
+    const post = await Post.findById(req.body.id).select('mediaType');
+    if (post) {
+      post.mediaType[req.body.index] = extension;
+      await post.save();
+    } else {
+      const comment = await Comment.findById(req.body.id).select('mediaType');
+      comment.mediaType = extension;
+      await comment.save();
+      console.log(comment);
+    }
 
-    const outputPath = path.join('media', 'image', `${req.body.postId + req.body.index}.${extension}`);
+    const outputPath = path.join('media', 'image', `${req.body.id + req.body.index}.${extension}`);
 
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-
-    post.mediaType[req.body.index] = extension;
 
     if (isGif) {
       await sharp(req.file.buffer, { animated: true })

@@ -2,24 +2,27 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LogWall from '../components/auth/LogWall';
 import { validatePost } from '../tools/validate';
-import { IoClose } from "react-icons/io5";
+import MediaSelector from '@/components/basic/MediaSelector';
 import { useAppContext } from '@/context/AppContext';
-import GifSelector from '@/components/basic/GifSelector';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function PostPage() {
   const [text, setText] = useState('');
+  const [buttonText, setButtonText] = useState('Post');
   const [error, setError] = useState('');
+  const [rerenderState, setRerenderState] = useState(false);
   const navigate = useNavigate();
-  const fileInputRef = useRef();
-  const [files, setFiles] = useState([]);
-  const [loadingFiles, setLoadingFiles] = useState(0);
   const { showErrorToast } = useAppContext();
+
+  const mediaSelector = useRef(null);
 
   const maxLength = 512;
 
   const handleSubmitingPost = async (e) => {
     e.preventDefault();
+
+    if (mediaSelector.current?.stillLoading()) 
+      return showErrorToast("Please wait for the media to upload before posting")
 
     setText(text.trim());
 
@@ -29,9 +32,6 @@ export default function PostPage() {
       setError(textValidation);
       return;
     }
-
-    const img1 = files[0];
-    const img2 = files[1];
 
     const res = await fetch(`${API}/post`, {
       method: 'POST',
@@ -45,73 +45,14 @@ export default function PostPage() {
     const data = await res.json();
     if (!res.ok) alert(data.message || 'Posting failed.');
     
-    if (img1) await uploadImage(img1, data._id, 0);
-    if (img2) await uploadImage(img2, data._id, 1);
+    setButtonText('Posting');
+
+    await mediaSelector?.current?.upload(data._id); 
 
     navigate('/');
   }
 
-  const uploadImage = async (file, postId, index) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    formData.append('index', index);
-    formData.append('postId', postId);
-
-    const res = await fetch(`${API}/upload/image`, {
-      method: 'POST',
-      body: formData,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-
-    const data = await res.json();
-    if (!res.ok) alert(data.message || 'Upload failed');
-  }
-
-  const handleGifClick = async (image) => {
-    const url = image?.url;
-    if (!url) return;
-
-    setLoadingFiles(prev => prev + 1);
-      
-    const response = await fetch(url);
-    const blob = await response.blob();
-    const file = new File([blob], url.split('/').pop(), { type: blob.type });
-    setLoadingFiles(prev => Math.max(prev - 1, 0));
-    addToFiles([file]);
-  }
-
-  const addToFiles = (arr) => {
-    const filtered = arr.filter(file => {
-      if (file.type.split('/')[0] === "image") return file;
-      showErrorToast("You can only upload images");
-    })
-    if (filtered.length + files.length > 2) showErrorToast("You can only upload up to 2 images");
-    setFiles((prev) => [...prev, ...filtered].slice(0, 2));
-  }
-
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    addToFiles(selectedFiles);
-    e.target.value = null;
-  }
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      addToFiles(Array.from(e.dataTransfer.files));
-      e.dataTransfer.clearData();
-    }
-  }
-
-  const handleRemoveFile = (index) => {
-    setFiles((prev) => {
-      let arr = [...prev];
-      arr.splice(index, 1);
-      return arr; 
-    })
-  }
+  const rerender = () => setRerenderState(val => !val);
 
   return (
     <>
@@ -127,37 +68,15 @@ export default function PostPage() {
           maxLength={maxLength}
           cols='100'
           rows='10'
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={mediaSelector.current?.handleDrop}
         ></textarea>
         <div className='flex gap-4'>
-          <div>
-            <label htmlFor="image" className='block cursor-pointer p-20 border border-black w-fit'
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleDrop}>Click or drag images</label>
-            <input type="file" name="image" id="image" accept="image/*" multiple 
-              onChange={handleFileChange} 
-              ref={fileInputRef}
-              className='hidden'
-              />
-          </div>
-          <GifSelector onSelect={handleGifClick} />
-          <div className='p-6'>
-            {[...Array(loadingFiles).keys()].map((_, index) => (
-              <div className='flex items-center gap-2' key={index}>
-                {"Loading..."}
-              </div>
-            ))}
-            {files.map((file, index) => (
-              <div className='flex items-center gap-2' key={index}>
-                {file.name}
-                <div className='cursor-pointer' onClick={() => handleRemoveFile(index)}>
-                  <IoClose />
-                </div>
-              </div>
-            ))}
-          </div>
+          <MediaSelector max={2} ref={mediaSelector} rerender={rerender} />
+          {mediaSelector.current?.getFiles()}
         </div>
         <p className="whitespace-pre-wrap">{error}</p>
-        <button type="submit" onClick={handleSubmitingPost}>Post</button>
+        <button type="submit" onClick={handleSubmitingPost}>{buttonText}</button>
       </form>
     </>
   );
