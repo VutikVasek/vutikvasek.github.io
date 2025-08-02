@@ -118,18 +118,17 @@ router.get('/:post', verifyTokenNotStrict, async (req, res) => {
 router.delete('/:post', verifyToken, async (req, res) => {
   const postId = req.params.post;
   try {
-    await Post.findByIdAndDelete(postId);
-    try {
-      const path = `media/image/${postId}`;
-      const img1 = path + "0.webp";
-      const img2 = path + "1.webp";
-      await fs.access(img1);
-      await fs.unlink(img1);
-      await fs.access(img2);
-      await fs.unlink(img2);
-    } catch (err) {
-      if (err.code !== 'ENOENT') console.log(err);
-    }
+    const post = await Post.findByIdAndDelete(postId);
+    const path = `media/image/${postId}`;
+    await Promise.all([0, 1].map(async num => {
+      const img = path + num + "." + post.mediaType[0];
+      try {
+          await fs.access(img);
+          await fs.unlink(img);
+      } catch (err) {
+        if (err.code !== 'ENOENT') console.log(err);
+      }
+    }))
     res.json({message: "Post deleted"})
   } catch (err) {
     console.log(err);

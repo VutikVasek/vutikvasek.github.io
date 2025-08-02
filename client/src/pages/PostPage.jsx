@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import LogWall from '../components/auth/LogWall';
 import { validatePost } from '../tools/validate';
 import { IoClose } from "react-icons/io5";
+import { useAppContext } from '@/context/AppContext';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function PostPage() {
@@ -11,6 +12,8 @@ export default function PostPage() {
   const navigate = useNavigate();
   const fileInputRef = useRef();
   const [files, setFiles] = useState([]);
+
+  const { showErrorToast } = useAppContext();
 
   const maxLength = 512;
 
@@ -66,8 +69,12 @@ export default function PostPage() {
   }
 
   const addToFiles = (arr) => {
-    if (arr.length + files.length > 2) alert("You can only upload up to 2 images");
-    setFiles((prev) => [...prev, ...arr].slice(0, 2));
+    const filtered = arr.filter(file => {
+      if (file.type.split('/')[0] === "image") return file;
+      showErrorToast("You can only upload images");
+    })
+    if (filtered.length + files.length > 2) showErrorToast("You can only upload up to 2 images");
+    setFiles((prev) => [...prev, ...filtered].slice(0, 2));
   }
 
   const handleFileChange = (e) => {
@@ -120,7 +127,7 @@ export default function PostPage() {
           </div>
           <div className='p-6'>
             {files.map((file, index) => (
-              <div className='flex items-center gap-2'>
+              <div className='flex items-center gap-2' key={index}>
                 {file.name}
                 <div className='cursor-pointer' onClick={() => handleRemoveFile(index)}>
                   <IoClose />

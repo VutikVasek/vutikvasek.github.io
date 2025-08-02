@@ -4,6 +4,7 @@ import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
 import { verifyToken } from '../middleware/auth.js';
+import Post from '../models/Post.js';
 
 const router = express.Router();
 
@@ -37,19 +38,39 @@ router.post('/pfp', verifyToken, upload.single('pfp'), async (req, res) => {
 router.post('/image', verifyToken, upload.single('image'), async (req, res) => {
   try {
     const userId = req.user._id.toString();
-    const outputPath = path.join('media', 'image', `${req.body.postId + req.body.index}.webp`);
+    const isGif = req.file.mimetype === "image/gif";
+    const extension = isGif ? "gif" : "webp";
+    const post = await Post.findById(req.body.postId).select('mediaType');
+    post.mediaType[req.body.index] = extension;
+    await post.save();
+
+    const outputPath = path.join('media', 'image', `${req.body.postId + req.body.index}.${extension}`);
 
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
-    await sharp(req.file.buffer)
-      .resize({
-        width: 1920,
-        height: 1920,
-        fit: sharp.fit.inside,
-        withoutEnlargement: true
-      })
-      .webp()
-      .toFile(outputPath);
+    post.mediaType[req.body.index] = extension;
+
+    if (isGif) {
+      await sharp(req.file.buffer, { animated: true })
+        .resize({
+          width: 1920,
+          height: 1920,
+          fit: sharp.fit.inside,
+          withoutEnlargement: true
+        })
+        .gif()
+        .toFile(outputPath);
+    } else {
+      await sharp(req.file.buffer)
+        .resize({
+          width: 1920,
+          height: 1920,
+          fit: sharp.fit.inside,
+          withoutEnlargement: true
+        })
+        .webp()
+        .toFile(outputPath);
+    }
 
     res.json({ message: 'Image uploaded successfully' });
   } catch (err) {

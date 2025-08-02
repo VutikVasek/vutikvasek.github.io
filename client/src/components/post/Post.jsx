@@ -19,7 +19,7 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
   const [liked, setLiked] = useState(post.liked);
 
   const shouldLink = !cut;
-  
+
   const handleLike = async () => {
     const res = await fetch(`${API}/post/${post._id}/like`, {
       method: 'PATCH',
@@ -55,7 +55,7 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
             <p>{post.text}</p>
           </div>
         )}
-        <Gallery images={[0, 1].map(num => `${MEDIA}/image/${post._id + num}.webp`)} link={`/p/${post._id}`} />
+        <Gallery images={[0, 1].map((num) => `${MEDIA}/image/${post._id + num}.${post.mediaType ? (post.mediaType[num] || "webp") : "webp"}`)} link={`/p/${post._id}`} />
         <div className='flex gap-6 items-center'>
           <Descriptor text={liked ? "Unlike" : "Like"}>
             <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 
