@@ -1,5 +1,5 @@
 import { LuShare2 } from "react-icons/lu";
-import Descriptor from "./Descriptor";
+import Descriptor from "../info/Descriptor";
 import { useAppContext } from "@/context/AppContext";
 
 export default function ShareButton({ url }) {

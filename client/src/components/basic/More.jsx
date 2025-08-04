@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiMoreHorizontal } from "react-icons/fi";
-import Descriptor from "./Descriptor";
+import Descriptor from "../info/Descriptor";
 
 export default function More({ children }) {
   if (!children) return "";

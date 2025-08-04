@@ -19,7 +19,6 @@ const MediaSelector = React.forwardRef(({ max = 1, rerender }, ref) => {
       await Promise.all(files.map(async (file, index) => {
         await uploadImage(file, id, index);
       }))
-      return files.map(file => file.type.split('/')[1] === "gif" ? "gif" : "webp");
     },
     getFiles() {
       return (

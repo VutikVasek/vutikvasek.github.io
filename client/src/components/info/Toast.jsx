@@ -2,7 +2,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import React, { useEffect, useRef } from "react"
 
-export default function InfoToast({ text, color, reshow, ...params }) {
+export default function Toast({ text, color, reshow, ...params }) {
   const toast = useRef(null);
   const { contextSafe } = useGSAP();
 

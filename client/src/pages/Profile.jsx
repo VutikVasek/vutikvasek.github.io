@@ -5,7 +5,7 @@ import FollowButton from "../components/profile/FollowButton";
 import UserList from "../components/profile/UserList";
 import Replies from "../components/profile/Replies";
 import SmartLink from "../components/basic/SmartLink";
-import ProfilePicture from "@/components/basic/ProfilePicture";
+import ProfilePicture from "@/components/media/ProfilePicture";
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Profile() {

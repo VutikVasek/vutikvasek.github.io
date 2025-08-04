@@ -14,7 +14,7 @@ import PostFull from './pages/PostFull';
 import NotFound from './pages/NotFound';
 import Notifications from './pages/Notifications';
 import NotificationSettings from './pages/account/NotificationSettings';
-import InfoToast from './components/basic/InfoToast';
+import Toast from './components/info/Toast';
 
 import SmartLink from './components/basic/SmartLink';
 
@@ -78,7 +78,7 @@ function App() {
             )}
           </div>
         </nav>
-        <InfoToast text={toastText} color={toastColor} reshow={toastReshow} />
+        <Toast text={toastText} color={toastColor} reshow={toastReshow} />
         <Routes>
           <Route path="/" element={<FeedPage />} />
           <Route path="/:following" element={<FeedPage />} />

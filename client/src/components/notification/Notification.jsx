@@ -1,7 +1,7 @@
 import { NotificationContext, NotificationType } from "^/shared"
 import { Link } from "react-router-dom"
 import More from "../basic/More"
-import ProfilePicture from "../basic/ProfilePicture"
+import ProfilePicture from "../media/ProfilePicture"
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Notification({ notification }) {

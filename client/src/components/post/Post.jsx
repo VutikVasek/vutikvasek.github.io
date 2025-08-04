@@ -5,9 +5,9 @@ import More from '../basic/More';
 import DeleteButton from '../basic/DeleteButton';
 import SmartLink from '../basic/SmartLink';
 import Gallery from './Gallery';
-import ProfilePicture from '../basic/ProfilePicture';
+import ProfilePicture from '../media/ProfilePicture';
 import ShareButton from '../basic/ShareButton';
-import Descriptor from '../basic/Descriptor';
+import Descriptor from '../info/Descriptor';
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
@@ -55,7 +55,7 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
             <p>{post.text}</p>
           </div>
         )}
-        <Gallery images={[0, 1].map((num) => `${MEDIA}/image/${post._id + num}.${post.mediaType ? (post.mediaType[num] || "webp") : "webp"}`)} link={`/p/${post._id}`} />
+        <Gallery images={[0, 1].map((num) => `${MEDIA}/image/${post._id + num}.webp`)} link={`/p/${post._id}`} />
         <div className='flex gap-6 items-center'>
           <Descriptor text={liked ? "Unlike" : "Like"}>
             <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 

@@ -121,7 +121,7 @@ router.delete('/:post', verifyToken, async (req, res) => {
     const post = await Post.findByIdAndDelete(postId);
     const path = `media/image/${postId}`;
     await Promise.all([0, 1].map(async num => {
-      const img = path + num + "." + post.mediaType[0];
+      const img = path + num + ".webp";
       try {
           await fs.access(img);
           await fs.unlink(img);

@@ -7,9 +7,9 @@ import More from "../basic/More";
 import DeleteButton from "../basic/DeleteButton";
 import SmartLink from "../basic/SmartLink";
 import ShareButton from "../basic/ShareButton";
-import Descriptor from "../basic/Descriptor";
+import Descriptor from "../info/Descriptor";
 import Gallery from "../post/Gallery";
-import MediaSelector from "../basic/MediaSelector";
+import MediaSelector from "../media/MediaSelector";
 import { useAppContext } from "@/context/AppContext";
 
 const API = import.meta.env.VITE_API_BASE_URL;
@@ -71,9 +71,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
 
     if (!res.ok) return console.log(data.message);
 
-    const extensions = await mediaSelector.current?.upload(data._id);
-
-    data.mediaType = extensions;
+    await mediaSelector.current?.upload(data._id);
 
     await setComments(comments => [ data, ...comments]);
 
@@ -106,7 +104,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
               <p className='text-xs text-gray-600'>{formatRelativeTime(comment.createdAt)}</p>
             </div>
             <p>{comment.text}</p>
-            <Gallery images={[`${MEDIA}/image/${comment._id}0.${comment.mediaType || "webp"}`]} />
+            <Gallery images={[`${MEDIA}/image/${comment._id}0.webp`]} />
             <div className='flex gap-6 items-center mt-2'>
               <Descriptor text={liked ? "Unlike" : "Like"}>
                 <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 

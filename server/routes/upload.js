@@ -38,44 +38,19 @@ router.post('/pfp', verifyToken, upload.single('pfp'), async (req, res) => {
 
 router.post('/image', verifyToken, upload.single('image'), async (req, res) => {
   try {
-    const isGif = req.file.mimetype === "image/gif";
-    const extension = isGif ? "gif" : "webp";
-    const post = await Post.findById(req.body.id).select('mediaType');
-    if (post) {
-      post.mediaType[req.body.index] = extension;
-      await post.save();
-    } else {
-      const comment = await Comment.findById(req.body.id).select('mediaType');
-      comment.mediaType = extension;
-      await comment.save();
-      console.log(comment);
-    }
-
-    const outputPath = path.join('media', 'image', `${req.body.id + req.body.index}.${extension}`);
+    const outputPath = path.join('media', 'image', `${req.body.id + req.body.index}.webp`);
 
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
-    if (isGif) {
-      await sharp(req.file.buffer, { animated: true })
-        .resize({
-          width: 1920,
-          height: 1920,
-          fit: sharp.fit.inside,
-          withoutEnlargement: true
-        })
-        .gif()
-        .toFile(outputPath);
-    } else {
-      await sharp(req.file.buffer)
-        .resize({
-          width: 1920,
-          height: 1920,
-          fit: sharp.fit.inside,
-          withoutEnlargement: true
-        })
-        .webp()
-        .toFile(outputPath);
-    }
+    await sharp(req.file.buffer, { animated: true })
+      .resize({
+        width: 1920,
+        height: 1920,
+        fit: sharp.fit.inside,
+        withoutEnlargement: true
+      })
+      .webp()
+      .toFile(outputPath);
 
     res.json({ message: 'Image uploaded successfully' });
   } catch (err) {

@@ -32,7 +32,7 @@ router.get('/', verifyToken, async (req, res) => {
           break;
         case NotificationType.NEW_REPLY:
           const comment = await Comment.findById(notification.context[NotificationContext.COMMENT_ID]).select('author parent').populate('author', 'username');
-          const postParent = await Post.findById(comment.parent);
+          const postParent = await Post.findById(comment?.parent);
           notification.author = comment?.author?.username || "<deleted>";
           notification.reply = !postParent;
           notification.pfp = comment?.author?._id;
