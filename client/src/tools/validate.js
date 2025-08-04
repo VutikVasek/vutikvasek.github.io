@@ -23,6 +23,7 @@ const maxTextLength = 512;
 const validateText = (text, type) => {
   if (!text) return `The ${type} cannot be blank`;
   if (text.length > maxTextLength) return `Maximum length of ${type}s is ${maxTextLength}\n${text.length}/${maxTextLength}`;
+  if (text.split('\n').length > 32) return `All ${type}s must have less than 32 new-lines`;
 }
 export const validatePost = post => validateText(post.trim(), "post");
 export const validateComment = comment => validateText(comment.trim(), "comment");

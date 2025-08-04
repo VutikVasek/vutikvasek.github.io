@@ -8,6 +8,7 @@ import Gallery from './Gallery';
 import ProfilePicture from '../media/ProfilePicture';
 import ShareButton from '../basic/ShareButton';
 import Descriptor from '../info/Descriptor';
+import ExpandableText from '../basic/ExpandableText';
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
@@ -48,11 +49,11 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
         </SmartLink>
         {shouldLink ? (
           <SmartLink to={`/p/${post._id}`}>
-            <p>{post.text}</p>
+            <ExpandableText text={post.text} />
           </SmartLink>
         ):(
           <div>
-            <p>{post.text}</p>
+            <ExpandableText text={post.text} maxHeight={Infinity} />
           </div>
         )}
         <Gallery images={[0, 1].map((num) => `${MEDIA}/image/${post._id + num}.webp`)} link={`/p/${post._id}`} />

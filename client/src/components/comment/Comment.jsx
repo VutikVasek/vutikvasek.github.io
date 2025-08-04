@@ -11,6 +11,7 @@ import Descriptor from "../info/Descriptor";
 import Gallery from "../post/Gallery";
 import MediaSelector from "../media/MediaSelector";
 import { useAppContext } from "@/context/AppContext";
+import ExpandableText from "../basic/ExpandableText";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
@@ -103,7 +104,9 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
               <SmartLink to={`/u/${comment.author.username}`} className="text-md font-semibold">{comment.author.username}</SmartLink>
               <p className='text-xs text-gray-600'>{formatRelativeTime(comment.createdAt)}</p>
             </div>
-            <p>{comment.text}</p>
+
+            <ExpandableText text={comment.text} />
+
             <Gallery images={[`${MEDIA}/image/${comment._id}0.webp`]} />
             <div className='flex gap-6 items-center mt-2'>
               <Descriptor text={liked ? "Unlike" : "Like"}>

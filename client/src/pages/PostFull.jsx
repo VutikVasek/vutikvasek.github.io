@@ -122,6 +122,7 @@ export default function PostFull() {
             <div className="h-20">
               {mediaSelector.current?.getFiles()}
             </div>
+            {replyError}
         </div>
         <div style={{width: '80%'}}>
           <div className="flex justify-end">
