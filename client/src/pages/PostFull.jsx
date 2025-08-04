@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useParams, useSearchParams } from "react-router-dom"
 import Post from "../components/post/Post";
 import CommentThread from "../components/comment/CommentThread";
 import { validateComment } from "../tools/validate";
 import Sorter from "../components/basic/Sorter";
+import MediaSelector from "@/components/media/MediaSelector";
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function PostFull() {
@@ -20,6 +21,9 @@ export default function PostFull() {
   const [pinnedTree, setPinnedTree] = useState();
   const [reply, setReply] = useState('');
   const [replyError, setReplyError] = useState('');
+  const [rerenderState, setRerenderState] = useState(false);
+  
+  const mediaSelector = useRef(null);
 
   const canExpand = (pinnedTree && sort == "newest");
 
@@ -44,6 +48,9 @@ export default function PostFull() {
 
   
   const handleReply = async () => {
+    if (mediaSelector.current?.stillLoading()) 
+      return showErrorToast("Please wait for all the media to upload") 
+
     const validated = validateComment(reply);
     if (validated) {
       setReplyError(validated);
@@ -61,6 +68,8 @@ export default function PostFull() {
     const data = await res.json();
 
     if (!res.ok) return alert(data.message);
+
+    await mediaSelector.current?.upload(data._id);
 
     await setComments(comments => [data, ...comments]);
 
@@ -86,6 +95,8 @@ export default function PostFull() {
     if (shouldFocus) node?.focus();
   }
 
+  const rerender = () => setRerenderState(val => !val);
+
   return (
     <>
       <div className="text-lg">
@@ -100,11 +111,17 @@ export default function PostFull() {
             onChange={(e) => setReply(e.target.value)}
             onFocus={(e) => e.target.rows = 3}
             onBlur={(e) => e.target.rows = 1}
+            onDrop={mediaSelector.current?.handleDrop}
             placeholder="Reply to the post..."
             ref={focus}
             ></textarea>
-            <button className="bg-green-300 px-4 h-10" onClick={handleReply}>Reply</button>
-            {replyError}
+            <div className="flex flex-col gap-2">
+              <button className="bg-green-300 px-4 h-10" onClick={handleReply}>Reply</button>
+              <MediaSelector ref={mediaSelector} rerender={rerender} flex="justify-around" className="h-10 w-full py-2" />
+            </div>
+            <div className="h-20">
+              {mediaSelector.current?.getFiles()}
+            </div>
         </div>
         <div style={{width: '80%'}}>
           <div className="flex justify-end">

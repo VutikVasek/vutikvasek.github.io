@@ -28,7 +28,7 @@ export default function DeleteButton({url, word}) {
   }
 
   return (
-    <div>
+    <div className="z-50">
       <button className="bg-red-400 text-white" onClick={() => setShowConfirmation(true)}>Delete {word}</button>
       {showConfirmation && <Confirmation text={`Do you really want to delete this ${word}?`} onConfirm={onConfirm} />}
     </div>

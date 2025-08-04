@@ -71,9 +71,11 @@ export default function PostPage() {
           onDragOver={(e) => e.preventDefault()}
           onDrop={mediaSelector.current?.handleDrop}
         ></textarea>
-        <div className='flex gap-4'>
-          <MediaSelector max={2} ref={mediaSelector} rerender={rerender} />
-          {mediaSelector.current?.getFiles()}
+        <div className='flex flex-col gap-4'>
+          <MediaSelector max={2} ref={mediaSelector} rerender={rerender} flex="justify-around w-fit" className="h-10 w-10 p-2" />
+          <div className={mediaSelector.current?.getFileCount() ? "h-20" : ""}>
+            {mediaSelector.current?.getFiles()}
+          </div>
         </div>
         <p className="whitespace-pre-wrap">{error}</p>
         <button type="submit" onClick={handleSubmitingPost}>{buttonText}</button>

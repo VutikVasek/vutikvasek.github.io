@@ -2,17 +2,27 @@ import { useAppContext } from "@/context/AppContext";
 import React, { useEffect, useImperativeHandle, useState } from "react";
 import ImageSelector from "./ImageSelector";
 import GifSelector from "./GifSelector";
-import { IoClose } from "react-icons/io5";
+import SelectedMedia from "./SelectedMedia";
 const API = import.meta.env.VITE_API_BASE_URL;
 
-const MediaSelector = React.forwardRef(({ max = 1, rerender }, ref) => {
+const MediaSelector = React.forwardRef(({ max = 1, rerender, flex = "", ...params }, ref) => {
   const [files, setFiles] = useState([]);
   const [loadingFiles, setLoadingFiles] = useState(0);
+  const [URLs, setURLs] = useState([]);
   const { showErrorToast } = useAppContext();
 
   useEffect(() => {
     if (rerender) rerender();
-  }, [files, loadingFiles]);
+  }, [loadingFiles, URLs]);
+
+  useEffect(() => {
+    const urlStrings = files.map(file => URL.createObjectURL(file));
+    setURLs(urlStrings);
+
+    return () => {
+      urlStrings.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [files]);
 
   useImperativeHandle(ref, () => ({
     async upload(id) {
@@ -21,22 +31,7 @@ const MediaSelector = React.forwardRef(({ max = 1, rerender }, ref) => {
       }))
     },
     getFiles() {
-      return (
-      <div className='p-6'>
-        {[...Array(loadingFiles).keys()].map((_, index) => (
-          <div className='flex items-center gap-2' key={index}>
-            {"Loading..."}
-          </div>
-        ))}
-        {files.map((file, index) => (
-          <div className='flex items-center gap-2' key={index}>
-            {file.name}
-            <div className='cursor-pointer' onClick={() => handleRemoveFile(index)}>
-              <IoClose />
-            </div>
-          </div>
-        ))}
-      </div>)
+      return <SelectedMedia files={files} loadingFiles={loadingFiles} URLs={URLs} handleRemoveFile={handleRemoveFile} />
     },
     getFileCount() {
       return files.length;
@@ -86,7 +81,7 @@ const MediaSelector = React.forwardRef(({ max = 1, rerender }, ref) => {
       showErrorToast("You can only upload images");
     })
     if (filtered.length + files.length > max) showErrorToast(`You can only upload up to ${max} images`);
-    setFiles((prev) => [...prev, ...filtered].slice(0, 2));
+    setFiles((prev) => [...prev, ...filtered].slice(0, max));
   }
 
   const handleFileChange = (e) => {
@@ -113,9 +108,9 @@ const MediaSelector = React.forwardRef(({ max = 1, rerender }, ref) => {
 
 
   return (
-    <div>
-      <ImageSelector onChange={handleFileChange} />
-      <GifSelector onSelect={handleGifClick} />
+    <div className={"flex gap-2 h-fit " + flex}>
+      <ImageSelector onChange={handleFileChange} {...params} />
+      <GifSelector onSelect={handleGifClick} {...params} />
     </div>
   )
 })

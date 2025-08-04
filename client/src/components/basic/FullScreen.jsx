@@ -1,0 +1,13 @@
+import { useEffect } from "react"
+
+export default function FullScreen({ invis = false, ...props }) {
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; }
+  }, [])
+
+  return (
+    <div className={"fixed w-dvw h-dvh left-0 top-0 bg-opacity-10 z-40 flex items-center justify-center cursor-default " + (!invis && "bg-black")} {...props} />
+  )
+}

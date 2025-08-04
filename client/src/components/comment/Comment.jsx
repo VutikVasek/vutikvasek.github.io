@@ -82,8 +82,8 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
     setReplying(false);
   }
 
-
   const rerender = () => setRerenderState(val => !val);
+
   return (
     <div className="whitespace-pre-wrap">
       { link && (<SmartLink to={`/p/${comment.parent._id}?sort=newest&c=${comment._id}`} className="p-4">
@@ -149,9 +149,10 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
               <button className="bg-gray-300 px-4  h-10" onClick={() => setReplying(false)}>Cancel</button>
               <button className="bg-green-300 px-4 h-10" onClick={handleReply}>Reply</button>
             </div>
-            <MediaSelector ref={mediaSelector} rerender={rerender} />
-            {mediaSelector.current?.stillLoading() ? "Loading" : 
-              mediaSelector.current?.getFileCount() ? "1 file attached" : ""}
+            <MediaSelector ref={mediaSelector} rerender={rerender} flex={"flex-col"} className="h-10 w-10 p-[0.4rem]" />
+            <div className="h-[5.5rem]">
+              {mediaSelector.current?.getFiles()}
+            </div>
             {replyError}
           </div>
         ):('')}

@@ -1,23 +1,16 @@
+import { useId } from "react";
 import { FaImage } from "react-icons/fa6";
 
-export default function ImageSelector({onChange}) {
+export default function ImageSelector({onChange, ...params}) {
+  const id = useId();
+
   return (
-    <div>
-      
-          {/* <div>
-            <label htmlFor="image" className='block cursor-pointer p-20 border border-black w-fit'
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleDrop}>Click or drag images</label>
-            <input type="file" name="image" id="image" accept="image/*" multiple 
-              onChange={handleFileChange} 
-              className='hidden'
-              />
-          </div> */}
-      <label htmlFor="image">
-        <FaImage className='text-gray-500 hover:text-black' />
+    <div className="h-fit">
+      <label htmlFor={id} className="cursor-pointer">
+        <FaImage className='text-gray-500 hover:text-black' {...params} />
       </label>
-      <input type="file" name="image" id="image" accept="image/*" multiple 
-        onChange={onChange} className="hidden"
+      <input type="file" name="image" id={id} accept="image/*" multiple 
+        onChange={onChange} className="hidden" 
         />
     </div>
   )

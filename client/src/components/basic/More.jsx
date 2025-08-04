@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FiMoreHorizontal } from "react-icons/fi";
 import Descriptor from "../info/Descriptor";
+import FullScreen from "./FullScreen";
 
 export default function More({ children }) {
   if (!children) return "";
@@ -16,7 +17,7 @@ export default function More({ children }) {
         </button>
         {showMore && (
           <>
-          <div className="fixed w-screen h-screen left-0 top-0" onClick={() => setShowMore(false)}></div>
+          <FullScreen onClick={() => setShowMore(false)} invis></FullScreen>
           <div className="w-0 h-0 overflow-visible">
             <div className="bg-gray-300 w-fit p-2 relative flex flex-col whitespace-nowrap">
               {childrenArray.map((item, index) => (

@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@floating-ui/react-dom": "^2.1.5",
     "@gsap/react": "^2.1.2",
     "bad-words": "^4.0.0",
     "gif-picker-react": "^1.4.0",
