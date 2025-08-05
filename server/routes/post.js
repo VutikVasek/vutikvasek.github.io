@@ -20,7 +20,7 @@ router.post('/', verifyToken, async (req, res) => {
     if (user.postTimes.length > 30) return res.status(400).json({message: "You can only post up to 30 times per half an hour."})
     await user.save();
 
-    const newPost = new Post({ author: req.user._id, text: req.body.text.trim() });
+    const newPost = new Post({ author: req.user._id, text: req.body.text.trim(), mentions: req.body.mentions });
     const savedPost = await newPost.save();
 
     notifyFollowers(req.user._id, savedPost._id);

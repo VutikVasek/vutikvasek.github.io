@@ -5,6 +5,7 @@ import CommentThread from "../components/comment/CommentThread";
 import { validateComment } from "../tools/validate";
 import Sorter from "../components/basic/Sorter";
 import MediaSelector from "@/components/media/MediaSelector";
+import TextInput from "@/components/basic/TextInput";
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function PostFull() {
@@ -20,6 +21,7 @@ export default function PostFull() {
   const [comments, setComments] = useState([]);
   const [pinnedTree, setPinnedTree] = useState();
   const [reply, setReply] = useState('');
+  const [mentions, setMentions] = useState(null);
   const [replyError, setReplyError] = useState('');
   const [rerenderState, setRerenderState] = useState(false);
   
@@ -63,7 +65,7 @@ export default function PostFull() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify({ text: reply.trim(), parent: postId }),
+      body: JSON.stringify({ text: reply.trim(), parent: postId, mentions }),
     });
     const data = await res.json();
 
@@ -91,10 +93,6 @@ export default function PostFull() {
 
   if (!post) return (replyError || "Loading...");
 
-  const focus = (node) => {
-    if (shouldFocus) node?.focus();
-  }
-
   const rerender = () => setRerenderState(val => !val);
 
   return (
@@ -105,16 +103,7 @@ export default function PostFull() {
       <div>
         <p>Comments ({post.comments})</p>
         <div className="flex gap-2">
-          <textarea name="" id="" rows="1"  cols="60"
-            className='resize-y border border-black min-h-10'
-            value={reply}
-            onChange={(e) => setReply(e.target.value)}
-            onFocus={(e) => e.target.rows = 3}
-            onBlur={(e) => e.target.rows = 1}
-            onDrop={mediaSelector.current?.handleDrop}
-            placeholder="Reply to the post..."
-            ref={focus}
-            ></textarea>
+            <TextInput text={reply} setText={setReply} setDBMentions={setMentions} shouldFocus={shouldFocus} onDrop={mediaSelector.current?.handleDrop} />
             <div className="flex flex-col gap-2">
               <button className="bg-green-300 px-4 h-10" onClick={handleReply}>Reply</button>
               <MediaSelector ref={mediaSelector} rerender={rerender} flex="justify-around" className="h-10 w-full py-2" />

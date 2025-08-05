@@ -12,6 +12,7 @@ import Gallery from "../post/Gallery";
 import MediaSelector from "../media/MediaSelector";
 import { useAppContext } from "@/context/AppContext";
 import ExpandableText from "../basic/ExpandableText";
+import TextInput from "../basic/TextInput";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
@@ -26,6 +27,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
   const [showComments, setShowComments] = useState(!!pinnedTree || false);
   const [replying, setReplying] = useState(false);
   const [reply, setReply] = useState('');
+  const [mentions, setMentions] = useState(null);
   const [replyError, setReplyError] = useState('');
   const [rerenderState, setRerenderState] = useState(false);
 
@@ -48,8 +50,6 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
     setLiked(data.liked);
   }
 
-  const focus = node => node?.focus();
-
   const handleReply = async () => {
     if (mediaSelector.current?.stillLoading()) 
       return showErrorToast("Please wait for all the media to upload") 
@@ -66,7 +66,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify({ text: reply.trim(), parent: comment._id }),
+      body: JSON.stringify({ text: reply.trim(), parent: comment._id, mentions }),
     });
     const data = await res.json();
 
@@ -142,12 +142,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
       <div style={{marginLeft: 2.75 + 'rem'}}>
         {replying ? (
           <div className="flex gap-2 ml-7">
-            <textarea name="" id="" className="border border-black resize-y" rows={3} cols={50} 
-              value={reply} 
-              onChange={(e) => setReply(e.target.value)} 
-              ref={focus} 
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={mediaSelector.current?.handleDrop}/>
+            <TextInput text={reply} setText={setReply} setDBMentions={setMentions} onDrop={mediaSelector.current?.handleDrop} />
             <div className="flex flex-col gap-2">
               <button className="bg-gray-300 px-4  h-10" onClick={() => setReplying(false)}>Cancel</button>
               <button className="bg-green-300 px-4 h-10" onClick={handleReply}>Reply</button>

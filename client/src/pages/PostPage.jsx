@@ -4,6 +4,8 @@ import LogWall from '../components/auth/LogWall';
 import { validatePost } from '../tools/validate';
 import MediaSelector from '@/components/media/MediaSelector';
 import { useAppContext } from '@/context/AppContext';
+import MentionSelector from '@/components/notification/MentionSelector';
+import TextInput from '@/components/basic/TextInput';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function PostPage() {
@@ -11,6 +13,8 @@ export default function PostPage() {
   const [buttonText, setButtonText] = useState('Post');
   const [error, setError] = useState('');
   const [rerenderState, setRerenderState] = useState(false);
+  const [mentions, setMentions] = useState(null);
+
   const navigate = useNavigate();
   const { showErrorToast } = useAppContext();
 
@@ -39,7 +43,7 @@ export default function PostPage() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify({ text: text.trim() }),
+      body: JSON.stringify({ text: text.trim(), mentions }),
     });
 
     const data = await res.json();
@@ -59,18 +63,7 @@ export default function PostPage() {
       <LogWall />
       <form onSubmit={handleSubmitingPost}>
         <h1>Make a new post!</h1>
-        <textarea
-          className="border border-black resize-none"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder='Start typing here...'
-          autoFocus
-          maxLength={maxLength}
-          cols='100'
-          rows='10'
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={mediaSelector.current?.handleDrop}
-        ></textarea>
+        <TextInput text={text} setText={setText} setDBMentions={setMentions} onDrop={mediaSelector.current?.handleDrop} rows={6} />
         <div className='flex flex-col gap-4'>
           <MediaSelector max={2} ref={mediaSelector} rerender={rerender} flex="justify-around w-fit" className="h-10 w-10 p-2" />
           <div className={mediaSelector.current?.getFileCount() ? "h-20" : ""}>

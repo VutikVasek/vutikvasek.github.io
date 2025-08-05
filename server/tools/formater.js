@@ -1,5 +1,7 @@
+import mongoose from "mongoose";
 import Comment from "../models/Comment.js";
 import Post from "../models/Post.js";
+import User from "../models/User.js";
 
 export const formatFeedPost = async (unpost, userId) => {
   const post = {...unpost};
@@ -29,6 +31,13 @@ const formatAuthorPost = async (post, userId) => {
   post.likes = post.likes?.length || post.likesCount;
   post.comments = (await Comment.find({parent: post._id})).length;
   post.itsme = post.author._id == userId;
+  if (post.mentions)
+    post.mentions = await Promise.all(post.mentions.map(async mention => {
+      if (!mongoose.Types.ObjectId.isValid(mention)) return { username: mention };
+      const user = await User.findById(mention).select('username');
+      if (!user) return { username: mention };
+      return { username: user.username, _id: user._id };
+    }))
 
   return {
     ...post,

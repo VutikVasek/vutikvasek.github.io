@@ -9,6 +9,7 @@ import ProfilePicture from '../media/ProfilePicture';
 import ShareButton from '../basic/ShareButton';
 import Descriptor from '../info/Descriptor';
 import ExpandableText from '../basic/ExpandableText';
+import { Link } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
@@ -47,6 +48,18 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
             <p className='text-xs text-gray-600'>{formatRelativeTime(post.createdAt)}</p>
           </div>
         </SmartLink>
+        {post.mentions?.length > 0 && 
+        <div className='flex gap-2'>
+          {post.mentions.map((mention) => {
+            if (mention._id) return (
+              <Link to={`/u/${mention.username}`} className='text-blue-500 font-semibold'>@{mention.username}</Link>
+            ); else return (
+              <div>@{mention.username}</div>
+            )
+          }
+          )}
+        </div>
+        }
         {shouldLink ? (
           <SmartLink to={`/p/${post._id}`}>
             <ExpandableText text={post.text} />
