@@ -14,8 +14,10 @@ import PostFull from './pages/PostFull';
 import NotFound from './pages/NotFound';
 import Notifications from './pages/Notifications';
 import NotificationSettings from './pages/account/NotificationSettings';
-import Toast from './components/info/Toast';
+import CreateGroup from './pages/CreateGroup';
+import GroupPage from './pages/GroupPage';
 
+import Toast from './components/info/Toast';
 import SmartLink from './components/basic/SmartLink';
 
 import gsap from 'gsap';
@@ -96,7 +98,9 @@ function App() {
           </Route>
           <Route path="/u/:username" element={<Profile />} />
           <Route path="/u/:username/:show" element={<Profile />} />
-          <Route path="/p/:postId" element={<PostFull />} />.
+          <Route path="/p/:postId" element={<PostFull />} />
+          <Route path="/g/:groupname" element={<GroupPage />} />
+          <Route path="/create-group" element={<CreateGroup />} />
 
           <Route path="*" element={<NotFound />}></Route>
         </Routes>

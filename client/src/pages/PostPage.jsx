@@ -4,7 +4,6 @@ import LogWall from '../components/auth/LogWall';
 import { validatePost } from '../tools/validate';
 import MediaSelector from '@/components/media/MediaSelector';
 import { useAppContext } from '@/context/AppContext';
-import MentionSelector from '@/components/notification/MentionSelector';
 import TextInput from '@/components/basic/TextInput';
 const API = import.meta.env.VITE_API_BASE_URL;
 

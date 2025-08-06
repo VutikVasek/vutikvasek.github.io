@@ -15,6 +15,7 @@ import followRoutes from './routes/follow.js';
 import feedRoutes from './routes/feed.js';
 import notificationRoutes from './routes/notification.js';
 import searchRoutes from './routes/search.js';
+import groupRoutes from './routes/group.js';
 
 
 const app = express();
@@ -33,6 +34,7 @@ app.use('/api/follow', followRoutes);
 app.use('/api/feed', feedRoutes);
 app.use('/api/notification', notificationRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/group', groupRoutes);
 
 app.use('/media', express.static(path.join(process.cwd(), 'media')));
 
