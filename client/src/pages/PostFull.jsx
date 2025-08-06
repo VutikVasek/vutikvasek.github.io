@@ -24,6 +24,7 @@ export default function PostFull() {
   const [mentions, setMentions] = useState(null);
   const [replyError, setReplyError] = useState('');
   const [rerenderState, setRerenderState] = useState(false);
+  const [reset, setReset] = useState(false);
   
   const mediaSelector = useRef(null);
 
@@ -59,7 +60,7 @@ export default function PostFull() {
       return;
     }
     
-    const res = await fetch(`${API}/post/comment/`, {
+    const res = await fetch(`${API}/comment/`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -76,6 +77,8 @@ export default function PostFull() {
     await setComments(comments => [data, ...comments]);
 
     setReply('');
+    setMentions(null);
+    setReset(val => !val);
     loadPost();
   }
 
@@ -103,7 +106,7 @@ export default function PostFull() {
       <div>
         <p>Comments ({post.comments})</p>
         <div className="flex gap-2">
-            <TextInput text={reply} setText={setReply} setDBMentions={setMentions} shouldFocus={shouldFocus} onDrop={mediaSelector.current?.handleDrop} />
+            <TextInput text={reply} setText={setReply} setDBMentions={setMentions} shouldFocus={shouldFocus} onDrop={mediaSelector.current?.handleDrop} reset={reset} />
             <div className="flex flex-col gap-2">
               <button className="bg-green-300 px-4 h-10" onClick={handleReply}>Reply</button>
               <MediaSelector ref={mediaSelector} rerender={rerender} flex="justify-around" className="h-10 w-full py-2" />

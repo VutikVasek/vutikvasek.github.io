@@ -62,8 +62,8 @@ export default function MentionSelector({mention, setMention, destroy, onEnter})
 
   const handleKeyDown = (e) => {
     if (query === '' && (e.key === "Delete" || e.key === "Backspace")) destroy();
-    else if (e.key === "Enter" && onEnter) onEnter();
-    else if (e.key === "Tab" && !selectedUser?._id) {
+    else if (e.key === "Enter" && onEnter) onEnter(e);
+    else if (e.key === "Tab" && !selectedUser?._id && results.length > 0) {
       e.preventDefault();
       handleSelectUser(results[0]);
     } 
@@ -89,7 +89,7 @@ export default function MentionSelector({mention, setMention, destroy, onEnter})
           <div className="flex items-center gap-2 p-2 cursor-pointer" key={index} 
               onClick={() => handleSelectUser(user)}
               onMouseDown={(e) => e.preventDefault()} >
-            <img src={`${MEDIA}/pfp/${user.pfp}.jpeg`} alt="pfp" className='rounded-full w-10'
+            <img src={`${MEDIA}/pfp/${user._id}.jpeg`} alt="pfp" className='rounded-full w-10'
               onError={(e) => {e.target.onError = null;e.target.src=`${MEDIA}/pfp/default.jpeg`}} />
             <p className="w-full">{user.username}</p>
           </div>

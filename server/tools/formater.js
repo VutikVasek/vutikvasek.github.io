@@ -68,6 +68,13 @@ const formatCommentObject = async (comment, linkParent, userId) => {
     comment.likes = comment.likes.length
     comment.comments = (await Comment.find({parent: comment._id})).length;
     comment.itsme = comment.author._id == userId;
+    if (comment.mentions)
+      comment.mentions = await Promise.all(comment.mentions.map(async mention => {
+        if (!mongoose.Types.ObjectId.isValid(mention)) return { username: mention };
+        const user = await User.findById(mention).select('username');
+        if (!user) return { username: mention };
+        return { username: user.username, _id: user._id };
+      }))
     
     if (linkParent) {
       let parent = await Post.findById(comment.parent).populate('author', 'username');

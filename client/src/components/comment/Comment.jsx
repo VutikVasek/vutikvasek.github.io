@@ -60,7 +60,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
       return;
     }
     
-    const res = await fetch(`${API}/post/comment/`, {
+    const res = await fetch(`${API}/comment/`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -105,6 +105,18 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
               <p className='text-xs text-gray-600'>{formatRelativeTime(comment.createdAt)}</p>
             </div>
 
+            {comment.mentions?.length > 0 && 
+            <div className='flex gap-2'>
+              {comment.mentions.map((mention, index) => {
+                if (mention._id) return (
+                  <SmartLink to={`/u/${mention.username}`} className='text-blue-500 font-semibold' key={index}>@{mention.username}</SmartLink>
+                ); else return (
+                  <div key={index}>@{mention.username}</div>
+                )
+              }
+              )}
+            </div>
+            }
             <ExpandableText text={comment.text} />
 
             <Gallery images={[`${MEDIA}/image/${comment._id}0.webp`]} />

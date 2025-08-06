@@ -13,5 +13,8 @@ export const NotificationContext = {
   POST_ID: 0,
   COMMENT_ID: 1,
   FOLLOWER_ID: 0,
-  FOLLOWING_ID: 1
+  FOLLOWING_ID: 1,
+  MENTION_NUM: 1,
+  MENTIONER_ID: 1,
+  POST_AUTHOR_ID: 2
 }

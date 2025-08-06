@@ -14,12 +14,12 @@ router.get('/', verifyToken, async (req, res) => {
   const skip = (page - 1) * limit;
 
   try {
-    const notifications = await Notification.find({ for: req.user._id }).sort({ createdAt: -1 }).skip(skip).limit(limit);
-    const total = await Notification.countDocuments({ for: req.user._id });
-
     const monthAgo = new Date();
     monthAgo.setMonth(monthAgo.getMonth() - 1);
     await Notification.deleteMany({ for: req.user._id, createdAt: { $lt: monthAgo } });
+    
+    const notifications = await Notification.find({ for: req.user._id }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+    const total = await Notification.countDocuments({ for: req.user._id });
 
     const formated = await Promise.all(notifications.map(async notif => {
       const notification = notif.toObject();
@@ -40,6 +40,14 @@ router.get('/', verifyToken, async (req, res) => {
         case NotificationType.NEW_POST:
           notification.author = (await User.findById(notification.context[NotificationContext.FOLLOWING_ID]).select('username')).username;
           notification.pfp = notification.context[NotificationContext.FOLLOWING_ID];
+          break;
+        case NotificationType.MENTION:
+          notification.author = (await User.findById(notification.context[NotificationContext.MENTIONER_ID]).select('username')).username;
+          notification.pfp = notification.context[NotificationContext.MENTIONER_ID];
+          break;
+        case NotificationType.COMMENT_MENTION:
+          notification.author = (await User.findById(notification.context[NotificationContext.POST_AUTHOR_ID]).select('username')).username;
+          notification.pfp = notification.context[NotificationContext.POST_AUTHOR_ID];
           break;
       }
       return notification;

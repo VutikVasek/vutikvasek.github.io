@@ -62,7 +62,7 @@ export default function UserList({url, source}) {
       <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button>
       <p>{users.length === 0 && ('No one yet!')}</p>
       {users.map((user, index) => (
-        <div className="flex items-center gap-4" ref={index === users.length - 1 ? lastPostRef : null} key={user._id}>
+        <div className="flex items-center gap-4" ref={index === users.length - 1 ? lastPostRef : null} key={user.pfp}>
           <SmartLink to={"/u/" + user.username} className="flex w-full items-center gap-4">
             <img src={`${MEDIA}/pfp/${user.pfp}.jpeg`} alt="pfp" className='rounded-full w-10'
               onError={(e) => {e.target.onError = null;e.target.src=`${MEDIA}/pfp/default.jpeg`}} />

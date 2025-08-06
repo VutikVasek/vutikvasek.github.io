@@ -50,11 +50,11 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
         </SmartLink>
         {post.mentions?.length > 0 && 
         <div className='flex gap-2'>
-          {post.mentions.map((mention) => {
+          {post.mentions.map((mention, index) => {
             if (mention._id) return (
-              <Link to={`/u/${mention.username}`} className='text-blue-500 font-semibold'>@{mention.username}</Link>
+              <SmartLink to={`/u/${mention.username}`} className='text-blue-500 font-semibold' key={index}>@{mention.username}</SmartLink>
             ); else return (
-              <div>@{mention.username}</div>
+              <div key={index}>@{mention.username}</div>
             )
           }
           )}

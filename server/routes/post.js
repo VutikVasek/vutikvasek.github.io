@@ -3,10 +3,10 @@ import { verifyToken, verifyTokenNotStrict } from '../middleware/auth.js';
 import Post from '../models/Post.js';
 import Comment from '../models/Comment.js';
 import { formatComment, formatDate, formatPopularComment, formatPost } from '../tools/formater.js';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import fs from 'fs/promises';
 import User from '../models/User.js';
-import { NotificationType } from '../../shared.js';
+import { NotificationContext, NotificationType } from '../../shared.js';
 import Notification from '../models/Notification.js';
 import Follow from '../models/Follow.js';
 
@@ -20,13 +20,16 @@ router.post('/', verifyToken, async (req, res) => {
     if (user.postTimes.length > 30) return res.status(400).json({message: "You can only post up to 30 times per half an hour."})
     await user.save();
 
-    const newPost = new Post({ author: req.user._id, text: req.body.text.trim(), mentions: req.body.mentions });
+    const newPost = new Post({ author: req.user._id, text: req.body.text.trim(), 
+      mentions: req.body.mentions.filter(val => val.trim() !== '').filter((val, index, array) => array.indexOf(val) === index) });
     const savedPost = await newPost.save();
 
     notifyFollowers(req.user._id, savedPost._id);
+    notifyMentioned(savedPost.mentions, savedPost._id, req.user._id);
 
     res.status(201).json(savedPost);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: err.messege });
   }
 });
@@ -46,46 +49,27 @@ const notifyFollowers = async (userId, postId) => {
     })
 }
 
-// Comment
-router.post('/comment/', verifyToken, async (req, res) => {
-  try {
-    const parentId = req.body.parent;
+const getTimes = (times) => {
+  const halfAnHourAgo = new Date();
+  halfAnHourAgo.setMinutes(halfAnHourAgo.getMinutes() - 30);
+  return [...times, new Date()].filter(val => val > halfAnHourAgo);
+}
 
-    const user = await User.findById(req.user._id);
-    user.commentTimes = getTimes(user.commentTimes);
-    if (user.commentTimes.length > 60) return res.status(400).json({message: "You can only comment up to 60 times per half an hour."})
-    await user.save();
-
-    const newComment = new Comment({ author: req.user._id, text: req.body.text.trim(), parent: parentId });
-    const saveComment = await newComment.save();
-
-    
-    let postParent = await Post.findById(parentId).select('author').populate('author', 'notifications _id');
-    let diretctParent = postParent;
-    if (!postParent) {
-      let commentParent = await Comment.findById(parentId).select('parent author').populate('author', 'notifications _id');
-      diretctParent = commentParent;
-      
-      while (commentParent) {
-        const next = await Comment.findById(commentParent.parent).select('parent');
-        if (!next) break;
-        commentParent = next;
+const notifyMentioned = (mentions, postId, userId) => {
+  if (!mentions) return;
+  mentions.forEach(async (mention) => {
+    try {
+      if (!mongoose.Types.ObjectId.isValid(mention)) return;
+      const mentioned = await User.findById(mention).select('notifications');
+      if (mentioned.notifications[NotificationType.MENTION]) {
+        const notif = new Notification({ for: mention, type: NotificationType.MENTION, context: [postId, userId] });
+        await notif.save();
       }
-
-      postParent = await Post.findById(commentParent.parent).select('author').populate('author', 'notifications _id');
+    } catch (err) {
+      console.log(err);
     }
-
-    if (diretctParent?.author?.notifications[NotificationType.NEW_REPLY]) {
-      const notif = new Notification({ for: diretctParent.author._id, type: NotificationType.NEW_REPLY, context: [postParent._id, newComment._id] });
-      await notif.save();
-    }
-
-    res.status(201).json(await formatComment(saveComment));
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Server error" });
-  }
-})
+  })
+}
 
 // Like post
 router.patch('/:post/like', verifyToken, async (req, res) => {
@@ -129,6 +113,7 @@ router.delete('/:post', verifyToken, async (req, res) => {
         if (err.code !== 'ENOENT') console.log(err);
       }
     }))
+    await Notification.deleteMany({ [`context.${NotificationContext.POST_ID}`]: postId });
     res.json({message: "Post deleted"})
   } catch (err) {
     console.log(err);
@@ -215,12 +200,6 @@ export const getComments = async (req, res, filter) => {
     res.status(500).json({ message: 'Server error' });
     console.log(err);
   }
-}
-
-const getTimes = (times) => {
-  const halfAnHourAgo = new Date();
-  halfAnHourAgo.setMinutes(halfAnHourAgo.getMinutes() - 30);
-  return [...times, new Date()].filter(val => val > halfAnHourAgo);
 }
 
 const getUncomments = async (filter, pinnedId, skip, limit) => {

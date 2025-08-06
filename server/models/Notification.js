@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const NotificationSchema = new mongoose.Schema({
   for: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   type: { type: Number, required: true },
-  context: { type: [mongoose.Schema.Types.ObjectId] },
+  context: { type: [String] },
   createdAt: { type: Date, default: Date.now },
   seen: { type: Boolean, default: false }
 });
