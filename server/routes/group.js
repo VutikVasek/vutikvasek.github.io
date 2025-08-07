@@ -5,7 +5,7 @@ import Group from '../models/Group.js';
 const router = express.Router();
 
 router.post('/', verifyToken, async (req, res) => {
-  const { name, isPrivate, everyoneCanPost } = req.body;
+  const { name, description, isPrivate, requestJoin, everyoneCanPost } = req.body;
   const userId = req.user._id;
   try {
     const ownedGroups = await Group.countDocuments({ owner: userId });
@@ -14,7 +14,7 @@ router.post('/', verifyToken, async (req, res) => {
     const existingName = await Group.exists({ name });
     if (existingName) return res.status(400).json({ message: "There already exists a group with this name" });
 
-    const newGroup = new Group({ name, members: [userId], admins: [userId], owner: userId, private: isPrivate, everyoneCanPost });
+    const newGroup = new Group({ name, description, members: [userId], admins: [userId], owner: userId, private: isPrivate, requestJoin, everyoneCanPost });
     await newGroup.save();
 
     res.json({message: "Group succesfully created", group: newGroup});
@@ -37,18 +37,28 @@ router.get('/:groupname', verifyTokenNotStrict, async (req, res) => {
         if (isAdmin) canUserPost = true;
       }
     }
-    return {
+    return res.json({
       _id: group._id,
       name: group.name,
+      description: group.description,
+      createdAt: group.createdAt,
       members: group.members.length,
       pinnedPost: group.pinnedPost,
       private: group.private,
+      requestJoin: group.requestJoin,
       canUserPost,
-    }
+      member: group.members.includes(req.user._id),
+      admin: group.admins.includes(req.user._id),
+      owner: group.owner.toString() === req.user._id,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({message: "Server error"});
   }
+})
+
+router.get('/:groupname/members', verifyTokenNotStrict, async (req, res) => {
+  
 })
 
 export default router;

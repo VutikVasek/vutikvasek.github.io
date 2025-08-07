@@ -3,12 +3,14 @@ import FollowButton from "./FollowButton";
 import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import SmartLink from "../basic/SmartLink";
+import More from "../basic/More";
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
 export default function UserList({url, source}) {
   const [users, setUsers] = useState([]);
   const [logged, setLogged] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [group, setGroup] = useState({});
   const [page, setPage] = useState(1);
 
   const observer = useRef();
@@ -29,6 +31,7 @@ export default function UserList({url, source}) {
               ));
         setLogged(data.logged);
         setHasMore(data.hasMore);
+        setGroup(data.group);
       })
       .catch(err => console.log(err));
   }
@@ -69,6 +72,14 @@ export default function UserList({url, source}) {
             <p className="w-full">{user.username}</p>
           </SmartLink>
           <FollowButton userData={user} simple={true} logged={logged} />
+          {group?.admin && (
+            <More>
+              <button>{user.admin ? "Revoke admin" : "Make admin"}</button>
+              {(group.owner && !user.owner) && (
+                <button>Transfer ownership</button>
+              )}
+            </More>
+          )}
         </div>
       ))}
     </div>

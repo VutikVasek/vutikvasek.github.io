@@ -65,7 +65,7 @@ router.post('/gp/:groupId', verifyToken, upload.single('gp'), async (req, res) =
     const isAdmin = group.admins.includes(req.user._id);
     if (!isAdmin) return res.status(401).json({ message: "You need to be admin of this group to change the picture" });
 
-    const outputPath = path.join('media', 'gp', `${groupId}.webp`);
+    const outputPath = path.join('media', 'gp', `${groupId}.jpeg`);
 
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
@@ -76,7 +76,7 @@ router.post('/gp/:groupId', verifyToken, upload.single('gp'), async (req, res) =
         fit: sharp.fit.cover,
         position: 'center'
       })
-      .webp()
+      .jpeg()
       .toFile(outputPath);
 
     res.json({ message: 'Group picture uploaded successfully' });

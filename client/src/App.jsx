@@ -100,6 +100,7 @@ function App() {
           <Route path="/u/:username/:show" element={<Profile />} />
           <Route path="/p/:postId" element={<PostFull />} />
           <Route path="/g/:groupname" element={<GroupPage />} />
+          <Route path="/g/:groupname/:show" element={<GroupPage />} />
           <Route path="/create-group" element={<CreateGroup />} />
 
           <Route path="*" element={<NotFound />}></Route>
