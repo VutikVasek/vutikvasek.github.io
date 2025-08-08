@@ -72,10 +72,10 @@ export default function UserList({url, source}) {
             <p className="w-full">{user.username}</p>
           </SmartLink>
           <FollowButton userData={user} simple={true} logged={logged} />
-          {group?.admin && (
+          {group?.admin && !user.owner && (
             <More>
-              <button>{user.admin ? "Revoke admin" : "Make admin"}</button>
-              {(group.owner && !user.owner) && (
+              <button>{(user.admin) ? "Revoke admin" : "Make admin"}</button>
+              {(group.owner) && (
                 <button>Transfer ownership</button>
               )}
             </More>

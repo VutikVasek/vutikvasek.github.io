@@ -2,7 +2,7 @@ import { useState } from "react";
 import Confirmation from "../basic/Confirmation";
 import { useAuth } from "@/context/AuthContext";
 
-export default function DeleteButton({url, word}) {
+export default function DeleteButton({url, word, deleteWord = "Delete"}) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const { logout } = useAuth();
 
@@ -29,7 +29,7 @@ export default function DeleteButton({url, word}) {
 
   return (
     <div className="z-50">
-      <button className="bg-red-400 text-white" onClick={() => setShowConfirmation(true)}>Delete {word}</button>
+      <button className="bg-red-400 text-white" onClick={() => setShowConfirmation(true)}>{deleteWord} {word}</button>
       {showConfirmation && <Confirmation text={`Do you really want to delete this ${word}?`} onConfirm={onConfirm} />}
     </div>
   )

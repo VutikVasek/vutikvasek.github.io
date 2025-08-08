@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import MentionSelector from "../notification/MentionSelector";
 import { useAppContext } from "@/context/AppContext";
+import GroupSelector from "../group/GroupSelector";
 
-export default function TextInput({text, setText, setDBMentions, shouldFocus = true, onDrop, rows = 3, reset}) {
+export default function TextInput({text, setText, setDBMentions, setDBGroups, shouldFocus = true, onDrop, rows = 3, reset}) {
   const [mentions, setMentions] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const supportGroups = !!setDBGroups;
   const textareaRef = useRef(null);
 
   const { showErrorToast } = useAppContext();
@@ -13,8 +16,14 @@ export default function TextInput({text, setText, setDBMentions, shouldFocus = t
     setMentions(prev => [...prev, { query: "" }]);
   }
 
+  const addGroup = () => {
+    if (groups.length >= 10) return showErrorToast("You can only post to up to 10 groups at once");
+    setGroups(prev => [...prev, { query: "" }]);
+  }
+
   useEffect(() => {
     setMentions([]);
+    setGroups([]);
   }, [reset])
 
   useEffect(() => {
@@ -24,6 +33,9 @@ export default function TextInput({text, setText, setDBMentions, shouldFocus = t
     if (text[start] === '@' && text[start - 1] === '@') {
       setText(text.slice(0, start - 1) + text.slice(start + 1));
       addMention();
+    } else if (supportGroups && text[start] === '&' && text[start - 1] === '&') {
+      setText(text.slice(0, start - 1) + text.slice(start + 1));
+      addGroup();
     }
   }, [text])
 
@@ -34,6 +46,15 @@ export default function TextInput({text, setText, setDBMentions, shouldFocus = t
     }).filter(val => val !== '').filter((val, index, array) => array.indexOf(val) === index);
     setDBMentions(arr.length > 0 ? arr : null);
   }, [mentions]);
+
+  useEffect(() => {
+    if (!supportGroups) return;
+    const arr = groups.map(group => {
+      if (group.selectedGroup?._id) return group.selectedGroup._id
+      return group.query
+    }).filter(val => val !== '').filter((val, index, array) => array.indexOf(val) === index);
+    setDBGroups(arr.length > 0 ? arr : null);
+  }, [groups]);
 
   return (
     <div>
@@ -46,6 +67,17 @@ export default function TextInput({text, setText, setDBMentions, shouldFocus = t
         ))}
         <button onClick={addMention}>Add new mention</button>
       </div>
+      {supportGroups && 
+      <div className="flex">
+        {groups.map((group, index) => (
+          <GroupSelector group={group} setGroup={(group) =>
+                setGroups(prev => prev.map((g, i) => i === index ? group : g))
+              } key={index} destroy={() => setGroups(prev => prev.filter((_, i) => i !== index))}
+              onEnter={(e) => { e.preventDefault(); textareaRef.current?.focus() }} />
+        ))}
+        <button onClick={addGroup}>Add new group</button>
+      </div>
+      }
       <textarea
         className="border border-black resize-none"
         value={text}

@@ -13,6 +13,7 @@ export default function PostPage() {
   const [error, setError] = useState('');
   const [rerenderState, setRerenderState] = useState(false);
   const [mentions, setMentions] = useState(null);
+  const [groups, setGroups] = useState(null);
 
   const navigate = useNavigate();
   const { showErrorToast } = useAppContext();
@@ -42,11 +43,15 @@ export default function PostPage() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify({ text: text.trim(), mentions }),
+      body: JSON.stringify({ text: text.trim(), mentions, groups }),
     });
 
     const data = await res.json();
-    if (!res.ok) alert(data.message || 'Posting failed.');
+    if (!res.ok) {
+      showErrorToast(data.message || "Posting failed");
+      setError(data.message || "Posting failed");
+      return;
+    };
     
     setButtonText('Posting');
 
@@ -62,7 +67,7 @@ export default function PostPage() {
       <LogWall />
       <form onSubmit={handleSubmitingPost}>
         <h1>Make a new post!</h1>
-        <TextInput text={text} setText={setText} setDBMentions={setMentions} onDrop={mediaSelector.current?.handleDrop} rows={6} />
+        <TextInput text={text} setText={setText} setDBMentions={setMentions} setDBGroups={setGroups} onDrop={mediaSelector.current?.handleDrop} rows={6} />
         <div className='flex flex-col gap-4'>
           <MediaSelector max={2} ref={mediaSelector} rerender={rerender} flex="justify-around w-fit" className="h-10 w-10 p-2" />
           <div className={mediaSelector.current?.getFileCount() ? "h-20" : ""}>

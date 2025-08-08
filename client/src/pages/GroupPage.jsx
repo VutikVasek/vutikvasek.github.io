@@ -1,4 +1,5 @@
 import SmartLink from "@/components/basic/SmartLink";
+import Feed from "@/components/feed/Feed";
 import ProfilePicture from "@/components/media/ProfilePicture";
 import UserList from "@/components/profile/UserList";
 import { useEffect, useState } from "react";
@@ -24,9 +25,7 @@ export default function GroupPage({}) {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       }})
       .then(res => res.json())
-      .then(data => {setGroup(data)
-        console.log(data);
-      })
+      .then(data => setGroup(data))
       .catch(err => console.log(err));
   }
 
@@ -39,11 +38,7 @@ export default function GroupPage({}) {
 
   useEffect(() => {
     loadGroup();
-  }, []);  
-
-  useEffect(() => {
-    console.log(group);
-  }, [group])
+  }, []);
 
   if (deleted) return <p>This group was deleted</p>
   if (!group) return <p>Loading...</p>;
@@ -69,7 +64,10 @@ export default function GroupPage({}) {
       </div>
       <div>
         {show === "members" && (
-          <UserList source={`/g/${groupname}`} />
+          <UserList url={`${API}/group/${groupname}/members`} source={`/g/${groupname}`} />
+        )}
+        {!show && (
+          <Feed url={`${API}/group/${groupname}/posts`} />
         )}
       </div>
     </>

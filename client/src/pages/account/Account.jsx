@@ -6,7 +6,7 @@ import PfpUpload from '@/components/profile/PfpUpload';
 import DeleteButton from '@/components/basic/DeleteButton';
 const API = import.meta.env.VITE_API_BASE_URL;
 
-export default function Feed() {
+export default function Account() {
   const [user, setUser] = useState({});
   const [date, setDate] = useState('');
   

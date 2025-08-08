@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Comment from "../models/Comment.js";
 import Post from "../models/Post.js";
 import User from "../models/User.js";
+import Group from "../models/Group.js";
 
 export const formatFeedPost = async (unpost, userId) => {
   const post = {...unpost};
@@ -38,6 +39,20 @@ const formatAuthorPost = async (post, userId) => {
       if (!user) return { username: mention };
       return { username: user.username, _id: user._id };
     }))
+  if (post.groups) {
+    post.adminGroups = [];
+    post.pinnedGroups = [];
+    post.groups = await Promise.all(post.groups.map(async (groupId, index) => {
+      if (!mongoose.Types.ObjectId.isValid(groupId)) return { name: "<Error>" };
+      const group = await Group.findById(groupId).select('name admins pinnedPost');
+      if (!group) return { name: "<deleted>" };
+      if (group.admins.includes(userId)) {
+        post.adminGroups.push(index);
+        post.pinnedGroups.push(group.pinnedPost?.equals(post._id));
+      }
+      return { name: group.name, _id: group._id };
+    }))
+  }
 
   return {
     ...post,

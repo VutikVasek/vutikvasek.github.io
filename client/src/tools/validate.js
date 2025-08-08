@@ -10,6 +10,7 @@ export const validateUsername = (username) => {
   if (username.length < 3) return "The length of username has to be 3 or more characters";
   if (username.length > 32) return "The maximum length of username is 32 characters";
   if (filter.isProfane(username)) return "Please remove any profanity from the username";
+  if (/@/.test(username)) return "Username cannot contain the @ symbol";
 }
 export const validatePassword = (password) => {
   if (!password) return "Please enter new password";

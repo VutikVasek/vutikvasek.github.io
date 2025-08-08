@@ -9,6 +9,7 @@ import User from '../models/User.js';
 import { NotificationContext, NotificationType } from '../../shared.js';
 import Notification from '../models/Notification.js';
 import Follow from '../models/Follow.js';
+import Group from '../models/Group.js';
 
 const router = express.Router();
 
@@ -20,8 +21,12 @@ router.post('/', verifyToken, async (req, res) => {
     if (user.postTimes.length > 30) return res.status(400).json({message: "You can only post up to 30 times per half an hour."})
     await user.save();
 
-    const newPost = new Post({ author: req.user._id, text: req.body.text.trim(), 
-      mentions: req.body.mentions.filter(val => val.trim() !== '').filter((val, index, array) => array.indexOf(val) === index) });
+    const groups = await Group.find({ _id: { $in: req.body.groups.filter(group => mongoose.Types.ObjectId.isValid(group)) } }).select('members admins');
+    if (groups && groups.length === 0) return res.status(400).json({ message: "When posting on groups, you need to have at least one valid group" });
+    const mygroups = groups?.filter(group => group.members.includes(req.user._id) && (group.everyoneCanPost || group.admins.includes(req.user._id)));
+
+    const newPost = new Post({ author: req.user._id, text: req.body.text.trim(), groups: mygroups?.map(group => group._id),
+      mentions: req.body.mentions?.filter(val => val.trim() !== '').filter((val, index, array) => array.indexOf(val) === index) });
     const savedPost = await newPost.save();
 
     notifyFollowers(req.user._id, savedPost._id);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { FaRegHeart, FaHeart, FaRegComments } from "react-icons/fa";
 import { formatRelativeTime } from '../../tools/time';
 import More from '../basic/More';
@@ -60,6 +60,18 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
           )}
         </div>
         }
+        {post.groups?.length > 0 && 
+        <div className='flex gap-2'>
+          {post.groups.map((group, index) => {
+            if (group._id) return (
+              <SmartLink to={`/g/${group.name}`} className='text-blue-500 font-semibold' key={index}>&{group.name}</SmartLink>
+            ); else return (
+              <div key={index}>&{group.name}</div>
+            )
+          }
+          )}
+        </div>
+        }
         {shouldLink ? (
           <SmartLink to={`/p/${post._id}`}>
             <ExpandableText text={post.text} />
@@ -88,7 +100,18 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
           ):("")}
           <ShareButton url={`${BASE}/p/${post._id}`} />
           <More>
-            {post.itsme && <DeleteButton url={`${API}/post/${post._id}`} word="post" />}
+            {[
+              post.itsme && <DeleteButton url={`${API}/post/${post._id}`} word="post" key={"delete post"} />,
+              ...(post.adminGroups?.flatMap((index, key) => (
+                [
+                  <DeleteButton url={`${API}/group/p/${post._id}/${post.groups[index]._id}`} key={"delete" + key} 
+                    deleteWord='Remove' word={`post from group ${post.groups[index].name}`} />,
+                  <button key={"pin" + key}>
+                    {post.pinnedGroups[key] ? `Unpin from group ${post.groups[index].name}` : `Pin to group ${post.groups[index].name}`}
+                  </button>
+                ]
+              )) ?? [])
+            ]}
           </More>
         </div>
       </div>

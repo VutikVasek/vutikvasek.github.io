@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Post from "../post/Post";
 import Sorter from "../basic/Sorter";
 import { useLocation } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Feed({url, reloadState}) {
   const location = useLocation();
@@ -14,6 +15,8 @@ export default function Feed({url, reloadState}) {
   const [error, setError] = useState('');
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+
+  const { logout } = useAuth();
   
   const loadPosts = async (reload) => {
     const res = await fetch(url + `?page=${reload ? 1 : page}&limit=4&sort=${sort}&time=${timeframe}`, {
@@ -38,6 +41,7 @@ export default function Feed({url, reloadState}) {
       setHasMore(data.hasMore);
     } else {
       setError('An error has occured while loading');
+      if (localStorage.getItem('token')) logout();
     }
   };
   
