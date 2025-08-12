@@ -5,6 +5,7 @@ import { getFeed } from './feed.js';
 import { verifyTokenNotStrict } from '../middleware/auth.js';
 import { getComments } from './post.js';
 import { Types } from 'mongoose';
+import Group from '../models/Group.js';
 
 const router = express.Router();
 
@@ -15,6 +16,7 @@ router.get("/user/:username",  verifyTokenNotStrict, async (req, res) => {
 
   const followers = await Follow.countDocuments({following: user._id});
   const following = await Follow.countDocuments({follower: user._id});
+  const groups = await Groups.countDocuments({member: user._id});
 
   const follow = await Follow.findOne({follower: req.user?._id, following: user._id});
 
@@ -27,6 +29,7 @@ router.get("/user/:username",  verifyTokenNotStrict, async (req, res) => {
             notify: follow?.notify,
             followers,
             following,
+            groups,
             itsme: user._id == req.user?._id });
 })
 
@@ -49,6 +52,40 @@ router.get("/user/:username/following", verifyTokenNotStrict, async (req, res) =
 
 router.get("/user/:username/followers", verifyTokenNotStrict, async (req, res) => {
   formatUserList(req, res, 'follower')
+})
+
+router.get('/user/:username/groups', verifyTokenNotStrict, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const username = req.params.username;
+    const user = await User.findOne({username: username});
+    if (!user) return res.status(404).json({ message: `No user with username ${username} was found`});
+
+    const groups = await Group.find({ members: user._id }).skip(skip).limit(limit).select('name members requestJoin');
+    const total = await Group.find({ members: user._id });
+
+    const myGroups = groups.map(group => 
+      ({
+        name: group.name,
+        gp: group._id.toString(),
+        member: group.members.includes(req.user?._id),
+        owner: group.owner.equals(req.user?._id),
+        banned: group.banned.includes(req.user?._id)
+      })
+    );
+
+    res.json({
+      groupList: myGroups,
+      logged: !!req.user, 
+      hasMore: skip + users.length < total
+    })
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: err});
+  }
 })
 
 const formatUserList = async (req, res, populate) => {

@@ -1,6 +1,8 @@
 import SmartLink from "@/components/basic/SmartLink";
 import Feed from "@/components/feed/Feed";
+import JoinButton from "@/components/group/JoinButton";
 import ProfilePicture from "@/components/media/ProfilePicture";
+import Post from "@/components/post/Post";
 import UserList from "@/components/profile/UserList";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -11,6 +13,7 @@ export default function GroupPage({}) {
   const [group, setGroup] = useState({});
   const [deleted, setDeleted] = useState();
   const [date, setDate] = useState('');
+  const [pinnedPost, setPinnedPost] = useState();
 
   const loadGroup = async () => {
     if (groupname == "<deleted>") {
@@ -34,6 +37,16 @@ export default function GroupPage({}) {
       year: 'numeric',
       month: 'long',
     }))
+    if (group.pinnedPost)
+      fetch(`${API}/group/${encodeURIComponent(groupname)}/pinned`, {
+        method: 'GET',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        }})
+        .then(res => res.json())
+        .then(data => setPinnedPost(data))
+        .catch(err => console.log(err));
   }, [group]);
 
   useEffect(() => {
@@ -52,14 +65,7 @@ export default function GroupPage({}) {
         <SmartLink to="members">{group.members} member{group.members > 1 && "s"}</SmartLink>
         {!deleted && (<>
           <p>{group._id ? "Since" : ""} {date}</p>
-          {!group.owner &&
-            (<div>
-              {group.member ? (
-                <button>Leave group</button>
-              ) : (
-                <button>{group.requestJoin ? "Request join" : "Join"}</button>
-              )}
-            </div>)}
+          <JoinButton group={group} logged={group.logged} />
         </>)}
       </div>
       <div>
@@ -67,7 +73,10 @@ export default function GroupPage({}) {
           <UserList url={`${API}/group/${groupname}/members`} source={`/g/${groupname}`} />
         )}
         {!show && (
+          <>
+          <Post post={pinnedPost} cut={true} />
           <Feed url={`${API}/group/${groupname}/posts`} />
+          </>
         )}
       </div>
     </>

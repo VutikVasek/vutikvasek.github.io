@@ -49,6 +49,21 @@ router.get('/', verifyToken, async (req, res) => {
           notification.author = (await User.findById(notification.context[NotificationContext.POST_AUTHOR_ID]).select('username')).username;
           notification.pfp = notification.context[NotificationContext.POST_AUTHOR_ID];
           break;
+        case NotificationType.NEW_MEMBER:
+          notification.username = (await User.findById(notification.context[NotificationContext.MEMBER_ID]).select('username')).username;
+          notification.groupname = (await Group.findById(notification.context[NotificationContext.GROUP_ID]).select('name')).name;
+          notification.pfp = notification.context[NotificationContext.MEMBER_ID];
+          break;
+        case NotificationType.GROUP_JOIN_REQUEST:
+          notification.username = (await User.findById(notification.context[NotificationContext.MEMBER_ID]).select('username')).username;
+          notification.groupname = (await Group.findById(notification.context[NotificationContext.GROUP_ID]).select('name')).name;
+          notification.pfp = notification.context[NotificationContext.MEMBER_ID];
+          break;
+        case NotificationType.GROUP_JOIN_ACCEPT || NotificationType.GROUP_JOIN_DENY 
+                 || NotificationType.MADE_ADMIN || NotificationType.REVOKED_ADMIN:
+          notification.groupname = (await Group.findById(notification.context[NotificationContext.GROUP_ID]).select('name')).name;
+          notification.gp = notification.context[NotificationContext.GROUP_ID];
+          break;
       }
       return notification;
     }))

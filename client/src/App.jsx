@@ -14,8 +14,8 @@ import PostFull from './pages/PostFull';
 import NotFound from './pages/NotFound';
 import Notifications from './pages/Notifications';
 import NotificationSettings from './pages/account/NotificationSettings';
-import CreateGroup from './pages/CreateGroup';
-import GroupPage from './pages/GroupPage';
+import CreateGroup from './pages/group/CreateGroup';
+import GroupPage from './pages/group/GroupPage';
 
 import Toast from './components/info/Toast';
 import SmartLink from './components/basic/SmartLink';

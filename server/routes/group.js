@@ -6,6 +6,8 @@ import Follow from '../models/Follow.js';
 import mongoose from 'mongoose';
 import { getFeed } from './feed.js';
 import Post from '../models/Post.js';
+import { NotificationType } from '../../shared.js';
+import { formatPost } from '../tools/formater.js';
 
 const router = express.Router();
 
@@ -55,6 +57,8 @@ router.get('/:groupname', verifyTokenNotStrict, async (req, res) => {
       member: group.members.includes(req.user._id),
       admin: group.admins.includes(req.user._id),
       owner: group.owner.toString() === req.user._id,
+      banned: group.banned.includes(req.user._id),
+      logged: !!req.user
     });
   } catch (err) {
     console.log(err);
@@ -67,6 +71,16 @@ router.get('/:groupname/posts', verifyTokenNotStrict, async (req, res) => {
   const group = await Group.findOne({name: groupname}).select('_id');
   if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
   getFeed(req, res, { groups: group._id })
+})
+
+router.get('/:groupname/pinned', verifyTokenNotStrict, async (req, res) => {
+  const groupname = req.params.groupname;
+  const group = await Group.findOne({name: groupname}).select('_id pinnedPost');
+  if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+  if (!group.pinnedPost) return res.status(400).json({ message: "This group doesn't have a pinned post" });
+  const post = await Post.findById(pinnedPost);
+  if (!post) return res.status(404).json({ message: "We didn't find the pinned post" });
+  res.json(formatPost(post, req.user?._id));
 })
 
 router.get('/:groupname/members', verifyTokenNotStrict, async (req, res) => {
@@ -89,7 +103,7 @@ router.get('/:groupname/members', verifyTokenNotStrict, async (req, res) => {
         notify: follows?.notify,
         itsme: member._id.equals(req.user?._id),
         admin: group.admins.includes(member._id),
-        owner: group.owner.equals(member._id),
+        owner: group.owner.equals(member._id)
       }
     }));
     const groupMembers = {
@@ -117,7 +131,7 @@ const returnDeleted = () => {
   }
 }
 
-router.delete('/p/:postId/:groupId', verifyToken, async (req, res) => {
+router.delete('/:groupId/p/:postId', verifyToken, async (req, res) => {
   const { postId, groupId } = req.params;
   try {
     const group = await Group.findById(groupId).select('admins');
@@ -135,5 +149,245 @@ router.delete('/p/:postId/:groupId', verifyToken, async (req, res) => {
     res.status(500).json({message: "Server error"});
   }
 })
+
+router.delete('/:groupname/leave', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  try {
+    const group = await Group.findOne({name: groupname}).select('members');
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    group.members = group.members.filter(userId => userId !== req.user._id);
+    await group.save();
+    await Notification.deleteOne({ for: group.owner, type: NotificationType.NEW_MEMBER, context: req.user._id})
+    res.json({ message: "You succesfully left the group" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.put('/:groupname/join', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  try {
+    const group = await Group.findOne({name: groupname});
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (group.banned.includes(req.user._id)) return res.status(403).json({ message: "You are banned from this group" });
+    if (group.requestJoin) return res.status(400).json({ message: "You need to send a request to join  " + groupname });
+    group.members.push(req.user._id);
+    await group.save();
+    const notif = new Notification({ for: group.owner, type: NotificationType.NEW_MEMBER, context: [group._id, req.user._id]})
+    await notif.save();
+    res.json({ message: "You succesfully joined the group" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.post('/:groupname/request', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  try {
+    const group = await Group.findOne({name: groupname});
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (group.banned.includes(req.user._id)) return res.status(403).json({ message: "You are banned from this group" });
+    if (!group.requestJoin) return res.status(400).json({ message: "This group doesn't require request to join" });
+    if (group.memebers.includes(req.user._id)) return res.status(400).json({ message: "You already are a member of this group" });
+    const notif = new Notification({ for: group.owner, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
+    group.admins.forEach(async admin => {
+      const notif = new Notification({ for: admin, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
+      await notif.save();
+    })
+    res.json({ message: "The request has been send" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.post('/:groupname/accept/:userId', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  const userId = req.params.userId;
+  try {
+    const group = await Group.findOne({name: groupname});
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to accept join requests" });
+    if (!group.requestJoin) return res.status(400).json({ message: "This group doesn't require request to join" });
+
+    group.members.push(userId);
+    await group.save();
+    
+    const notif1 = new Notification({ for: userId, type: NotificationType.GROUP_JOIN_ACCEPT, context: [group._id] });
+    await notif1.save();
+
+    const notif2 = new Notification({ for: group.owner, type: NotificationType.NEW_MEMBER, context: [group._id, req.user._id]})
+    await notif2.save();
+
+    await Notification.deleteOne({ for: group.owner, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
+    group.admins.forEach(async admin => {
+      await Notification.deleteOne({ for: admin, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
+    })
+    res.json({ message: "The request has been accepted" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.post('/:groupname/deny/:userId', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  const userId = req.params.userId;
+  try {
+    const group = await Group.findOne({name: groupname});
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to accept join requests" });
+    if (!group.requestJoin) return res.status(400).json({ message: "This group doesn't require request to join" });
+    
+    if (!group.members.includes(userId)) {
+      const notif = new Notification({ for: userId, type: NotificationType.GROUP_JOIN_DENY, context: [group._id] });
+      await notif.save();
+    }
+
+    await Notification.deleteOne({ for: group.owner, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
+    group.admins.forEach(async admin => {
+      await Notification.deleteOne({ for: admin, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
+    })
+    res.json({ message: "The request has been dennied" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.patch('/:groupname/admin/:userId', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  const userId = req.params.userId;
+  try {
+    const group = await Group.findOne({name: groupname});
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to make someone admin" });
+    if (!group.members.includes(userId)) return res.status(400).json({ message: "This user isn't a member of this group" });
+    if (group.admins.includes(userId)) return res.status(400).json({ message: "This user is admin already" });
+    
+    group.admins.push(userId);
+    await group.save();
+
+    const notif = new Notification({ for: userId, type: NotificationType.MADE_ADMIN, context: [group._id] });
+    await notif.save();
+    
+    res.json({ message: "The user has been made admin" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.patch('/:groupname/deadmin/:userId', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  const userId = req.params.userId;
+  try {
+    const group = await Group.findOne({name: groupname});
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to make someone admin" });
+    if (!group.admins.includes(userId)) return res.status(400).json({ message: "This user isn't admin" });
+    
+    group.admins = group.admins.filter(adminId => adminId !== userId);
+    await group.save();
+
+    const notif = new Notification({ for: userId, type: NotificationType.REVOKED_ADMIN, context: [group._id] });
+    await notif.save();
+    
+    res.json({ message: "The user has been revoked of their admin status" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.put('/:groupname/pin/:postId', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  const postId = req.params.postId;
+  try {
+    const group = await Group.findOne({name: groupname});
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to pin a post" });
+    const post = await Post.findById(postId).select('');
+    if (!post) return res.status(404).json({ message: "We didn't find that post" });
+
+    group.pinnedPost = postId;
+    await group.save();
+    
+    res.json({ message: "The post has been pinned" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.put('/:groupname/unpin', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  try {
+    const group = await Group.findOne({name: groupname});
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to unpin a post" });
+
+    group.pinnedPost = null;
+    await group.save();
+    
+    res.json({ message: "The post has been unpinned" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.put('/:groupname/ban/:userId', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  const userId = req.params.userId;
+  try {
+    const group = await Group.findOne({name: groupname});
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to ban people" });
+    if (group.owner.equals(userId)) return res.status(403).json({ message: "You cannot ban the owner" });
+
+    const user = await User.exists({ _id: userId });
+    if (!user) return res.status(404).json({ message: "We didn't find that user" });
+    if (group.banned.includes(userId)) return res.status(400).json({ message: "That user is already banned" });
+    group.banned.push(userId);
+
+    if (group.members.includes(userId)) {
+      group.members = group.members.filter(member => !member.equals(userId));
+      group.admins = group.admins.filter(admin => !admin.equals(userId));
+    }
+
+    await group.save();
+    
+    res.json({ message: "The user has been banned" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.put('/:groupname/unban/:userId', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  const userId = req.params.userId;
+  try {
+    const group = await Group.findOne({name: groupname});
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to ban people" });
+
+    const user = await User.exists({ _id: userId });
+    if (!user) return res.status(404).json({ message: "We didn't find that user" });
+    if (!group.banned.includes(userId)) return res.status(400).json({ message: "That user isn't banned" });
+
+    group.banned = group.banned.filter(bannedId => !bannedId.equals(userId));
+    await group.save();
+    
+    res.json({ message: "The user has been unbanned" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
 
 export default router;

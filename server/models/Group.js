@@ -5,6 +5,7 @@ const GroupSchema = new mongoose.Schema({
   description: { type: String },
   members: { type: [mongoose.Types.ObjectId], ref: 'User' },
   admins: { type: [mongoose.Types.ObjectId], ref: 'User' },
+  banned: { type: [mongoose.Types.ObjectId], ref: 'User' },
   owner: { type: mongoose.Types.ObjectId, ref: 'User' },
   pinnedPost: { type: mongoose.Types.ObjectId, ref: 'Post' },
   private: { type: Boolean, default: false },

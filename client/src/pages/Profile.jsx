@@ -6,6 +6,7 @@ import UserList from "../components/profile/UserList";
 import Replies from "../components/profile/Replies";
 import SmartLink from "../components/basic/SmartLink";
 import ProfilePicture from "@/components/media/ProfilePicture";
+import GroupList from "@/components/profile/GroupList";
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Profile() {
@@ -49,6 +50,7 @@ export default function Profile() {
         {!deleted && (<>
           <SmartLink to={`/u/${username}/followers`}>Followers: {userData.followers}</SmartLink>
           <SmartLink to={`/u/${username}/following`}>Following: {userData.following}</SmartLink>
+          <SmartLink to={`/u/${username}/groups`}>Groups: {userData.groups}</SmartLink>
           <p>{userData.pfp ? "Since" : ""} {date}</p>
           <div><FollowButton userData={userData} /></div>
         </>)}
@@ -58,6 +60,9 @@ export default function Profile() {
         <>
           {(show == "followers" || show == "following") && (
             <UserList url={`${API}/profile/user/${username}/${show}`} source={`/u/${username}`} />
+          )}
+          {show == "groups" && (
+            <GroupList url={`${API}/profile/user/${username}/${show}`} source={`/u/${username}`} />
           )}
           {(!show || show == "replies") &&
           <div className='flex gap-4'>

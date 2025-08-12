@@ -38,8 +38,62 @@ export default function Notification({ notification }) {
             {notification.context[NotificationContext.MENTION_NUM]}{" people have mentioned you on a post from "}{notification.author}
           </SmartLink>
         )
+      case NotificationType.NEW_MEMBER:
+        return (
+          <SmartLink to={`/u/${notification.username}`}>
+            {notification.username}{" has joined "}{notification.groupname}
+          </SmartLink>
+        )
+      case NotificationType.GROUP_JOIN_REQUEST:
+        return (
+          <div>
+            <SmartLink to={`/u/${notification.username}`}>
+              {notification.username}{" has requested to join "}{notification.groupname}
+            </SmartLink>
+            <button onClick={e => handleResultRequest(e, "accept")}>Accept</button>
+            <button onClick={e => handleResultRequest(e, "deny")}>Deny</button>
+          </div>
+        )
+      case NotificationType.GROUP_JOIN_ACCEPT:
+        return (
+          <SmartLink to={`/g/${notification.groupname}`}>
+            {"Your request to join "}{notification.groupname}{" has been accepted"}
+          </SmartLink>
+        )
+      case NotificationType.GROUP_JOIN_DENY:
+        return (
+          <SmartLink to={`/g/${notification.groupname}`}>
+            {"Your request to join "}{notification.groupname}{" has been dennied"}
+          </SmartLink>
+        )
+      case NotificationType.MADE_ADMIN:
+        return (
+          <SmartLink to={`/g/${notification.groupname}`}>
+            {"You have been made an admin of "}{notification.groupname}
+          </SmartLink>
+        )
+      case NotificationType.GROUP_JOIN_DENY:
+        return (
+          <SmartLink to={`/g/${notification.groupname}`}>
+            {"You are no longer an admin of "}{notification.groupname}
+          </SmartLink>
+        )
     }
   }
+
+  const handleResultRequest = async (e, result) => {
+    e.preventDefault();
+    const res = await fetch(`${API}/group/${notification.context[NotificationContext.GROUP_ID]}/${result}`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      }
+    });
+    const data = await res.json();
+    if (!res.ok) console.log(data.message);
+    window.location.reload();
+  } 
 
   const handleDelete = async (e) => {
     e.preventDefault();
@@ -60,7 +114,11 @@ export default function Notification({ notification }) {
       <More>
         <button onClick={handleDelete}>Clear Notification</button>
       </More>
-      <ProfilePicture pfp={notification.pfp} className="h-10" />
+      { notification.pfp ? 
+        <ProfilePicture pfp={notification.pfp} className="h-10" />
+        :
+        <ProfilePicture pfp={notification.gp} path="gp" className="h-10" />
+      }
       {getContent()}
     </div>
   )

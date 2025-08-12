@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import SmartLink from "../basic/SmartLink";
 import More from "../basic/More";
+import ProfilePicture from "../media/ProfilePicture";
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
 export default function UserList({url, source}) {
@@ -60,6 +61,34 @@ export default function UserList({url, source}) {
     if (node) observer.current.observe(node);
   }, [hasMore]);
 
+  const handleMakeAdmin = async (e, userId, action) => {
+      e.preventDefault();
+      const res = await fetch(`${API}/group/${notification.context[NotificationContext.GROUP_ID]}/${action}/${userId}`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
+      const data = await res.json();
+      if (!res.ok) console.log(data.message);
+      setUsers(prev => prev.map(user => user.pfp !== userId ? user : { ...user, admin: action === "admin" } ));
+  }
+
+  const handleBan = async (e, userId) => {
+      e.preventDefault();
+      const res = await fetch(`${API}/group/${notification.context[NotificationContext.GROUP_ID]}/ban/${userId}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
+      const data = await res.json();
+      if (!res.ok) console.log(data.message);
+      setUsers(prev => prev.filter(user => user.pfp !== userId ));
+  }
+
   return (
     <div className="w-fit">
       <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button>
@@ -67,17 +96,22 @@ export default function UserList({url, source}) {
       {users.map((user, index) => (
         <div className="flex items-center gap-4" ref={index === users.length - 1 ? lastPostRef : null} key={user.pfp}>
           <SmartLink to={"/u/" + user.username} className="flex w-full items-center gap-4">
-            <img src={`${MEDIA}/pfp/${user.pfp}.jpeg`} alt="pfp" className='rounded-full w-10'
-              onError={(e) => {e.target.onError = null;e.target.src=`${MEDIA}/pfp/default.jpeg`}} />
+            <ProfilePicture pfp={user.pfp} className="w-10" />
             <p className="w-full">{user.username}</p>
           </SmartLink>
           <FollowButton userData={user} simple={true} logged={logged} />
           {group?.admin && !user.owner && (
             <More>
-              <button>{(user.admin) ? "Revoke admin" : "Make admin"}</button>
-              {(group.owner) && (
+              {user.admin ? 
+                <button onClick={e => handleMakeAdmin(e, "admin")}>Make user admin</button>
+                :
+                <button onClick={e => handleMakeAdmin(e, "deadmin")}>Revoke users admin status</button>
+              }
+              {(group.owner) ? 
                 <button>Transfer ownership</button>
-              )}
+                : 
+                <button onClick={e => handleBan(e, user.pfp)}>Ban user</button>
+              }
             </More>
           )}
         </div>

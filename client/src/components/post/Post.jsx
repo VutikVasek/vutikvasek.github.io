@@ -10,6 +10,7 @@ import ShareButton from '../basic/ShareButton';
 import Descriptor from '../info/Descriptor';
 import ExpandableText from '../basic/ExpandableText';
 import { Link } from 'react-router-dom';
+import { useAppContext } from '@/context/AppContext';
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
@@ -19,6 +20,8 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
   const [hovered, setHovered] = useState(post.liked);
   const [likes, setLikes] = useState(post.likes);
   const [liked, setLiked] = useState(post.liked);
+
+  const { showInfoToast } = useAppContext();
 
   const shouldLink = !cut;
 
@@ -36,6 +39,38 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
 
     setLikes(data.likes);
     setLiked(data.liked);
+  }
+
+  const handlePinPost = async (e, group, pin) => {
+    e.preventDefault();
+    const res = await fetch(
+        `${API}/group/${group}/${pin ? `pin/${post._id}` : "unpin"}`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      }
+    });
+    const data = await res.json();
+    if (!res.ok) console.log(data.message);
+
+    showInfoToast("Post has been " + (pin ? "pinned" : "unpinned"));
+  }
+
+  const handleBan = async (e, group, ban) => {
+    e.preventDefault();
+    const res = await fetch(
+        `${API}/group/${group}/${ban ? `ban` : "unban"}/${post.author.pfp}`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      }
+    });
+    const data = await res.json();
+    if (!res.ok) console.log(data.message);
+
+    showInfoToast("User has been " + (ban ? "banned" : "unbanned"));
   }
 
   return (
@@ -104,10 +139,13 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
               post.itsme && <DeleteButton url={`${API}/post/${post._id}`} word="post" key={"delete post"} />,
               ...(post.adminGroups?.flatMap((index, key) => (
                 [
-                  <DeleteButton url={`${API}/group/p/${post._id}/${post.groups[index]._id}`} key={"delete" + key} 
+                  <DeleteButton url={`${API}/group/${post.groups[index]._id}/p/${post._id}`} key={"delete" + key} 
                     deleteWord='Remove' word={`post from group ${post.groups[index].name}`} />,
-                  <button key={"pin" + key}>
+                  <button key={"pin" + key} onClick={e => handlePinPost(e, post.groups[index].name, post.pinnedGroups[key])}>
                     {post.pinnedGroups[key] ? `Unpin from group ${post.groups[index].name}` : `Pin to group ${post.groups[index].name}`}
+                  </button>,
+                  <button key={"ban" + key} onClick={e => handleBan(e, post.groups[index].name, post.bannedGroups[key])}>
+                    {post.bannedGroups[key] ? `Unban user from ${post.groups[index].name}` : `Ban user from ${post.groups[index].name}`}
                   </button>
                 ]
               )) ?? [])
