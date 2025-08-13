@@ -40,7 +40,7 @@ router.get('/:groupname', verifyTokenNotStrict, async (req, res) => {
     if (req.user) {
       if (group.everyoneCanPost) canUserPost = true;
       else {
-        const isAdmin = group.admins.includes(req.user._id);
+        const isAdmin = group.admins.includes(req.user?._id);
         if (isAdmin) canUserPost = true;
       }
     }
@@ -54,12 +54,39 @@ router.get('/:groupname', verifyTokenNotStrict, async (req, res) => {
       private: group.private,
       requestJoin: group.requestJoin,
       canUserPost,
-      member: group.members.includes(req.user._id),
-      admin: group.admins.includes(req.user._id),
-      owner: group.owner.toString() === req.user._id,
-      banned: group.banned.includes(req.user._id),
+      member: group.members.includes(req.user?._id),
+      admin: group.admins.includes(req.user?._id),
+      owner: group.owner.toString() === req.user?._id,
+      banned: group.banned.includes(req.user?._id),
       logged: !!req.user
     });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.post('/:groupId/update', verifyToken, async (req, res) => {
+  const groupId = req.params.groupId;
+  const { name, description, isPrivate, requestJoin, everyoneCanPost } = req.body;
+  const userId = req.user._id;
+  try {
+    const group = await Group.findById(groupId);
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to update the group" });
+
+    const existingName = await Group.exists({ name });
+    if (existingName && (name !== group.name)) return res.status(400).json({ message: "There already exists a group with this name" });
+
+    const newGroup = new Group({ name, description, members: [userId], admins: [userId], owner: userId, private: isPrivate, requestJoin, everyoneCanPost });
+    if (group.name !== name) group.name = name;
+    if (group.description !== description) group.description = description;
+    if (group.private !== isPrivate) group.private = isPrivate;
+    if (group.requestJoin !== requestJoin) group.requestJoin = requestJoin;
+    if (group.everyoneCanPost !== everyoneCanPost) group.everyoneCanPost = everyoneCanPost;
+    await group.save();
+    
+    res.json({ message: "The group has been updated" });
   } catch (err) {
     console.log(err);
     res.status(500).json({message: "Server error"});
@@ -383,6 +410,22 @@ router.put('/:groupname/unban/:userId', verifyToken, async (req, res) => {
     await group.save();
     
     res.json({ message: "The user has been unbanned" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.delete('/:groupname', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  try {
+    const group = await Group.findOne({name: groupname});
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (!group.owner.equals(req.user._id)) return res.status(403).json({ message: "You have to be the owner to delete the group" });
+
+    await Group.findByIdAndDelete(group._id);
+    
+    res.json({ message: "The group has been deleted" });
   } catch (err) {
     console.log(err);
     res.status(500).json({message: "Server error"});

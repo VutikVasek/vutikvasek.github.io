@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 const API = import.meta.env.VITE_API_BASE_URL;
 
-export default function PfpUpload() {
+export default function PfpUpload(type = "pfp") {
   const fileInputRef = useRef();
   const [status, setStatus] = useState('');
 
@@ -16,9 +16,9 @@ export default function PfpUpload() {
 
   const uploadPfp = async (file) => {
     const formData = new FormData();
-    formData.append('pfp', file);
+    formData.append(type, file);
 
-    const res = await fetch(`${API}/upload/pfp`, {
+    const res = await fetch(`${API}/upload/${type}`, {
       method: 'POST',
       body: formData,
       headers: {

@@ -5,7 +5,9 @@ import { sendEmail } from '../tools/mailer.js';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import Follow from '../models/Follow.js';
+import Notification from '../models/Notification.js';
 import fs from 'fs/promises';
+import Group from '../models/Group.js';
 
 const router = express.Router();
 
@@ -142,6 +144,13 @@ router.delete('/delete', verifyToken, async (req, res) =>  {
     }
     await Follow.deleteMany({follower: userId});
     await Follow.deleteMany({following: userId});
+    await Notification.deleteMany({for: userId});
+    const ownedGroups = await Group.find({ owner: userId }).select('owner admins');
+    await Promise.all(ownedGroups.forEach(async group => {
+      group.owner = group.admins[0];
+      await group.save();
+    }))
+
     res.json({ message: 'Account deleted' });
   } catch (err) {
     res.status(500).json({message: err});
