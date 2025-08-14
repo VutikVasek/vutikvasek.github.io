@@ -233,24 +233,24 @@ export default function Credentials() {
         <>
           <p>Password: { changingPassword ? (
           <>
-            <input type="password" name="oldPassword" id="oldPassword" className='border border-black'
+            <PasswordInput 
+              placeholder="Current password" name="oldPassword" id="oldPassword"
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
-              ref={passwordFocus}
               onKeyDown={handleKeyDown}
-              placeholder='Current password'
+              ref={passwordFocus}
             />
-            <input type="password" name="newPassword" id="newPassword" className='border border-black'
+            <PasswordInput 
+              placeholder="New password" name="newPassword" id="newPassword"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder='New password'
             />
-            <input type="password" name="newPasswordCheck" id="newPasswordCheck" className='border border-black'
+            <PasswordInput 
+              placeholder="New password again" name="newPasswordCheck" id="newPasswordCheck"
               value={newPasswordCheck}
               onChange={(e) => setNewPasswordCheck(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder='New password again'
             />
           </>
         ) : "••••••••"} {passwordError}</p>

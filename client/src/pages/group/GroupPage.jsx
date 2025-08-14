@@ -68,6 +68,7 @@ export default function GroupPage({}) {
           <JoinButton group={group} logged={group.logged} />
         </>)}
       </div>
+      <SmartLink to={`/post?g=${groupname}`}>Post on group</SmartLink>
       <div>
         {show === "members" && (
           <UserList url={`${API}/group/${groupname}/members`} source={`/g/${groupname}`} />

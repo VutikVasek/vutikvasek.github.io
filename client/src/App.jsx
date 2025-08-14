@@ -2,8 +2,8 @@ import React, { useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 
-import Signup from './pages/Signup';
-import Login from './pages/Login';
+import Signup from './pages/account/Signup';
+import Login from './pages/account/Login';
 import FeedPage from './pages/FeedPage';
 import Account from './pages/account/Account';
 import PostPage from './pages/PostPage';
@@ -23,6 +23,8 @@ import SmartLink from './components/basic/SmartLink';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { AppContext } from './context/AppContext';
+import GroupSettings from './components/group/GroupSettings';
+import HashtagPage from './pages/HashtagPage';
 
 gsap.registerPlugin(useGSAP);
 
@@ -83,9 +85,8 @@ function App() {
         <Toast text={toastText} color={toastColor} reshow={toastReshow} />
         <Routes>
           <Route path="/" element={<FeedPage />} />
-          <Route path="/:following" element={<FeedPage />} />
           <Route path="/feed" element={<FeedPage />} />
-          <Route path="/feed/:following" element={<FeedPage />} />
+          <Route path="/feed/:subpage" element={<FeedPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/verify" element={<Verified />} />
@@ -101,7 +102,9 @@ function App() {
           <Route path="/p/:postId" element={<PostFull />} />
           <Route path="/g/:groupname" element={<GroupPage />} />
           <Route path="/g/:groupname/:show" element={<GroupPage />} />
+          <Route path="/g/:groupname/settings" element={<GroupSettings />} />
           <Route path="/create-group" element={<CreateGroup />} />
+          <Route path="/h/:hashtag" element={<HashtagPage />} />
 
           <Route path="*" element={<NotFound />}></Route>
         </Routes>

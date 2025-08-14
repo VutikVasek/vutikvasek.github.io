@@ -3,6 +3,7 @@ import Post from '../models/Post.js';
 import { verifyToken, verifyTokenNotStrict } from '../middleware/auth.js';
 import { formatDate, formatFeedPost, formatPost } from '../tools/formater.js';
 import Follow from '../models/Follow.js';
+import Group from '../models/Group.js';
 
 const router = express.Router();
 
@@ -18,6 +19,20 @@ router.get('/following', verifyToken, async (req, res) => {
   const followingList = following.map(obj => obj.following);
   getFeed(req, res, {author: { $in: followingList }});
 });
+
+// Get posts from groups user is member of
+router.get('/groups', verifyToken, async (req, res) => {
+  const groups = await Group.find({ members: req.user._id }).select('_id');
+  const groupsIds = groups.map(group => group._id);
+
+  getFeed(req, res, { groups: { $in: groupsIds } });
+})
+
+// Get hashtag posts
+router.get('/hash/:hashtag', verifyTokenNotStrict, async (req, res) => {
+  const hashtag = req.params.hashtag;
+  getFeed(req, res, { text: new RegExp(`#${hashtag}(?=\\s|$|[^\\w]|#)`, 'gi') });
+})
 
 export const getFeed = async (req, res, filter) => {
   const page = parseInt(req.query.page) || 1;

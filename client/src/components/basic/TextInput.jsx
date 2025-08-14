@@ -8,6 +8,10 @@ export default function TextInput({text, setText, setDBMentions, setDBGroups, sh
   const [groups, setGroups] = useState([]);
   const supportGroups = !!setDBGroups;
   const textareaRef = useRef(null);
+  
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const groupname = queryParams.get('g');
 
   const { showErrorToast } = useAppContext();
 
@@ -22,7 +26,7 @@ export default function TextInput({text, setText, setDBMentions, setDBGroups, sh
   }
 
   useEffect(() => {
-    setMentions([]);
+    setMentions(groupname ? [{query: groupname}] : []);
     setGroups([]);
   }, [reset])
 

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import GoogleLoginButton from '../components/auth/GoogleLogin';
+import { useAuth } from '../../context/AuthContext';
+import GoogleLoginButton from '../../components/auth/GoogleLogin';
+import PasswordInput from '@/components/auth/PasswordInput';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Login() {
@@ -42,9 +43,7 @@ export default function Login() {
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
-      <input
-        className="w-full border p-2 rounded"
-        type="password"
+      <PasswordInput 
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}

@@ -1,0 +1,30 @@
+import { useEffect, useRef, useState } from "react"
+import { BiShowAlt } from "react-icons/bi";
+import { BiHide } from "react-icons/bi";
+
+export default function PasswordInput({...params}) {
+  const input = useRef(null);
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    input.current?.type = show ? "text" : "password";
+  }, [show])
+
+  return (
+    <div className="flex w-fit">
+      <input
+        className="border p-2 rounded"
+        type="password"
+        ref={input}
+        {...params}
+      />
+      <div onClick={setShow(prev => !prev)}>,
+        {
+          show ?
+          <BiHide /> :
+          <BiShowAlt />
+        }
+      </div>
+    </div>
+  )
+}
