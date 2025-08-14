@@ -6,6 +6,7 @@ const PostSchema = new mongoose.Schema({
   likes: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
   mentions: { type: [String] },
   groups: { type: [mongoose.Schema.Types.ObjectId], ref: 'Group' },
+  replyingTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
   createdAt: { type: Date, default: Date.now }
 });
 

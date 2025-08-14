@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import MentionSelector from "../notification/MentionSelector";
 import { useAppContext } from "@/context/AppContext";
 import GroupSelector from "../group/GroupSelector";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function TextInput({text, setText, setDBMentions, setDBGroups, shouldFocus = true, onDrop, rows = 3, reset}) {
   const [mentions, setMentions] = useState([]);
@@ -12,6 +13,7 @@ export default function TextInput({text, setText, setDBMentions, setDBGroups, sh
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const groupname = queryParams.get('g');
+  const replyingTo = queryParams.get('rep');
 
   const { showErrorToast } = useAppContext();
 
@@ -26,9 +28,18 @@ export default function TextInput({text, setText, setDBMentions, setDBGroups, sh
   }
 
   useEffect(() => {
-    setMentions(groupname ? [{query: groupname}] : []);
-    setGroups([]);
+    setMentions([]);
+    if (reset || reset === false)
+      setGroups(groupname ? [{query: groupname}] : []);
   }, [reset])
+
+  useEffect(() => {
+    if (reset === null || reset === undefined)
+      fetch(`${API}/post/${rep}/groups`)
+        .then(res => res.json())
+        .then(data => setGroups(data.map(groupname => ({query: groupname, locked: true}))))
+        .catch(err => console.log(err));
+  }, [])
 
   useEffect(() => {
     const textarea = textareaRef.current;

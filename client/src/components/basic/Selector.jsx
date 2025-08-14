@@ -85,9 +85,13 @@ export default function Selector({selected, setSelected, search, symbol = "@", d
     <div ref={refs.setReference} className="flex" onFocus={() => setFocused(true)} onBlur={handleOnBlur} >
       <p>{symbol}</p>
       <span ref={spanRef} className="absolute invisible whitespace-pre">{query || " "}</span>
-      <input type="text" style={{ width }} 
-        value={query} onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={handleKeyDown} autoFocus />
+      {!selected.locked ?
+        <input type="text" style={{ width }} 
+          value={query} onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown} autoFocus />
+        :
+        <p style={{ width }}>{query}</p>
+      }
       {(results.length > 0 && focused) &&
       <div className="bg-gray-300 flex flex-col p-1" ref={refs.setFloating} style={floatingStyles}>
         {loading && "Loading..."}

@@ -15,6 +15,11 @@ export default function PostPage() {
   const [mentions, setMentions] = useState(null);
   const [groups, setGroups] = useState(null);
 
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const replyingTo = queryParams.get('rep');
+  const author = queryParams.get('author');
+
   const navigate = useNavigate();
   const { showErrorToast } = useAppContext();
 
@@ -43,7 +48,7 @@ export default function PostPage() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify({ text: text.trim(), mentions, groups }),
+      body: JSON.stringify({ text: text.trim(), mentions, groups, replyingTo }),
     });
 
     const data = await res.json();
@@ -66,7 +71,14 @@ export default function PostPage() {
     <>
       <LogWall />
       <form onSubmit={handleSubmitingPost}>
-        <h1>Make a new post!</h1>
+        {
+          replyingTo ?
+            (author ? 
+              <h1>Replying to a post from {author}</h1> :
+              <h1>Replying to a post</h1>) :
+          <h1>Make a new post!</h1>
+        }
+        
         <TextInput text={text} setText={setText} setDBMentions={setMentions} setDBGroups={setGroups} onDrop={mediaSelector.current?.handleDrop} rows={6} />
         <div className='flex flex-col gap-4'>
           <MediaSelector max={2} ref={mediaSelector} rerender={rerender} flex="justify-around w-fit" className="h-10 w-10 p-2" />

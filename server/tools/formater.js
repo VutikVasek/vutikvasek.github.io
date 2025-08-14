@@ -32,6 +32,7 @@ const formatAuthorPost = async (post, userId) => {
   post.likes = post.likes?.length || post.likesCount;
   post.comments = (await Comment.find({parent: post._id})).length;
   post.itsme = post.author._id == userId;
+  post.canReply = !!userId;
   if (post.mentions)
     post.mentions = await Promise.all(post.mentions.map(async mention => {
       if (!mongoose.Types.ObjectId.isValid(mention)) return { username: mention };
@@ -50,6 +51,8 @@ const formatAuthorPost = async (post, userId) => {
         post.adminGroups.push(index);
         post.pinnedGroups.push(group.pinnedPost?.equals(post._id));
       }
+      if (post.canReply && (!group.members.includes(userId) || 
+        !(group.everyoneCanPost || group.admins.includes(userId)))) post.canReply = false;
       return { name: group.name, _id: group._id };
     }))
   }

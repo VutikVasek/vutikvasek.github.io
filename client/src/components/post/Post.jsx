@@ -16,14 +16,29 @@ const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 const BASE = import.meta.env.VITE_BASE_URL;
 
-const Post = React.forwardRef(({ post, cut }, ref) => {
+const Post = React.forwardRef(({ post, cut, ...params }, ref) => {
   const [hovered, setHovered] = useState(post.liked);
   const [likes, setLikes] = useState(post.likes);
   const [liked, setLiked] = useState(post.liked);
+  const [replyingToPost, setReplyingToPost] = useState();
 
-  const { showInfoToast } = useAppContext();
+  const { showInfoToast, showErrorToast } = useAppContext();
 
   const shouldLink = !cut;
+  
+  useEffect(async () => {
+    const res = await fetch(`${API}/post/${post._id}`, {
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      }
+    });
+
+    const data = await res.json();
+    if (!res.ok) return showErrorToast("Could not load the original post");
+    setReplyingToPost(data);
+  }, [])
 
   const handleLike = async () => {
     const res = await fetch(`${API}/post/${post._id}/like`, {
@@ -74,7 +89,7 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
   }
 
   return (
-    <div className="w-[calc(100%-0.5rem)] p-4 m-2 shadow whitespace-pre-wrap flex" ref={ref}>
+    <div className="w-[calc(100%-0.5rem)] p-4 m-2 shadow whitespace-pre-wrap flex" ref={ref} {...params}>
       <div className='gap-2 flex flex-col'>
         <SmartLink to={`/u/${post.author.username}`} className='flex items-center gap-2 w-fit'>
           <ProfilePicture pfp={post.author.pfp} className="w-10" />
@@ -117,6 +132,11 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
           </div>
         )}
         <Gallery images={[0, 1].map((num) => `${MEDIA}/image/${post._id + num}.webp`)} link={`/p/${post._id}`} />
+        {replyingToPost && 
+          <div className='m-2'>
+            <Post post={replyingToPost} />
+          </div>
+        }
         <div className='flex gap-6 items-center'>
           <Descriptor text={liked ? "Unlike" : "Like"}>
             <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 
@@ -147,8 +167,11 @@ const Post = React.forwardRef(({ post, cut }, ref) => {
                   <button key={"ban" + key} onClick={e => handleBan(e, post.groups[index].name, post.bannedGroups[key])}>
                     {post.bannedGroups[key] ? `Unban user from ${post.groups[index].name}` : `Ban user from ${post.groups[index].name}`}
                   </button>
-                ]
-              )) ?? [])
+                ]),
+              post.canReply && <SmartLink to={`/post?author=${post.author.username}&rep=${post._id}`}>
+                  Reply with a post
+                </SmartLink>
+              ) ?? [])
             ]}
           </More>
         </div>

@@ -21,12 +21,26 @@ router.post('/', verifyToken, async (req, res) => {
     if (user.postTimes.length > 30) return res.status(400).json({message: "You can only post up to 30 times per half an hour."})
     await user.save();
 
+    const replyingTo = mongoose.Types.ObjectId.isValid(req.body.replyingTo) ? req.body.replyingTo : undefined;
+    const replyingToPost = await Post.findById(replyingTo).select('groups');
+
     const groups = await Group.find({ _id: { $in: req.body.groups.filter(group => mongoose.Types.ObjectId.isValid(group)) } }).select('members admins');
     if (groups && groups.length === 0) return res.status(400).json({ message: "When posting on groups, you need to have at least one valid group" });
-    const mygroups = groups?.filter(group => group.members.includes(req.user._id) && (group.everyoneCanPost || group.admins.includes(req.user._id)));
+    const allGroups = groups?.filter(group => group.members.includes(req.user._id) && (group.everyoneCanPost || group.admins.includes(req.user._id)));
 
-    const newPost = new Post({ author: req.user._id, text: req.body.text.trim(), groups: mygroups?.map(group => group._id),
-      mentions: req.body.mentions?.filter(val => val.trim() !== '').filter((val, index, array) => array.indexOf(val) === index) });
+    if (replyingToPost) {
+      const replyingToGroups = await Group.find({ _id: { $in: replyingToPost.groups } }).select('members admins');
+      const replyingToMyGroups = replyingToGroups?.filter(group => group.members.includes(req.user._id) && (group.everyoneCanPost || group.admins.includes(req.user._id)));
+      if (replyingToMyGroups.length < replyingToGroups.length) return res.status(400).json({ message: "You cannot reply to this post (you cannot post on all of the tagged groups)" });
+      allGroups.push(...replyingToMyGroups);
+    }
+
+    const newPost = new Post({ 
+      author: req.user._id, 
+      text: req.body.text.trim(),
+      mentions: req.body.mentions?.filter(val => val.trim() !== '').filter((val, index, array) => array.indexOf(val) === index),
+      groups: allGroups?.filter((group, i, arr) => arr.indexOf(group) === i).map(group => group._id), 
+      replyingTo: validReplyingTo ? replyingTo : undefined });
     const savedPost = await newPost.save();
 
     notifyFollowers(req.user._id, savedPost._id);
@@ -125,6 +139,14 @@ router.delete('/:post', verifyToken, async (req, res) => {
     res.status(500).json({message: "Server error"});
   }
 });
+
+// Get groups
+router.get('/:id/groups', async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: "Not valid post id" })
+  const post = await Post.findById(req.params.id).select('groups');
+  const groups = await Group.find({ _id: { $in: post.groups } }).select('name');
+  res.json(groups.map(group => group.name));
+})
 
 // Get comments
 router.get('/:id/comments', verifyTokenNotStrict, async (req, res) => {
