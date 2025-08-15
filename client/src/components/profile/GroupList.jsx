@@ -8,7 +8,7 @@ import ProfilePicture from "../media/ProfilePicture";
 import JoinButton from "../group/JoinButton";
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
-export default function GroupList({url, source}) {
+export default function GroupList({url, source, setGroupsParent}) {
   const [groups, setGroups] = useState([]);
   const [logged, setLogged] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -46,6 +46,10 @@ export default function GroupList({url, source}) {
   useEffect(() => {
     loadGroups(true);
   }, [url])
+
+  useEffect(() => {
+    if (setGroupsParent) setGroupsParent(groups);
+  }, [groups])
   
   const lastPostRef = useCallback((node) => {
     if (!hasMore) return;
@@ -62,7 +66,7 @@ export default function GroupList({url, source}) {
 
   return (
     <div className="w-fit">
-      <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button>
+      {source && <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button> }
       <p>{groups.length === 0 && ('No one yet!')}</p>
       {groups.map((group, index) => (
         <div className="flex items-center gap-4" ref={index === groups.length - 1 ? lastPostRef : null} key={user.gp}>
@@ -70,7 +74,8 @@ export default function GroupList({url, source}) {
             <ProfilePicture pfp={group.gp} path="gp" className="w-10" />
             <p className="w-full">{group.name}</p>
           </SmartLink>
-          <JoinButton group={group} logged={logged} />
+          {!setGroupsIds && 
+          <JoinButton group={group} logged={logged} />}
         </div>
       ))}
     </div>

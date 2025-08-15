@@ -26,3 +26,9 @@ export const NotificationContext = {
   GROUP_ID: 0,
   MEMBER_ID: 1,
 }
+
+export const GroupNotification = {
+  ALL: 0,
+  ESSENTIAL: 1,
+  NONE: 2
+}

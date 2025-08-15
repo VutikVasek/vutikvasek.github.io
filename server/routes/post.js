@@ -6,10 +6,11 @@ import { formatComment, formatDate, formatPopularComment, formatPost } from '../
 import mongoose, { Types } from 'mongoose';
 import fs from 'fs/promises';
 import User from '../models/User.js';
-import { NotificationContext, NotificationType } from '../../shared.js';
+import { GroupNotification, NotificationContext, NotificationType } from '../../shared.js';
 import Notification from '../models/Notification.js';
 import Follow from '../models/Follow.js';
 import Group from '../models/Group.js';
+import { notify } from './group.js';
 
 const router = express.Router();
 
@@ -35,16 +36,19 @@ router.post('/', verifyToken, async (req, res) => {
       allGroups.push(...replyingToMyGroups);
     }
 
+    const filteredGroups = allGroups?.filter((group, i, arr) => arr.indexOf(group) === i);
+
     const newPost = new Post({ 
       author: req.user._id, 
       text: req.body.text.trim(),
       mentions: req.body.mentions?.filter(val => val.trim() !== '').filter((val, index, array) => array.indexOf(val) === index),
-      groups: allGroups?.filter((group, i, arr) => arr.indexOf(group) === i).map(group => group._id), 
+      groups: filteredGroups.map(group => group._id), 
       replyingTo: validReplyingTo ? replyingTo : undefined });
     const savedPost = await newPost.save();
 
-    notifyFollowers(req.user._id, savedPost._id);
+    notifyFollowers(savedPost._id, req.user._id);
     notifyMentioned(savedPost.mentions, savedPost._id, req.user._id);
+    notifyGroupsMembers(filteredGroups, savedPost._id, req.user._id);
 
     res.status(201).json(savedPost);
   } catch (err) {
@@ -53,7 +57,13 @@ router.post('/', verifyToken, async (req, res) => {
   }
 });
 
-const notifyFollowers = async (userId, postId) => {
+const getTimes = (times) => {
+  const halfAnHourAgo = new Date();
+  halfAnHourAgo.setMinutes(halfAnHourAgo.getMinutes() - 30);
+  return [...times, new Date()].filter(val => val > halfAnHourAgo);
+}
+
+const notifyFollowers = async (postId, userId) => {
     const followers = await Follow.find({ following: userId, notify: true });
     followers.forEach(async (follow) => {
       try {
@@ -68,11 +78,6 @@ const notifyFollowers = async (userId, postId) => {
     })
 }
 
-const getTimes = (times) => {
-  const halfAnHourAgo = new Date();
-  halfAnHourAgo.setMinutes(halfAnHourAgo.getMinutes() - 30);
-  return [...times, new Date()].filter(val => val > halfAnHourAgo);
-}
 
 const notifyMentioned = (mentions, postId, userId) => {
   if (!mentions) return;
@@ -88,6 +93,18 @@ const notifyMentioned = (mentions, postId, userId) => {
       console.log(err);
     }
   })
+}
+
+const notifyGroupsMembers = (groups, postId, userId) => {
+  try {
+    groups?.forEach(group => {
+      group.members.forEach(async member => {
+        await notify(member, group._id, GroupNotification.ALL, NotificationType.GROUP_POST, [postId, userId])
+      })
+    })
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 // Like post

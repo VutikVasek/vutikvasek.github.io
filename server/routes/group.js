@@ -6,7 +6,7 @@ import Follow from '../models/Follow.js';
 import mongoose from 'mongoose';
 import { getFeed } from './feed.js';
 import Post from '../models/Post.js';
-import { NotificationType } from '../../shared.js';
+import { GroupNotification, NotificationType } from '../../shared.js';
 import { formatPost } from '../tools/formater.js';
 
 const router = express.Router();
@@ -23,6 +23,8 @@ router.post('/', verifyToken, async (req, res) => {
 
     const newGroup = new Group({ name, description, members: [userId], admins: [userId], owner: userId, private: isPrivate, requestJoin, everyoneCanPost });
     await newGroup.save();
+
+    await setNotification(userId, newGroup._id, GroupNotification.ESSENTIAL);
 
     res.json({message: "Group succesfully created", group: newGroup});
   } catch (err) {
@@ -185,6 +187,7 @@ router.delete('/:groupname/leave', verifyToken, async (req, res) => {
     group.members = group.members.filter(userId => userId !== req.user._id);
     await group.save();
     await Notification.deleteOne({ for: group.owner, type: NotificationType.NEW_MEMBER, context: req.user._id})
+    await deleteNotification(req.user._id, group._id);
     res.json({ message: "You succesfully left the group" });
   } catch (err) {
     console.log(err);
@@ -201,8 +204,9 @@ router.put('/:groupname/join', verifyToken, async (req, res) => {
     if (group.requestJoin) return res.status(400).json({ message: "You need to send a request to join  " + groupname });
     group.members.push(req.user._id);
     await group.save();
-    const notif = new Notification({ for: group.owner, type: NotificationType.NEW_MEMBER, context: [group._id, req.user._id]})
-    await notif.save();
+    await notify(group.owner, group._id, GroupNotification.ALL, 
+      NotificationType.NEW_MEMBER, [group._id, req.user._id]);
+    await setNotification(userId, newGroup._id, GroupNotification.ESSENTIAL);
     res.json({ message: "You succesfully joined the group" });
   } catch (err) {
     console.log(err);
@@ -218,10 +222,11 @@ router.post('/:groupname/request', verifyToken, async (req, res) => {
     if (group.banned.includes(req.user._id)) return res.status(403).json({ message: "You are banned from this group" });
     if (!group.requestJoin) return res.status(400).json({ message: "This group doesn't require request to join" });
     if (group.memebers.includes(req.user._id)) return res.status(400).json({ message: "You already are a member of this group" });
-    const notif = new Notification({ for: group.owner, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
+    await notify(group.owner, group._id, GroupNotification.ESSENTIAL, 
+      NotificationType.GROUP_JOIN_REQUEST, [group._id, req.user._id])
     group.admins.forEach(async admin => {
-      const notif = new Notification({ for: admin, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
-      await notif.save();
+      await notify(admin, group._id, GroupNotification.ESSENTIAL, 
+        NotificationType.GROUP_JOIN_REQUEST, [group._id, req.user._id])
     })
     res.json({ message: "The request has been send" });
   } catch (err) {
@@ -242,12 +247,12 @@ router.post('/:groupname/accept/:userId', verifyToken, async (req, res) => {
     group.members.push(userId);
     await group.save();
     
-    const notif1 = new Notification({ for: userId, type: NotificationType.GROUP_JOIN_ACCEPT, context: [group._id] });
-    await notif1.save();
-
-    const notif2 = new Notification({ for: group.owner, type: NotificationType.NEW_MEMBER, context: [group._id, req.user._id]})
-    await notif2.save();
-
+    const notif = new Notification({ for: userId, type: NotificationType.GROUP_JOIN_ACCEPT, context: [group._id] });
+    await notif.save();
+    
+    await notify(group.owner, group._id, GroupNotification.ALL, 
+      NotificationType.NEW_MEMBER, [group._id, req.user._id])
+      
     await Notification.deleteOne({ for: group.owner, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
     group.admins.forEach(async admin => {
       await Notification.deleteOne({ for: admin, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
@@ -297,8 +302,8 @@ router.patch('/:groupname/admin/:userId', verifyToken, async (req, res) => {
     group.admins.push(userId);
     await group.save();
 
-    const notif = new Notification({ for: userId, type: NotificationType.MADE_ADMIN, context: [group._id] });
-    await notif.save();
+    await notify(userId, group._id, GroupNotification.ESSENTIAL, 
+      NotificationType.MADE_ADMIN, [group._id]);
     
     res.json({ message: "The user has been made admin" });
   } catch (err) {
@@ -319,8 +324,8 @@ router.patch('/:groupname/deadmin/:userId', verifyToken, async (req, res) => {
     group.admins = group.admins.filter(adminId => adminId !== userId);
     await group.save();
 
-    const notif = new Notification({ for: userId, type: NotificationType.REVOKED_ADMIN, context: [group._id] });
-    await notif.save();
+    await notify(userId, group._id, GroupNotification.ESSENTIAL, 
+      NotificationType.REVOKED_ADMIN, [group._id]);
     
     res.json({ message: "The user has been revoked of their admin status" });
   } catch (err) {
@@ -386,6 +391,8 @@ router.put('/:groupname/ban/:userId', verifyToken, async (req, res) => {
     }
 
     await group.save();
+
+    await deleteNotification(userId, group._id);
     
     res.json({ message: "The user has been banned" });
   } catch (err) {
@@ -432,5 +439,50 @@ router.delete('/:groupname', verifyToken, async (req, res) => {
   }
 })
 
+router.patch('/:groupId/notification', verifyToken, async (req, res) => {
+  const groupId = req.params.groupId;
+  const notification = req.body.notification;
+  try {
+    const user = await User.findById(req.user._id).select('groupsNotifications');
+    user.groupsNotifications.set(groupId, notification);
+    await user.save();
+    res.json({ message: "ok" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+const setNotification = async (userId, groupId, value) => {
+  const user = await User.findById(userId).select('groupsNotifications');
+  setNotificationForUser(user, groupId, value);
+}
+
+const setNotificationForUser = async (user, groupId, value) => {
+  user.groupsNotifications.set(groupId.toString(), value);
+  await user.save();
+}
+
+const userValidFor = async (userId, groupId, value) => {
+  const user = await User.findById(userId).select('groupsNotifications');
+  return user.groupsNotifications.get(groupId.toString()) <= value;
+}
+
+const deleteNotification = async (userId, groupId) => {
+  const user = await User.findById(userId).select('groupsNotifications');
+  deleteNotificationForUser(user, groupId);
+}
+
+const deleteNotificationForUser = async (user, groupId) => {
+  user.groupsNotifications.delete(groupId.toString());
+  await user.save();
+}
+
+export const notify = async (userId, groupId, validFor, type, context) => {
+  if (userValidFor(userId, groupId, validFor)) {
+    const notif = new Notification({ for: userId, type, context});
+    await notif.save();
+  }
+}
 
 export default router;

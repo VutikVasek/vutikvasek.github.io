@@ -1,25 +1,19 @@
 import { useEffect, useState } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { useLocation, useNavigate } from "react-router-dom";
+import Dropdown from "./Dropdown";
 
 export default function Sorter({url, sortBy, time, defaultSort = SortType.newest, defaultTime = TimeUnit.week}) {
   const [sort, setSort] = useState(sortBy);
   const [timeframe, setTimeframe] = useState(time);
-  const [showSort, setShowSort] = useState(false);
-  const [showTimeframe, setShowTimeframe] = useState(false);
   const location = useLocation();
 
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   
   useEffect(() => {
-    setShowSort(false);
     navigateQuery();
-  }, [sort])
-  useEffect(() => {
-    setShowTimeframe(false);
-    navigateQuery();
-  }, [timeframe])
+  }, [sort, timeframe])
   useEffect(() => {
     setSort(sortBy);
     setTimeframe(time);
@@ -59,30 +53,24 @@ export default function Sorter({url, sortBy, time, defaultSort = SortType.newest
       <div className='flex gap-4 self-end'>
         Sort by:
         <div>
-          <button onClick={() => setShowSort(val => !val)} className="flex items-center">{sort == SortType.newest ? "newest" : "popular"}<MdKeyboardArrowDown /></button>
-          {showSort && (
-            <div className="w-0 h-0 overflow-visible">
-              <div className="bg-gray-300 w-fit p-2 relative flex flex-col whitespace-nowrap">
-                <button onClick={() => setSort(SortType.newest)}>newest</button>
-                <button onClick={() => setSort(SortType.popular)}>popular</button>
-              </div>
-            </div>
-          )}
+          <Dropdown set={setSort} get={sort == SortType.newest ? "newest" : "popular"} close={[sortBy]}>
+            {[
+            [SortType.newest, "newest"],
+            [SortType.popular, "popular"]
+            ]}
+          </Dropdown>
         </div>
         {sort == SortType.popular && (
         <div>
-          <button onClick={() => setShowTimeframe(val => !val)} className="flex items-center">{getTimeframe()}<MdKeyboardArrowDown /></button>
-          {showTimeframe && (
-            <div className="w-0 h-0 overflow-visible">
-              <div className="bg-gray-300 w-fit p-2 relative flex flex-col whitespace-nowrap">
-                <button onClick={() => setTimeframe(TimeUnit.day)}>{getTimeframe(TimeUnit.day)}</button>
-                <button onClick={() => setTimeframe(TimeUnit.week)}>{getTimeframe(TimeUnit.week)}</button>
-                <button onClick={() => setTimeframe(TimeUnit.month)}>{getTimeframe(TimeUnit.month)}</button>
-                <button onClick={() => setTimeframe(TimeUnit.year)}>{getTimeframe(TimeUnit.year)}</button>
-                <button onClick={() => setTimeframe(TimeUnit.all)}>{getTimeframe(TimeUnit.all)}</button>
-              </div>
-            </div>
-          )}
+          <Dropdown set={setTimeframe} get={getTimeframe()} close={[time]}>
+            {[
+            [TimeUnit.day, getTimeframe(TimeUnit.day)],
+            [TimeUnit.week, getTimeframe(TimeUnit.week)],
+            [TimeUnit.month, getTimeframe(TimeUnit.month)],
+            [TimeUnit.year, getTimeframe(TimeUnit.year)],
+            [TimeUnit.all, getTimeframe(TimeUnit.all)],
+            ]}
+          </Dropdown>
         </div>
         )}
       </div>

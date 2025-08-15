@@ -2,7 +2,7 @@ import express from 'express';
 import User from '../models/User.js';
 import Follow from '../models/Follow.js';
 import { getFeed } from './feed.js';
-import { verifyTokenNotStrict } from '../middleware/auth.js';
+import { verifyToken, verifyTokenNotStrict } from '../middleware/auth.js';
 import { getComments } from './post.js';
 import { Types } from 'mongoose';
 import Group from '../models/Group.js';
@@ -74,6 +74,37 @@ router.get('/user/:username/groups', verifyTokenNotStrict, async (req, res) => {
         member: group.members.includes(req.user?._id),
         owner: group.owner.equals(req.user?._id),
         banned: group.banned.includes(req.user?._id)
+      })
+    );
+
+    res.json({
+      groupList: myGroups,
+      logged: !!req.user, 
+      hasMore: skip + users.length < total
+    })
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: err});
+  }
+})
+
+router.get('/groups', verifyToken, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const userId = req.user._id; 
+    const user = await User.findById(userId).select('groupsNotifications');
+
+    const groups = await Group.find({ members: userId }).skip(skip).limit(limit).select('name');
+    const total = await Group.find({ members: userId });
+
+    const myGroups = groups.map(group => 
+      ({
+        name: group.name,
+        gp: group._id.toString(),
+        notification: user.groupsNotifications.get(group._id.toString())
       })
     );
 

@@ -72,7 +72,7 @@ export default function Notification({ notification }) {
             {"You have been made an admin of "}{notification.groupname}
           </SmartLink>
         )
-      case NotificationType.GROUP_JOIN_DENY:
+      case NotificationType.REVOKED_ADMIN:
         return (
           <SmartLink to={`/g/${notification.groupname}`}>
             {"You are no longer an admin of "}{notification.groupname}

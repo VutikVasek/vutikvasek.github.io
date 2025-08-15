@@ -12,7 +12,8 @@ const UserSchema = new mongoose.Schema({
   bio: { type: String },
   postTimes: { type: [Date]},
   commentTimes: { type: [Date]},
-  notifications: [{ type: Boolean, default: true }]
+  notifications: [{ type: Boolean, default: true }],
+  groupsNotifications: { type: Map, of: { type: Number, enum: [0, 1, 2] } }
 });
 
 export default mongoose.model('User', UserSchema);
