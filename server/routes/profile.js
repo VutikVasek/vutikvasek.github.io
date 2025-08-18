@@ -6,6 +6,7 @@ import { verifyToken, verifyTokenNotStrict } from '../middleware/auth.js';
 import { getComments } from './post.js';
 import { Types } from 'mongoose';
 import Group from '../models/Group.js';
+import { GroupNotification } from '../../shared.js';
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get("/user/:username",  verifyTokenNotStrict, async (req, res) => {
 
   const followers = await Follow.countDocuments({following: user._id});
   const following = await Follow.countDocuments({follower: user._id});
-  const groups = await Groups.countDocuments({member: user._id});
+  const groups = await Group.countDocuments({members: user._id});
 
   const follow = await Follow.findOne({follower: req.user?._id, following: user._id});
 
@@ -64,7 +65,7 @@ router.get('/user/:username/groups', verifyTokenNotStrict, async (req, res) => {
     const user = await User.findOne({username: username});
     if (!user) return res.status(404).json({ message: `No user with username ${username} was found`});
 
-    const groups = await Group.find({ members: user._id }).skip(skip).limit(limit).select('name members requestJoin');
+    const groups = await Group.find({ members: user._id }).skip(skip).limit(limit);
     const total = await Group.find({ members: user._id });
 
     const myGroups = groups.map(group => 
@@ -73,14 +74,15 @@ router.get('/user/:username/groups', verifyTokenNotStrict, async (req, res) => {
         gp: group._id.toString(),
         member: group.members.includes(req.user?._id),
         owner: group.owner.equals(req.user?._id),
-        banned: group.banned.includes(req.user?._id)
+        banned: group.banned.includes(req.user?._id),
+        notification: user.groupsNotifications?.get(group._id.toString()),
       })
     );
 
     res.json({
       groupList: myGroups,
       logged: !!req.user, 
-      hasMore: skip + users.length < total
+      hasMore: skip + myGroups.length < total
     })
   } catch (err) {
     console.log(err);

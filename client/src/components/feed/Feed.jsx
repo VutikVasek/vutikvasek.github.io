@@ -33,7 +33,7 @@ export default function Feed({url, reloadState}) {
         setPosts(data.posts);
         setPage(1);
       } else {
-        setPosts((prev) => [...prev, ...data.posts].filter(
+        setPosts((prev) => [...prev, ...data.posts].filter(post => post).filter(
             (post, index, self) => index === self.findIndex(p => p._id === post._id)
         ));
       }
@@ -41,7 +41,7 @@ export default function Feed({url, reloadState}) {
       setHasMore(data.hasMore);
     } else {
       setError('An error has occured while loading');
-      if (localStorage.getItem('token')) logout();
+      console.log(data.message);
     }
   };
   
@@ -56,7 +56,7 @@ export default function Feed({url, reloadState}) {
   
   useEffect(() => {
     loadPosts(true);
-  }, [reloadState]);
+  }, [reloadState, url]);
   
   const lastPostRef = useCallback((node) => {
     if (!hasMore) return;
@@ -81,7 +81,7 @@ export default function Feed({url, reloadState}) {
       {posts.map((post, index) => (
         <Post 
           post={post} 
-          key={post._id}
+          key={post?._id ?? index}
           ref={index === posts.length - 1 ? lastPostRef : null}/>
       ))}
       {!hasMore && <p className="text-gray-400 mt-4">No more posts</p>}

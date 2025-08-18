@@ -17,7 +17,7 @@ export default function GroupPage({}) {
 
   const loadGroup = async () => {
     if (groupname == "<deleted>") {
-      setGroup({name: "This account was deleted"});
+      setGroup({name: "This group was deleted"});
       setDeleted(true);
       return;
     }
@@ -62,22 +62,29 @@ export default function GroupPage({}) {
         <ProfilePicture path="gp" pfp={group._id} className="w-36" />
         <p>{group.name}</p>
         <p>{group.description}</p>
-        <SmartLink to="members">{group.members} member{group.members > 1 && "s"}</SmartLink>
+        {group.owner && <SmartLink to="settings">Settings</SmartLink>}
+        <SmartLink to={`/g/${group.name}/members`}>{group.members} member{group.members > 1 && "s"}</SmartLink>
         {!deleted && (<>
           <p>{group._id ? "Since" : ""} {date}</p>
           <JoinButton group={group} logged={group.logged} />
         </>)}
       </div>
+      {group.canUserPost &&
       <SmartLink to={`/post?g=${groupname}`}>Post on group</SmartLink>
+      }
       <div>
         {show === "members" && (
           <UserList url={`${API}/group/${groupname}/members`} source={`/g/${groupname}`} />
         )}
         {!show && (
-          <>
-          <Post post={pinnedPost} cut={true} />
-          <Feed url={`${API}/group/${groupname}/posts`} />
-          </>
+          group.private && !group.member ? 
+            <p>You need to join this group to see the posts</p> :
+            <>
+              {pinnedPost && 
+              <Post post={pinnedPost} cut={true} pinned />
+              }
+              <Feed url={`${API}/group/${groupname}/posts`} />
+            </>
         )}
       </div>
     </>

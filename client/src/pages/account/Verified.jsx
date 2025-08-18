@@ -1,6 +1,6 @@
+import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from "../context/AuthContext";
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Verified() {

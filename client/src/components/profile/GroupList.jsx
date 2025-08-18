@@ -27,7 +27,7 @@ export default function GroupList({url, source, setGroupsParent}) {
       .then(res => res.json())
       .then(data => {
         if (reload) setGroups(data.groupList);
-        else  setGroups(prev => [...prev, ...data.groupList].filter(
+        else  setGroups(prev => [...prev, ...(data.groupList ?? [])].filter(
                 (group, index, self) => index === self.findIndex(u => u.gp === group.gp)
               ));
         setLogged(data.logged);
@@ -67,14 +67,14 @@ export default function GroupList({url, source, setGroupsParent}) {
   return (
     <div className="w-fit">
       {source && <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button> }
-      <p>{groups.length === 0 && ('No one yet!')}</p>
-      {groups.map((group, index) => (
-        <div className="flex items-center gap-4" ref={index === groups.length - 1 ? lastPostRef : null} key={user.gp}>
+      <p>{groups?.length === 0 && ('No one yet!')}</p>
+      {groups?.map((group, index) => (
+        <div className="flex items-center gap-4" ref={index === groups.length - 1 ? lastPostRef : null} key={index}>
           <SmartLink to={"/g/" + group.name} className="flex w-full items-center gap-4">
             <ProfilePicture pfp={group.gp} path="gp" className="w-10" />
             <p className="w-full">{group.name}</p>
           </SmartLink>
-          {!setGroupsIds && 
+          {!setGroupsParent && 
           <JoinButton group={group} logged={logged} />}
         </div>
       ))}

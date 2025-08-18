@@ -5,7 +5,8 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import SmartLink from "../basic/SmartLink";
 import More from "../basic/More";
 import ProfilePicture from "../media/ProfilePicture";
-const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
+import { useAppContext } from "@/context/AppContext";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function UserList({url, source}) {
   const [users, setUsers] = useState([]);
@@ -16,6 +17,8 @@ export default function UserList({url, source}) {
 
   const observer = useRef();
   const navigate = useNavigate();
+
+const { showInfoToast } = useAppContext();
 
   const loadUsers = (reload) => {
     fetch(url + `?page=${reload ? 1 : page}&limit=5`, {
@@ -63,7 +66,7 @@ export default function UserList({url, source}) {
 
   const handleMakeAdmin = async (e, userId, action) => {
       e.preventDefault();
-      const res = await fetch(`${API}/group/${notification.context[NotificationContext.GROUP_ID]}/${action}/${userId}`, {
+      const res = await fetch(`${API}/group/${group.name}/${action}/${userId}`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -73,11 +76,12 @@ export default function UserList({url, source}) {
       const data = await res.json();
       if (!res.ok) console.log(data.message);
       setUsers(prev => prev.map(user => user.pfp !== userId ? user : { ...user, admin: action === "admin" } ));
+      showInfoToast(`The user has been ${action}ed`);
   }
 
   const handleBan = async (e, userId) => {
       e.preventDefault();
-      const res = await fetch(`${API}/group/${notification.context[NotificationContext.GROUP_ID]}/ban/${userId}`, {
+      const res = await fetch(`${API}/group/${group.name}/ban/${userId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -87,6 +91,7 @@ export default function UserList({url, source}) {
       const data = await res.json();
       if (!res.ok) console.log(data.message);
       setUsers(prev => prev.filter(user => user.pfp !== userId ));
+      showInfoToast(`The user has been banned`);
   }
 
   return (
@@ -97,21 +102,19 @@ export default function UserList({url, source}) {
         <div className="flex items-center gap-4" ref={index === users.length - 1 ? lastPostRef : null} key={user.pfp}>
           <SmartLink to={"/u/" + user.username} className="flex w-full items-center gap-4">
             <ProfilePicture pfp={user.pfp} className="w-10" />
-            <p className="w-full">{user.username}</p>
+            <p className={"w-full" + (user.admin ? " font-semibold" : "")}>{user.username}</p>
           </SmartLink>
           <FollowButton userData={user} simple={true} logged={logged} />
           {group?.admin && !user.owner && (
             <More>
-              {user.admin ? 
-                <button onClick={e => handleMakeAdmin(e, "admin")}>Make user admin</button>
+              {!user.admin ? 
+                <button onClick={e => handleMakeAdmin(e, user.pfp, "admin")}>Make user admin</button>
                 :
-                <button onClick={e => handleMakeAdmin(e, "deadmin")}>Revoke users admin status</button>
+                <button onClick={e => handleMakeAdmin(e, user.pfp, "deadmin")}>Revoke users admin status</button>
               }
-              {(group.owner) ? 
-                <button>Transfer ownership</button>
-                : 
-                <button onClick={e => handleBan(e, user.pfp)}>Ban user</button>
-              }
+              <button onClick={e => handleBan(e, user.pfp)}>Ban user</button>
+              {(group.owner) && 
+                <button>Transfer ownership</button>}
             </More>
           )}
         </div>

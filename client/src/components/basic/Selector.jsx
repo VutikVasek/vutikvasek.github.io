@@ -23,7 +23,7 @@ export default function Selector({selected, setSelected, search, symbol = "@", d
   });
 
   useEffect(() => {
-    setSelected({query, selectedItem});
+    setSelected({query, selectedItem, locked: selected.locked});
   }, [query, selectedItem])
 
   useEffect(() => {

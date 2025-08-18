@@ -44,6 +44,21 @@ export const getFeed = async (req, res, filter) => {
   if (sortByPopularity && time != "all") filter = {...filter, createdAt: {$gt: formatDate(time)}};
   const sortStage = sortByPopularity ? { likesCount: -1, createdAt: -1 } : { createdAt: -1 };
 
+  if (!filter.groups) {
+    const publicGroups = (await Group.find({ private: false }).select('_id')).map(group => group._id);
+    const myGroups = (await Group.find({ members: req.user?._id }).select('_id')).map(group => group._id);
+    const allGroups = [...publicGroups, ...myGroups, null].filter((id, index, arr) => arr.indexOf(id) === index);
+    filter = {
+      ...filter, 
+      $or: [
+        { groups: { $in: allGroups } },
+        { groups: { $exists: false } },
+        { groups: null },
+        { groups: [] }
+      ]
+     }
+  }
+
   try {
     const posts = await Post.aggregate([
       { $match: filter },

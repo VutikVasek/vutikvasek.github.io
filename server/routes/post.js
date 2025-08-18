@@ -10,7 +10,7 @@ import { GroupNotification, NotificationContext, NotificationType } from '../../
 import Notification from '../models/Notification.js';
 import Follow from '../models/Follow.js';
 import Group from '../models/Group.js';
-import { notify } from './group.js';
+import { notify, userValidFor } from './group.js';
 
 const router = express.Router();
 
@@ -25,25 +25,28 @@ router.post('/', verifyToken, async (req, res) => {
     const replyingTo = mongoose.Types.ObjectId.isValid(req.body.replyingTo) ? req.body.replyingTo : undefined;
     const replyingToPost = await Post.findById(replyingTo).select('groups');
 
-    const groups = await Group.find({ _id: { $in: req.body.groups.filter(group => mongoose.Types.ObjectId.isValid(group)) } }).select('members admins');
-    if (groups && groups.length === 0) return res.status(400).json({ message: "When posting on groups, you need to have at least one valid group" });
+    const groups = await Group.find({ _id: { $in: req.body.groups?.filter(group => mongoose.Types.ObjectId.isValid(group)) } }).select('members admins everyoneCanPost');
+    if (groups && groups.length === 0 && req.body.groups?.length > 0) return res.status(400).json({ message: "When posting on groups, you need to have at least one valid group" });
     const allGroups = groups?.filter(group => group.members.includes(req.user._id) && (group.everyoneCanPost || group.admins.includes(req.user._id)));
 
     if (replyingToPost) {
-      const replyingToGroups = await Group.find({ _id: { $in: replyingToPost.groups } }).select('members admins');
+      const replyingToGroups = await Group.find({ _id: { $in: replyingToPost.groups } }).select('members admins everyoneCanPost');
       const replyingToMyGroups = replyingToGroups?.filter(group => group.members.includes(req.user._id) && (group.everyoneCanPost || group.admins.includes(req.user._id)));
       if (replyingToMyGroups.length < replyingToGroups.length) return res.status(400).json({ message: "You cannot reply to this post (you cannot post on all of the tagged groups)" });
       allGroups.push(...replyingToMyGroups);
     }
 
-    const filteredGroups = allGroups?.filter((group, i, arr) => arr.indexOf(group) === i);
+    const filteredGroups = allGroups?.reduce((acc, curr) => {
+      if (!acc.find(group => group._id === curr._id)) acc.push(curr);
+      return acc
+    }, []);
 
     const newPost = new Post({ 
       author: req.user._id, 
       text: req.body.text.trim(),
       mentions: req.body.mentions?.filter(val => val.trim() !== '').filter((val, index, array) => array.indexOf(val) === index),
       groups: filteredGroups.map(group => group._id), 
-      replyingTo: validReplyingTo ? replyingTo : undefined });
+      replyingTo: replyingTo });
     const savedPost = await newPost.save();
 
     notifyFollowers(savedPost._id, req.user._id);
@@ -94,18 +97,35 @@ const notifyMentioned = (mentions, postId, userId) => {
     }
   })
 }
-
+/////////////////////////////////// async await promese
+//////////////////////////////////////////////
+///////////////////////////////////////////
 const notifyGroupsMembers = (groups, postId, userId) => {
   try {
-    groups?.forEach(group => {
-      group.members.forEach(async member => {
-        await notify(member, group._id, GroupNotification.ALL, NotificationType.GROUP_POST, [postId, userId])
-      })
-    })
+    groups?.
+       reduce((acc, curr) => {
+        acc.push(...(curr.members.filter(async id => await userValidFor(id, curr._id, GroupNotification.ALL)).map(id => id.toString()))); 
+        return acc;
+      }, [])
+      .filter((memberId, index, arr) => arr.indexOf(memberId) === index)
+      .forEach(async memberId => {
+        const notif = new Notification({ for: memberId, type: NotificationType.GROUP_POST, context: [postId, userId]});
+        await notif.save();
+      });
   } catch (err) {
     console.log(err);
   }
 }
+
+// Get post
+router.get('/:post', verifyTokenNotStrict, async (req, res) => {
+  const postId = req.params.post;
+
+  const unpost = await Post.findById(postId);
+  if (!unpost) return res.status(404).json({message: "Post not found"});
+
+  res.json(await formatPost(unpost, req.user?._id));
+})
 
 // Like post
 router.patch('/:post/like', verifyToken, async (req, res) => {
@@ -122,16 +142,6 @@ router.patch('/:post/like', verifyToken, async (req, res) => {
 
   await post.save();
   res.json({ likes: post.likes.length, liked: !hasLiked });
-})
-
-// Get post
-router.get('/:post', verifyTokenNotStrict, async (req, res) => {
-  const postId = req.params.post;
-
-  const unpost = await Post.findById(postId);
-  if (!unpost) return res.status(404).json({message: "Post not found"});
-
-  res.json(await formatPost(unpost, req.user?._id));
 })
 
 // Delete post

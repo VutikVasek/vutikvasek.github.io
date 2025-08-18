@@ -2,9 +2,11 @@ import express from 'express';
 import { verifyToken } from '../middleware/auth.js';
 import Notification from '../models/Notification.js';
 import Comment from '../models/Comment.js';
-import { NotificationContext, NotificationType } from '../../shared.js';
+import { GroupNotification, NotificationContext, NotificationType } from '../../shared.js';
 import Post from '../models/Post.js';
 import User from '../models/User.js';
+import Group from '../models/Group.js';
+import { userValidFor } from './group.js';
 
 const router = express.Router();
 
@@ -61,8 +63,16 @@ router.get('/', verifyToken, async (req, res) => {
           break;
         case NotificationType.GROUP_JOIN_ACCEPT || NotificationType.GROUP_JOIN_DENY 
                  || NotificationType.MADE_ADMIN || NotificationType.REVOKED_ADMIN:
-          notification.groupname = (await Group.findById(notification.context[NotificationContext.GROUP_ID]).select('name')).name;
+          notification.groupname = (await Group.findById(notification.context[NotificationContext.GROUP_ID]).select('name'))?.name ?? "<deleted>";
           notification.gp = notification.context[NotificationContext.GROUP_ID];
+          break;
+        case NotificationType.GROUP_POST:
+          notification.author = (await User.findById(notification.context[NotificationContext.MEMBER_ID]).select('username')).username;
+          const postGroups = (await Post.findById(notification.context[NotificationContext.POST_ID]).select('groups')).groups;
+          const groups = await Group.find({_id: { $in: postGroups }, members: req.user._id}).select('name');
+          const myGroups = groups.filter(group => userValidFor(req.user._id, group._id, GroupNotification.ALL));
+          notification.groups = myGroups.map(group => group.name);
+          notification.pfp = notification.context[NotificationContext.MEMBER_ID];
           break;
       }
       return notification;

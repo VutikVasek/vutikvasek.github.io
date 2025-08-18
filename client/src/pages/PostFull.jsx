@@ -17,6 +17,8 @@ export default function PostFull() {
   const pinned = queryParams.get('c');
   
   const { postId } = useParams();
+  const postRef = useRef();
+
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [pinnedTree, setPinnedTree] = useState();
@@ -101,7 +103,7 @@ export default function PostFull() {
   return (
     <>
       <div className="text-lg">
-        <Post post={post} cut={true} />
+        <Post post={post} cut={true} ref={postRef} />
       </div>
       <div>
         <p>Comments ({post.comments})</p>

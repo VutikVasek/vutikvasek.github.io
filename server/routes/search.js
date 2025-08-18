@@ -24,7 +24,7 @@ router.get('/mygroups', verifyToken, async (req, res) => {
 
   try {
     const groups = await Group.find({ members: req.user._id, name: { $regex: query, $options: "i" }  }).select('name everyoneCanPost admins').limit(10);
-    res.json(groups.filter(group => group.everyoneCanPost || group.admins.includes(req.user._id)));
+    res.json(groups.filter(group => group.everyoneCanPost || group.admins.includes(req.user._id)).map(group => ({_id: group._id, name: group.name})));
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error" });

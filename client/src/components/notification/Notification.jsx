@@ -41,7 +41,8 @@ export default function Notification({ notification }) {
       case NotificationType.NEW_MEMBER:
         return (
           <SmartLink to={`/u/${notification.username}`}>
-            {notification.username}{" has joined "}{notification.groupname}
+            {notification.username}{" has joined "}
+            <SmartLink to={`/g/${notification.groupname}`} as="span">{notification.groupname}</SmartLink>
           </SmartLink>
         )
       case NotificationType.GROUP_JOIN_REQUEST:
@@ -78,12 +79,18 @@ export default function Notification({ notification }) {
             {"You are no longer an admin of "}{notification.groupname}
           </SmartLink>
         )
+      case NotificationType.GROUP_POST:
+        return (
+          <SmartLink to={`/p/${notification.context[NotificationContext.POST_ID]}`}>
+            {notification.author}{" has posted to "}{notification.groups.join(', ')}
+          </SmartLink>
+        )
     }
   }
 
   const handleResultRequest = async (e, result) => {
     e.preventDefault();
-    const res = await fetch(`${API}/group/${notification.context[NotificationContext.GROUP_ID]}/${result}`, {
+    const res = await fetch(`${API}/group/${notification.groupname}/${result}/${notification.pfp}`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -114,7 +121,7 @@ export default function Notification({ notification }) {
       <More>
         <button onClick={handleDelete}>Clear Notification</button>
       </More>
-      { notification.pfp ? 
+      { !notification.gp ? 
         <ProfilePicture pfp={notification.pfp} className="h-10" />
         :
         <ProfilePicture pfp={notification.gp} path="gp" className="h-10" />

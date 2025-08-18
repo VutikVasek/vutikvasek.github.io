@@ -6,6 +6,7 @@ import Follow from '../models/Follow.js';
 import mongoose from 'mongoose';
 import { getFeed } from './feed.js';
 import Post from '../models/Post.js';
+import Notification from '../models/Notification.js';
 import { GroupNotification, NotificationType } from '../../shared.js';
 import { formatPost } from '../tools/formater.js';
 
@@ -38,8 +39,12 @@ router.get('/:groupname', verifyTokenNotStrict, async (req, res) => {
   try {
     const group = await Group.findOne({name: groupname});
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+
+    const logged = !!req.user;
+    const member = group.members.includes(req.user?._id);
+
     let canUserPost = false;
-    if (req.user) {
+    if (req.user && member) {
       if (group.everyoneCanPost) canUserPost = true;
       else {
         const isAdmin = group.admins.includes(req.user?._id);
@@ -55,12 +60,13 @@ router.get('/:groupname', verifyTokenNotStrict, async (req, res) => {
       pinnedPost: group.pinnedPost,
       private: group.private,
       requestJoin: group.requestJoin,
+      everyoneCanPost: group.everyoneCanPost,
       canUserPost,
-      member: group.members.includes(req.user?._id),
+      member,
       admin: group.admins.includes(req.user?._id),
       owner: group.owner.toString() === req.user?._id,
       banned: group.banned.includes(req.user?._id),
-      logged: !!req.user
+      logged
     });
   } catch (err) {
     console.log(err);
@@ -88,7 +94,7 @@ router.post('/:groupId/update', verifyToken, async (req, res) => {
     if (group.everyoneCanPost !== everyoneCanPost) group.everyoneCanPost = everyoneCanPost;
     await group.save();
     
-    res.json({ message: "The group has been updated" });
+    res.json({ message: "The group has been updated", group: { _id: group._id } });
   } catch (err) {
     console.log(err);
     res.status(500).json({message: "Server error"});
@@ -97,8 +103,9 @@ router.post('/:groupId/update', verifyToken, async (req, res) => {
 
 router.get('/:groupname/posts', verifyTokenNotStrict, async (req, res) => {
   const groupname = req.params.groupname;
-  const group = await Group.findOne({name: groupname}).select('_id');
+  const group = await Group.findOne({name: groupname}).select('_id private members');
   if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+  if (group.private && !group.members.includes(req.user?._id)) return res.status(404).json({ message: "You are not a member of this group" });
   getFeed(req, res, { groups: group._id })
 })
 
@@ -107,9 +114,9 @@ router.get('/:groupname/pinned', verifyTokenNotStrict, async (req, res) => {
   const group = await Group.findOne({name: groupname}).select('_id pinnedPost');
   if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
   if (!group.pinnedPost) return res.status(400).json({ message: "This group doesn't have a pinned post" });
-  const post = await Post.findById(pinnedPost);
+  const post = await Post.findById(group.pinnedPost);
   if (!post) return res.status(404).json({ message: "We didn't find the pinned post" });
-  res.json(formatPost(post, req.user?._id));
+  res.json(await formatPost(post, req.user?._id));
 })
 
 router.get('/:groupname/members', verifyTokenNotStrict, async (req, res) => {
@@ -119,7 +126,7 @@ router.get('/:groupname/members', verifyTokenNotStrict, async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const group = await Group.findOne({name: groupname}).select('members admins owner');
+    const group = await Group.findOne({name: groupname}).select('members admins owner name');
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
     const members = await Promise.all(group.members.slice(skip, skip + limit).map(async memberId => {
       const member = await User.findById(memberId);
@@ -141,7 +148,9 @@ router.get('/:groupname/members', verifyTokenNotStrict, async (req, res) => {
       hasMore: skip + members.length < group.members.length,
       group: {
         admin: group.admins.includes(req.user?._id),
-        owner: group.owner.equals(req.user?._id)
+        owner: group.owner.equals(req.user?._id),
+        _id: group._id,
+        name: group.name
       }};
     res.json(groupMembers)
   } catch (err) {
@@ -184,7 +193,7 @@ router.delete('/:groupname/leave', verifyToken, async (req, res) => {
   try {
     const group = await Group.findOne({name: groupname}).select('members');
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
-    group.members = group.members.filter(userId => userId !== req.user._id);
+    group.members = group.members.filter(userId => !userId.equals(req.user._id));
     await group.save();
     await Notification.deleteOne({ for: group.owner, type: NotificationType.NEW_MEMBER, context: req.user._id})
     await deleteNotification(req.user._id, group._id);
@@ -206,7 +215,7 @@ router.put('/:groupname/join', verifyToken, async (req, res) => {
     await group.save();
     await notify(group.owner, group._id, GroupNotification.ALL, 
       NotificationType.NEW_MEMBER, [group._id, req.user._id]);
-    await setNotification(userId, newGroup._id, GroupNotification.ESSENTIAL);
+    await setNotification(req.user._id, group._id, GroupNotification.ESSENTIAL);
     res.json({ message: "You succesfully joined the group" });
   } catch (err) {
     console.log(err);
@@ -221,7 +230,10 @@ router.post('/:groupname/request', verifyToken, async (req, res) => {
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
     if (group.banned.includes(req.user._id)) return res.status(403).json({ message: "You are banned from this group" });
     if (!group.requestJoin) return res.status(400).json({ message: "This group doesn't require request to join" });
-    if (group.memebers.includes(req.user._id)) return res.status(400).json({ message: "You already are a member of this group" });
+    if (group.members.includes(req.user._id)) return res.status(400).json({ message: "You already are a member of this group" });
+    const alreadyRequested = await Notification.exists({type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
+    if (alreadyRequested) return res.status(400).json({ message: "You have already sent a join request to this group" });
+
     await notify(group.owner, group._id, GroupNotification.ESSENTIAL, 
       NotificationType.GROUP_JOIN_REQUEST, [group._id, req.user._id])
     group.admins.forEach(async admin => {
@@ -243,6 +255,10 @@ router.post('/:groupname/accept/:userId', verifyToken, async (req, res) => {
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
     if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to accept join requests" });
     if (!group.requestJoin) return res.status(400).json({ message: "This group doesn't require request to join" });
+    if (group.banned.includes(req.user._id)) return res.status(400).json({ message: "This user is banned" });
+    if (group.members.includes(userId)) return res.status(400).json({ message: "This user is already in this group" });
+    const request = await Notification.exists({type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, userId]});
+    if (!request)  return res.status(400).json({ message: "This user hasn't requested to join" });
 
     group.members.push(userId);
     await group.save();
@@ -251,12 +267,10 @@ router.post('/:groupname/accept/:userId', verifyToken, async (req, res) => {
     await notif.save();
     
     await notify(group.owner, group._id, GroupNotification.ALL, 
-      NotificationType.NEW_MEMBER, [group._id, req.user._id])
+      NotificationType.NEW_MEMBER, [group._id, userId])
       
-    await Notification.deleteOne({ for: group.owner, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
-    group.admins.forEach(async admin => {
-      await Notification.deleteOne({ for: admin, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
-    })
+    await Notification.deleteMany({ type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, userId]});
+
     res.json({ message: "The request has been accepted" });
   } catch (err) {
     console.log(err);
@@ -272,16 +286,16 @@ router.post('/:groupname/deny/:userId', verifyToken, async (req, res) => {
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
     if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to accept join requests" });
     if (!group.requestJoin) return res.status(400).json({ message: "This group doesn't require request to join" });
+    const request = await Notification.exists({type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, userId]});
+    if (!request)  return res.status(400).json({ message: "This user hasn't requested to join" });
     
     if (!group.members.includes(userId)) {
       const notif = new Notification({ for: userId, type: NotificationType.GROUP_JOIN_DENY, context: [group._id] });
       await notif.save();
     }
+      
+    await Notification.deleteMany({ type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, userId]});
 
-    await Notification.deleteOne({ for: group.owner, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
-    group.admins.forEach(async admin => {
-      await Notification.deleteOne({ for: admin, type: NotificationType.GROUP_JOIN_REQUEST, context: [group._id, req.user._id]});
-    })
     res.json({ message: "The request has been dennied" });
   } catch (err) {
     console.log(err);
@@ -321,7 +335,7 @@ router.patch('/:groupname/deadmin/:userId', verifyToken, async (req, res) => {
     if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to make someone admin" });
     if (!group.admins.includes(userId)) return res.status(400).json({ message: "This user isn't admin" });
     
-    group.admins = group.admins.filter(adminId => adminId !== userId);
+    group.admins = group.admins.filter(adminId => !adminId.equals(userId));
     await group.save();
 
     await notify(userId, group._id, GroupNotification.ESSENTIAL, 
@@ -431,6 +445,7 @@ router.delete('/:groupname', verifyToken, async (req, res) => {
     if (!group.owner.equals(req.user._id)) return res.status(403).json({ message: "You have to be the owner to delete the group" });
 
     await Group.findByIdAndDelete(group._id);
+    await Notification.deleteMany({ context: group._id });
     
     res.json({ message: "The group has been deleted" });
   } catch (err) {
@@ -441,7 +456,7 @@ router.delete('/:groupname', verifyToken, async (req, res) => {
 
 router.patch('/:groupId/notification', verifyToken, async (req, res) => {
   const groupId = req.params.groupId;
-  const notification = req.body.notification;
+  const notification = parseInt(req.body.notification);
   try {
     const user = await User.findById(req.user._id).select('groupsNotifications');
     user.groupsNotifications.set(groupId, notification);
@@ -459,13 +474,18 @@ const setNotification = async (userId, groupId, value) => {
 }
 
 const setNotificationForUser = async (user, groupId, value) => {
+  if (!user.groupsNotifications) user.groupsNotifications = {};
   user.groupsNotifications.set(groupId.toString(), value);
   await user.save();
 }
 
-const userValidFor = async (userId, groupId, value) => {
-  const user = await User.findById(userId).select('groupsNotifications');
-  return user.groupsNotifications.get(groupId.toString()) <= value;
+export const userValidFor = async (userId, groupId, value) => {
+  const user = await User.findById(userId).select('groupsNotifications username');
+  if (!user.groupsNotifications) {
+    user.groupsNotifications = {};
+    return false;
+  } 
+  return (value >= user.groupsNotifications.get(groupId.toString()));
 }
 
 const deleteNotification = async (userId, groupId) => {
@@ -474,7 +494,7 @@ const deleteNotification = async (userId, groupId) => {
 }
 
 const deleteNotificationForUser = async (user, groupId) => {
-  user.groupsNotifications.delete(groupId.toString());
+  user.groupsNotifications?.delete(groupId.toString());
   await user.save();
 }
 

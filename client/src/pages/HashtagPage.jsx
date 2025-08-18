@@ -11,7 +11,7 @@ export default function HashtagPage() {
     <>
       <h1 className="text-2xl p-4">#{hashtag}</h1>
       <div className='flex justify-center'>
-        <Feed url={`${API}/feed/hashtag/${hashtag}`} reloadState={hashtag} />
+        <Feed url={`${API}/feed/hash/${hashtag}`} reloadState={hashtag} />
       </div>
     </>
   );

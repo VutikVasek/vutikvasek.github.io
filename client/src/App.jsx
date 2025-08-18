@@ -8,7 +8,7 @@ import FeedPage from './pages/FeedPage';
 import Account from './pages/account/Account';
 import PostPage from './pages/PostPage';
 import Credentials from './pages/account/Credentials';
-import Verified from './pages/Verified';
+import Verified from './pages/account/Verified';
 import Profile from './pages/Profile';
 import PostFull from './pages/PostFull';
 import NotFound from './pages/NotFound';
@@ -16,6 +16,8 @@ import Notifications from './pages/Notifications';
 import NotificationSettings from './pages/account/NotificationSettings';
 import CreateGroup from './pages/group/CreateGroup';
 import GroupPage from './pages/group/GroupPage';
+import HashtagPage from './pages/HashtagPage';
+import GroupSettingsPage from './pages/group/GroupSettingsPage';
 
 import Toast from './components/info/Toast';
 import SmartLink from './components/basic/SmartLink';
@@ -23,8 +25,6 @@ import SmartLink from './components/basic/SmartLink';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { AppContext } from './context/AppContext';
-import GroupSettings from './components/group/GroupSettings';
-import HashtagPage from './pages/HashtagPage';
 
 gsap.registerPlugin(useGSAP);
 
@@ -102,7 +102,7 @@ function App() {
           <Route path="/p/:postId" element={<PostFull />} />
           <Route path="/g/:groupname" element={<GroupPage />} />
           <Route path="/g/:groupname/:show" element={<GroupPage />} />
-          <Route path="/g/:groupname/settings" element={<GroupSettings />} />
+          <Route path="/g/:groupname/settings" element={<GroupSettingsPage />} />
           <Route path="/create-group" element={<CreateGroup />} />
           <Route path="/h/:hashtag" element={<HashtagPage />} />
 

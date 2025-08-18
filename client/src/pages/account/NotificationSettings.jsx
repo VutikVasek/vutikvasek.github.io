@@ -1,4 +1,6 @@
+import Dropdown from "@/components/basic/Dropdown";
 import GroupList from "@/components/profile/GroupList";
+import { useAuth } from "@/context/AuthContext";
 import { GroupNotification, NotificationType } from "^/shared";
 import { useEffect, useState } from "react";
 import Switch from "react-switch";
@@ -9,6 +11,7 @@ export default function NotificationSettings() {
   const [groups, setGroups] = useState([]);
   const [groupsNotifications, setGroupsNotifications] = useState([]);
   const [error, setError] = useState('');
+  const { user } = useAuth();
 
   const notifNames = [];
   notifNames[NotificationType.NEW_FOLLOWER] = "Someone follows you";
@@ -77,7 +80,7 @@ export default function NotificationSettings() {
       Notify when:
       <div>
         {notifications.map((val, type) => {
-          if (type === NotificationType.NEW_MESSAGE) return;
+          if (!notifNames[type]) return;
           return (
             <div className="flex gap-2" key={type}>
               {notifNames[type]}
@@ -88,15 +91,17 @@ export default function NotificationSettings() {
         <div>
           Groups:
           <div className="flex">
-            <GroupList url={`${API}/profile/user/${username}/groups`} setGroupsParent={setGroups} />
+            <GroupList url={`${API}/profile/user/${user}/groups`} setGroupsParent={setGroups} />
             <div className="flex flex-col justify-end">
               {groups.map((group, index) => 
                 <Dropdown 
-                    set={(val) => {
-                      if (notifications[index] !== val) updateGroupNotification(group._id, val);
-                      setNotifications(prev => prev.map((notif, i) => i !== index ? notif : val));
-                    }} 
-                    get={getText(notifications[index], true)}>
+                  set={(val) => {
+                    if (groupsNotifications[index] !== val) updateGroupNotification(group.gp, val);
+                    setGroupsNotifications(prev => prev.map((notif, i) => i !== index ? notif : val));
+                  }} 
+                  get={getText(groupsNotifications[index], true)}
+                  key={index}
+                >
                   {[
                   [GroupNotification.ALL, getText(GroupNotification.ALL)],
                   [GroupNotification.ESSENTIAL, getText(GroupNotification.ESSENTIAL)],
@@ -113,28 +118,17 @@ export default function NotificationSettings() {
   )
 }
 
+const textArray = [];
+textArray[GroupNotification.ALL] = ["All", "Get notifications to everything that happens (new posts, or new members if you are the owner)"];
+textArray[GroupNotification.ESSENTIAL] = ["Essential", "Get notified only for the importand stuff (mainly for admins)"];
+textArray[GroupNotification.NONE] = ["None", "You'll get zero notifications from this group"];
+
 const getText = (groupNotif, cut) => {
-  switch (groupNotif) {
-    case GroupNotification.ALL:
-      return (
-        <>
-          <h3>All</h3>
-          {!cut && <p>Get notifications to everything that happens (new posts, or new members if you are the owner)</p>}
-        </>
-      )
-    case GroupNotification.ESSENTIAL:
-      return (
-        <>
-          <h3>Essential</h3>
-          {!cut && <p>Get notified only for the importand stuff (mainly for admins)</p>}
-        </>
-      )
-    case GroupNotification.NONE:
-      return (
-        <>
-          <h3>None</h3>
-          {!cut && <p>You'll get zero notifications from this group</p>}
-        </>
-      )
-  }
+  if (groupNotif == null) return;
+  return (
+    <>
+      <h3>{textArray[groupNotif][0]}</h3>
+      {!cut && <p className="text-sm pl-2 whitespace-normal">{textArray[groupNotif][1]}</p>}
+    </>
+  )
 }

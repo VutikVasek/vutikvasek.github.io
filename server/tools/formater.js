@@ -40,22 +40,32 @@ const formatAuthorPost = async (post, userId) => {
       if (!user) return { username: mention };
       return { username: user.username, _id: user._id };
     }))
-  if (post.groups) {
+  if (post.groups && post.groups.length > 0) {
+    let visible = false;
     post.adminGroups = [];
     post.pinnedGroups = [];
-    post.groups = await Promise.all(post.groups.map(async (groupId, index) => {
-      if (!mongoose.Types.ObjectId.isValid(groupId)) return { name: "<Error>" };
-      const group = await Group.findById(groupId).select('name admins pinnedPost');
-      if (!group) return { name: "<deleted>" };
+    post.bannedGroups = [];
+    post.groups = (await Promise.all(post.groups.map(async (groupId, index) => {
+      if (!mongoose.Types.ObjectId.isValid(groupId)) return { name: "" };
+      const group = await Group.findById(groupId);
+      if (!group) return { name: "" };
+
+      if (!visible && (!group.private || group.members.includes(userId))) visible = true;
+
       if (group.admins.includes(userId)) {
         post.adminGroups.push(index);
-        post.pinnedGroups.push(group.pinnedPost?.equals(post._id));
+        if (group.pinnedPost?.equals(post._id))
+          post.pinnedGroups.push(index);
+        if (group.banned?.includes(post.author._id))
+          post.bannedGroups.push(index)
       }
       if (post.canReply && (!group.members.includes(userId) || 
         !(group.everyoneCanPost || group.admins.includes(userId)))) post.canReply = false;
       return { name: group.name, _id: group._id };
-    }))
+    }))).filter(group => group.name !== "");
+    if (!visible) return;
   }
+
 
   return {
     ...post,

@@ -13,7 +13,7 @@ const UserSchema = new mongoose.Schema({
   postTimes: { type: [Date]},
   commentTimes: { type: [Date]},
   notifications: [{ type: Boolean, default: true }],
-  groupsNotifications: { type: Map, of: { type: Number, enum: [0, 1, 2] } }
+  groupsNotifications: { type: Map, of: { type: Number } }
 });
 
 export default mongoose.model('User', UserSchema);

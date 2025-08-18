@@ -4,31 +4,19 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 const API = import.meta.env.VITE_API_BASE_URL;
 
-export default function GroupSettings({ groupname }) {
-  const [status, setStatus] = useState('');
-  const [group, setGroup] = useState('');
+export default function GroupSettings({ group }) {
 
-  const { showErrorToast } = useAppContext();
+  const { showErrorToast, showInfoToast } = useAppContext();
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!groupname) return;
-    fetch(`${API}/group/${groupname}`)
-    .then(res => res.json())
-    .then(data => setGroup(data))
-    .catch(err => showErrorToast(err));
-  }, [groupname])
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-
-    console.log(data);
     
-    const res = await fetch(`${API}/group${group && `/${group._id}/update`}`, {
+    const res = await fetch(`${API}/group${group ? `/${group._id}/update` : ""}`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -58,7 +46,8 @@ export default function GroupSettings({ groupname }) {
       if (!res.ok) return showErrorToast(resData2.message || 'Posting failed.');
     }
 
-    navigate(`/g/${encodeURIComponent(resData.group.name)}`);
+    if (resData.group.name) navigate(`/g/${encodeURIComponent(resData.group.name)}`);
+    else showInfoToast("Group updated");
   }
   
   return (
@@ -67,11 +56,11 @@ export default function GroupSettings({ groupname }) {
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2">
           <p>Name:</p>
-          <input type="text" name="name" id="" className="border border-black" value={group?.name ?? ''} required />
+          <input type="text" name="name" id="name" className="border border-black" defaultValue={group?.name ?? ''} required />
         </div>
         <div className="flex gap-2">
           <p>Description:</p>
-          <input type="text" name="description" id="" className="border border-black" value={group?.description ?? ''} />
+          <input type="text" name="description" id="description" className="border border-black" defaultValue={group?.description ?? ''} />
         </div>
         <div>
           <p>Who can see the group posts:</p>
@@ -100,7 +89,7 @@ export default function GroupSettings({ groupname }) {
           className="block"
           name="gp"
         />
-        <input type="submit" value="Create" className="cursor-pointer" />
+        <input type="submit" value={group ? "Save" : "Create"} className="cursor-pointer" />
       </form>
     </div>
   )

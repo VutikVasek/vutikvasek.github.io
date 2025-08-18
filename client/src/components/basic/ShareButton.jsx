@@ -6,7 +6,8 @@ export default function ShareButton({ url }) {
 
   const { showInfoToast, showErrorToast } = useAppContext();
 
-  const handleClick = () => {
+  const handleClick = (e) => {
+    e.stopPropagation();
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
       navigator.clipboard.writeText(url)
         .then(() => showInfoToast("Link copied to clipboard"))

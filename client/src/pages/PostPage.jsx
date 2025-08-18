@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import LogWall from '../components/auth/LogWall';
 import { validatePost } from '../tools/validate';
 import MediaSelector from '@/components/media/MediaSelector';

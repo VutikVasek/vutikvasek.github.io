@@ -7,18 +7,18 @@ export default function PasswordInput({...params}) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    input.current?.type = show ? "text" : "password";
+    input.current.type = show ? "text" : "password";
   }, [show])
 
   return (
-    <div className="flex w-fit">
+    <div className="flex w-fit items-center gap-3">
       <input
         className="border p-2 rounded"
         type="password"
         ref={input}
         {...params}
       />
-      <div onClick={setShow(prev => !prev)}>,
+      <div onClick={() => setShow(prev => !prev)}>
         {
           show ?
           <BiHide /> :

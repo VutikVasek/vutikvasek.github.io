@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Fragment } from "react";
 import SmartLink from "./SmartLink";
 
 export default function ExpandableText({ text, maxHeight = 200 }) {
   const [expanded, setExpanded] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const textRef = useRef(null);
-  const [, setTextElements] = useState([text]);
+  const [textElements, setTextElements] = useState([text]);
 
   useEffect(() => {
     setIsOverflowing(textRef.current?.scrollHeight > maxHeight);
@@ -18,10 +18,10 @@ export default function ExpandableText({ text, maxHeight = 200 }) {
   return (
     <div>
       <p ref={textRef} className={"overflow-clip"} style={{maxHeight: expanded ? "initial" : maxHeight + "px"}}>
-        {textElements.map(element => 
-          element.split()[0] !== '#' ? 
-            element : 
-            <SmartLink to={`/h/${element.split().slice(1).join()}`}>{element}</SmartLink>)}
+        {textElements.map((element, index) => 
+          element.split('')[0] !== '#' ? 
+            <Fragment key={index}>{element}</Fragment> : 
+            <SmartLink to={`/h/${element.split('').slice(1).join('')}`} key={index} className='text-blue-500 font-semibold'>{element}</SmartLink>)}
       </p>
       {isOverflowing && (
         <button onClick={() => setExpanded(val => !val)}>
