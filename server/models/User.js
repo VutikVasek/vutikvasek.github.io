@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { NotificationType } from '../../shared.js';
 
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true },
@@ -12,7 +13,7 @@ const UserSchema = new mongoose.Schema({
   bio: { type: String },
   postTimes: { type: [Date]},
   commentTimes: { type: [Date]},
-  notifications: [{ type: Boolean, default: true }],
+  notifications: { type: [Boolean], default: Object.keys(NotificationType).map(_ => true) },
   groupsNotifications: { type: Map, of: { type: Number } }
 });
 

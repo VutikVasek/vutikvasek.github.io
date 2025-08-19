@@ -146,14 +146,22 @@ router.delete('/delete', verifyToken, async (req, res) =>  {
     await Follow.deleteMany({following: userId});
     await Notification.deleteMany({for: userId});
     const ownedGroups = await Group.find({ owner: userId }).select('owner admins');
-    await Promise.all(ownedGroups.forEach(async group => {
+    ownedGroups.forEach(async group => {
       if (!group.admins || group.admins.length === 0) {
         await Group.findByIdAndDelete(group._id);
       } else {
         group.owner = group.admins[0];
         await group.save();
       }
-    }))
+    })
+
+    const memberGroups = await Group.find({ members: userId }).select('members admins');
+    memberGroups.forEach(async group => {
+      group.members = group.members.filter(memberId => !memberId.equals(userId));
+      group.admins = group.admins.filter(adminId => !adminId.equals(userId));
+      await group.save();
+    }
+    );
 
     res.json({ message: 'Account deleted' });
   } catch (err) {

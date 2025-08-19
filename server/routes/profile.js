@@ -40,7 +40,7 @@ router.get("/posts/:username", verifyTokenNotStrict, async (req, res) => {
 
   if (!user) return res.status(404).json({ message: `No user with username ${username} was found`});
   
-  getFeed(req, res, {author: user._id});
+  getFeed(req, res, { author: user._id }, !user._id.equals(req.user?._id) );
 })
 
 router.get("/comments/:id", verifyTokenNotStrict, async (req, res) => {

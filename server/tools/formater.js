@@ -48,7 +48,7 @@ const formatAuthorPost = async (post, userId) => {
     post.groups = (await Promise.all(post.groups.map(async (groupId, index) => {
       if (!mongoose.Types.ObjectId.isValid(groupId)) return { name: "" };
       const group = await Group.findById(groupId);
-      if (!group) return { name: "" };
+      if (!group) return { name: "<deleted group>" };
 
       if (!visible && (!group.private || group.members.includes(userId))) visible = true;
 
@@ -62,8 +62,9 @@ const formatAuthorPost = async (post, userId) => {
       if (post.canReply && (!group.members.includes(userId) || 
         !(group.everyoneCanPost || group.admins.includes(userId)))) post.canReply = false;
       return { name: group.name, _id: group._id };
-    }))).filter(group => group.name !== "");
-    if (!visible) return;
+    })));
+    if (!visible && !post.groups.some(group => group.name === "<deleted group>")) return;
+    if (post.groups.length > 1 && post.groups.some(group => group.name === "<deleted group>")) post.groups = post.groups.filter(group => group.name !== "<deleted group>")
   }
 
 

@@ -25,7 +25,7 @@ router.get('/groups', verifyToken, async (req, res) => {
   const groups = await Group.find({ members: req.user._id }).select('_id');
   const groupsIds = groups.map(group => group._id);
 
-  getFeed(req, res, { groups: { $in: groupsIds } });
+  getFeed(req, res, { groups: { $in: groupsIds } }, false);
 })
 
 // Get hashtag posts
@@ -34,7 +34,7 @@ router.get('/hash/:hashtag', verifyTokenNotStrict, async (req, res) => {
   getFeed(req, res, { text: new RegExp(`#${hashtag}(?=\\s|$|[^\\w]|#)`, 'gi') });
 })
 
-export const getFeed = async (req, res, filter) => {
+export const getFeed = async (req, res, filter, groups = true) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
@@ -44,7 +44,7 @@ export const getFeed = async (req, res, filter) => {
   if (sortByPopularity && time != "all") filter = {...filter, createdAt: {$gt: formatDate(time)}};
   const sortStage = sortByPopularity ? { likesCount: -1, createdAt: -1 } : { createdAt: -1 };
 
-  if (!filter.groups) {
+  if (groups) {
     const publicGroups = (await Group.find({ private: false }).select('_id')).map(group => group._id);
     const myGroups = (await Group.find({ members: req.user?._id }).select('_id')).map(group => group._id);
     const allGroups = [...publicGroups, ...myGroups, null].filter((id, index, arr) => arr.indexOf(id) === index);

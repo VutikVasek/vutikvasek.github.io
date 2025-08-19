@@ -20,13 +20,14 @@ export default function Notifications() {
       }
     });
     const data = await res.json();
+    const notifications = data.notifications.filter(notif => notif != null);
 
     if (res.ok) {
       if (reload) {
-        setNotifications(data.notifications);
+        setNotifications(notifications);
         setPage(1);
       } else {
-        setNotifications((prev) => [...prev, ...data.notifications].filter(
+        setNotifications((prev) => [...prev, ...notifications].filter(
             (post, index, self) => index === self.findIndex(p => p._id === post._id)
         ));
       }

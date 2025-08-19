@@ -70,7 +70,7 @@ export default function PostPage() {
   return (
     <>
       <LogWall />
-      <form onSubmit={handleSubmitingPost}>
+      <form onSubmit={e => e.preventDefault()}>
         {
           replyingTo ?
             (author ? 
@@ -79,7 +79,14 @@ export default function PostPage() {
           <h1>Make a new post!</h1>
         }
         
-        <TextInput text={text} setText={setText} setDBMentions={setMentions} setDBGroups={setGroups} onDrop={mediaSelector.current?.handleDrop} rows={6} />
+        <TextInput 
+          text={text} 
+          setText={setText} 
+          setDBMentions={setMentions} 
+          setDBGroups={setGroups} 
+          onDrop={mediaSelector.current?.handleDrop} 
+          rows={6} 
+          handleSubmit={handleSubmitingPost} />
         <div className='flex flex-col gap-4'>
           <MediaSelector max={2} ref={mediaSelector} rerender={rerender} flex="justify-around w-fit" className="h-10 w-10 p-2" />
           <div className={mediaSelector.current?.getFileCount() ? "h-20" : ""}>

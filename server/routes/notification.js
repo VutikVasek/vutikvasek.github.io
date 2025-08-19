@@ -24,7 +24,7 @@ router.get('/', verifyToken, async (req, res) => {
     const total = await Notification.countDocuments({ for: req.user._id });
 
     const formated = await Promise.all(notifications.map(async notif => {
-      const notification = notif.toObject();
+      let notification = notif.toObject();
       notif.seen = true;
       await notif.save();
       switch (notification.type) {
@@ -70,9 +70,15 @@ router.get('/', verifyToken, async (req, res) => {
           notification.author = (await User.findById(notification.context[NotificationContext.MEMBER_ID]).select('username')).username;
           const postGroups = (await Post.findById(notification.context[NotificationContext.POST_ID]).select('groups')).groups;
           const groups = await Group.find({_id: { $in: postGroups }, members: req.user._id}).select('name');
-          const myGroups = groups.filter(group => userValidFor(req.user._id, group._id, GroupNotification.ALL));
+          let myGroups = [];
+          await Promise.all(groups.map(async group => {
+            const isValid = await userValidFor(req.user._id, group._id, GroupNotification.ALL);
+            if (isValid) myGroups.push(group);
+            return isValid;
+          }))
           notification.groups = myGroups.map(group => group.name);
           notification.pfp = notification.context[NotificationContext.MEMBER_ID];
+          if (myGroups.length === 0) notification = null;
           break;
       }
       return notification;

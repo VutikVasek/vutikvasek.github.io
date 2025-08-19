@@ -100,14 +100,19 @@ const notifyMentioned = (mentions, postId, userId) => {
 /////////////////////////////////// async await promese
 //////////////////////////////////////////////
 ///////////////////////////////////////////
-const notifyGroupsMembers = (groups, postId, userId) => {
+const notifyGroupsMembers = async (groups, postId, userId) => {
   try {
-    groups?.
-       reduce((acc, curr) => {
-        acc.push(...(curr.members.filter(async id => await userValidFor(id, curr._id, GroupNotification.ALL)).map(id => id.toString()))); 
-        return acc;
-      }, [])
-      .filter((memberId, index, arr) => arr.indexOf(memberId) === index)
+    if (!groups) return;
+    const valid = await Promise.all(groups.map(async (group, i) => {
+        const filtered = await filterGroup(group);
+        return filtered;
+    }));
+    const reduced = valid.reduce((acc, curr) => {
+      acc.push(...curr);
+      return acc;
+    }, []);
+    
+    reduced.filter((memberId, index, arr) => arr.indexOf(memberId) === index)
       .forEach(async memberId => {
         const notif = new Notification({ for: memberId, type: NotificationType.GROUP_POST, context: [postId, userId]});
         await notif.save();
@@ -115,6 +120,16 @@ const notifyGroupsMembers = (groups, postId, userId) => {
   } catch (err) {
     console.log(err);
   }
+}
+
+const filterGroup = async group => {
+  const filtered = [];
+  await Promise.all(group.members.map(async memberId => {
+    const isValid = await userValidFor(memberId, group._id, GroupNotification.ALL);
+    if (isValid) filtered.push(memberId);
+    return isValid;
+  }));
+  return filtered;
 }
 
 // Get post

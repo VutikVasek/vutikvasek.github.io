@@ -481,11 +481,12 @@ const setNotificationForUser = async (user, groupId, value) => {
 
 export const userValidFor = async (userId, groupId, value) => {
   const user = await User.findById(userId).select('groupsNotifications username');
+  if (!user) return false;
   if (!user.groupsNotifications) {
     user.groupsNotifications = {};
     return false;
   } 
-  return (value >= user.groupsNotifications.get(groupId.toString()));
+  return value >= user.groupsNotifications.get(groupId.toString());
 }
 
 const deleteNotification = async (userId, groupId) => {
@@ -499,7 +500,7 @@ const deleteNotificationForUser = async (user, groupId) => {
 }
 
 export const notify = async (userId, groupId, validFor, type, context) => {
-  if (userValidFor(userId, groupId, validFor)) {
+  if (await userValidFor(userId, groupId, validFor)) {
     const notif = new Notification({ for: userId, type, context});
     await notif.save();
   }

@@ -5,7 +5,7 @@ import GroupSelector from "../group/GroupSelector";
 import { useLocation } from "react-router-dom";
 const API = import.meta.env.VITE_API_BASE_URL;
 
-export default function TextInput({text, setText, setDBMentions, setDBGroups, shouldFocus = true, onDrop, rows = 3, reset}) {
+export default function TextInput({text, setText, setDBMentions, setDBGroups, shouldFocus = true, onDrop, rows = 3, reset, handleSubmit}) {
   const [mentions, setMentions] = useState([]);
   const [groups, setGroups] = useState([]);
   const supportGroups = !!setDBGroups;
@@ -105,6 +105,7 @@ export default function TextInput({text, setText, setDBMentions, setDBGroups, sh
         onDragOver={(e) => e.preventDefault()}
         onDrop={onDrop}
         ref={textareaRef}
+        onKeyDownCapture={(e) => { if (e.key === "Enter" && e.ctrlKey && handleSubmit) handleSubmit(e) }}
       ></textarea>
     </div>
   );

@@ -62,7 +62,12 @@ export default function Profile() {
             <UserList url={`${API}/profile/user/${username}/${show}`} source={`/u/${username}`} />
           )}
           {show == "groups" && (
+            <>
+            {userData.itsme && 
+              <SmartLink to="/create-group">Create new group</SmartLink>
+            }
             <GroupList url={`${API}/profile/user/${username}/${show}`} source={`/u/${username}`} />
+            </>
           )}
           {(!show || show == "replies") &&
           <div className='flex gap-4'>
