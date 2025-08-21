@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { MdKeyboardArrowDown } from "react-icons/md";
 import { useLocation, useNavigate } from "react-router-dom";
 import Dropdown from "./Dropdown";
 
@@ -26,12 +25,15 @@ export default function Sorter({url, sortBy, time, defaultSort = SortType.newest
 
     if (currSort == sort && sameTime) return;
 
-    const query = [];
+    const query = Object.fromEntries(queryParams.entries());
 
-    if (sort != defaultSort)  query.push("sort=" + sort);
-    if (sort == SortType.popular && timeframe != defaultTime) query.push("time=" + timeframe);
+    if (sort != defaultSort) query.sort = sort;
+    else delete query.sort;
+    if (sort == SortType.popular && timeframe != defaultTime) query.time = timeframe;
+    else delete query.time;
 
-    navigate(query.length ? `${url}?${query.join('&')}` : url);
+    const entries = Object.entries(query);
+    navigate(entries.length ? `${url}?${entries.map(pair => pair[0] + "=" + pair[1]).join('&')}` : url);
   }
   
   const getTimeframe = (frame) => {

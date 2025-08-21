@@ -14,7 +14,6 @@ export default function Verified() {
   useEffect(() => {
     const verify = async () => {
       const queryParams = new URLSearchParams(location.search);
-      console.log(queryParams);
       const token = queryParams.get('token');
       const email = queryParams.get('email');
 

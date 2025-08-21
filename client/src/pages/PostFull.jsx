@@ -87,7 +87,7 @@ export default function PostFull() {
   const loadPinnedTree = async () => {
     await fetch(`${API}/comment/${pinned}/tree`).then((res) => res.json()).then((data) => {
       setPinnedTree(data.pinnedTree)
-    }).catch(err => console.log(err, "teedoo"));
+    }).catch(err => console.log(err));
   }
 
   useEffect(() => {

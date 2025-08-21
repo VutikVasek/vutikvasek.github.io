@@ -97,9 +97,7 @@ const notifyMentioned = (mentions, postId, userId) => {
     }
   })
 }
-/////////////////////////////////// async await promese
-//////////////////////////////////////////////
-///////////////////////////////////////////
+
 const notifyGroupsMembers = async (groups, postId, userId) => {
   try {
     if (!groups) return;
@@ -144,19 +142,25 @@ router.get('/:post', verifyTokenNotStrict, async (req, res) => {
 
 // Like post
 router.patch('/:post/like', verifyToken, async (req, res) => {
-  const postId = req.params.post;
-  const post = await Post.findById(postId);
-  const userId = req.user._id;
+  try {
+    const postId = req.params.post;
+    if (!mongoose.Types.ObjectId.isValid(postId)) return res.status(400).json({ message: "Invalid post id" });
+    const post = await Post.findById(postId);
+    const userId = req.user._id;
 
-  if (!post) return res.status(404).json({message: "Post not found"});
+    if (!post) return res.status(404).json({message: "Post not found"});
 
-  const hasLiked = post.likes.includes(userId);
+    const hasLiked = post.likes.includes(userId);
 
-  if (!hasLiked) post.likes.push(userId);
-  else post.likes.pull(userId);
+    if (!hasLiked) post.likes.push(userId);
+    else post.likes.pull(userId);
 
-  await post.save();
-  res.json({ likes: post.likes.length, liked: !hasLiked });
+    await post.save();
+    res.json({ likes: post.likes.length, liked: !hasLiked });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server error"})
+  }
 })
 
 // Delete post
@@ -199,8 +203,8 @@ export const getComments = async (req, res, filter) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 3;
   const skip = (page - 1) * limit;
-  const sortByPopularity = req.query.sort == "popular";
-  const time = req.query.time;
+  const sortByPopularity = req.query.sort?.trim() == "popular";
+  const time = req.query.time?.trim();
   const linkParent = req.query.link;
   const pinnedId = req.query.pinned;
   if (sortByPopularity && time != "all") filter = {...filter, createdAt: {$gt: formatDate(time)}};
@@ -272,7 +276,7 @@ export const getComments = async (req, res, filter) => {
 }
 
 const getUncomments = async (filter, pinnedId, skip, limit) => {
-  if (!pinnedId) return await Comment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit);
+  if (!pinnedId || !mongoose.Types.ObjectId.isValid(pinnedId)) return await Comment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit);
 
   const pinned = await Comment.findById(pinnedId);
   const comments = await Comment.find({ ...filter, _id: { $ne: pinnedId } }).sort({ createdAt: -1 }).skip(skip).limit(limit);

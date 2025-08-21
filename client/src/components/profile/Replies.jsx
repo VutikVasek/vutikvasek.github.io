@@ -3,21 +3,23 @@ import Sorter from "../basic/Sorter";
 import CommentThread from "../comment/CommentThread";
 import { useLocation } from "react-router-dom";
 
-export default function Replies({userData}) {
+export default function Replies({userData, search, query, reloadState, defaultTime = "all", defaultSort = "newest", sorter = true, setParams}) {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const sort = queryParams.get('sort') || "newest"
-  const timeframe = queryParams.get('time') || "all"
+  const sort = queryParams.get('sort') || defaultSort
+  const timeframe = queryParams.get('time') || defaultTime
 
   const [comments, setComments] = useState([]);
 
   return (
     <>
       <div style={{width: '80%'}}>
+        {sorter &&
         <div className="flex justify-end">
-          <Sorter url={location.pathname} sortBy={sort} time={timeframe} defaultTime="all" />
-        </div>
-        <CommentThread userId={userData.pfp} comments={comments} setComments={setComments} infiniteScroll={true} reload={userData.pfp} sort={sort} timeframe={timeframe} />
+          <Sorter url={location.pathname} sortBy={sort} time={timeframe} defaultTime={defaultTime} defaultSort={defaultSort} />
+        </div>}
+        <CommentThread userId={userData?.pfp} query={search ? query : null} comments={comments} setComments={setComments} infiniteScroll={true} reload={userData?.pfp || reloadState} sort={sort} timeframe={timeframe} />
+        <button onClick={e => setParams("s", "replies")}>Show more</button>
       </div>
     </>
   )

@@ -61,9 +61,10 @@ export default function GroupPage({}) {
       <div className="flex flex-col">
         <ProfilePicture path="gp" pfp={group._id} className="w-36" />
         <p>{group.name}</p>
-        <p>{group.description}</p>
-        {group.owner && <SmartLink to="settings">Settings</SmartLink>}
+        <p className="max-w-max overflow-x-clip">{group.description}</p>
+        {group.owner && <SmartLink to={`/g/${group.name}/settings`}>Settings</SmartLink>}
         <SmartLink to={`/g/${group.name}/members`}>{group.members} member{group.members > 1 && "s"}</SmartLink>
+        {group.bans && <SmartLink to={`/g/${group.name}/banned`}>{group.bans} banned</SmartLink>}
         {!deleted && (<>
           <p>{group._id ? "Since" : ""} {date}</p>
           <JoinButton group={group} logged={group.logged} />
@@ -73,8 +74,8 @@ export default function GroupPage({}) {
       <SmartLink to={`/post?g=${groupname}`}>Post on group</SmartLink>
       }
       <div>
-        {show === "members" && (
-          <UserList url={`${API}/group/${groupname}/members`} source={`/g/${groupname}`} />
+        {(show === "members" || show === "banned") && (
+          <UserList url={`${API}/group/${groupname}/${show}`} source={`/g/${groupname}`} />
         )}
         {!show && (
           group.private && !group.member ? 

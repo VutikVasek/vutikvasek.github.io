@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 const API = import.meta.env.VITE_API_BASE_URL;
 
-export default function PfpUpload(type = "pfp") {
+export default function PfpUpload({type = "pfp"}) {
   const fileInputRef = useRef();
   const [status, setStatus] = useState('');
 

@@ -22,7 +22,7 @@ export default function GroupSettings({ group }) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify({ name: data.name, description: data.description, 
+      body: JSON.stringify({ name: data.name, description: data.description.split('').slice(0, 100).join(''), 
         isPrivate: data.private === "true", requestJoin: data.requestJoin === "true", everyoneCanPost: data.everyoneCanPost === "true" }),
     });
 
@@ -60,7 +60,7 @@ export default function GroupSettings({ group }) {
         </div>
         <div className="flex gap-2">
           <p>Description:</p>
-          <input type="text" name="description" id="description" className="border border-black" defaultValue={group?.description ?? ''} />
+          <input type="text" name="description" id="description" className="border border-black" maxLength={100} defaultValue={group?.description ?? ''} />
         </div>
         <div>
           <p>Who can see the group posts:</p>

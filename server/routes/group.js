@@ -17,7 +17,7 @@ router.post('/', verifyToken, async (req, res) => {
   const userId = req.user._id;
   try {
     const ownedGroups = await Group.countDocuments({ owner: userId });
-    if (ownedGroups >= 5) return res.status(400).json({ message: "You can only own up to 5 groups", tooMany: true });
+    if (ownedGroups >= 10) return res.status(400).json({ message: "You can only own up to 10 groups", tooMany: true });
 
     const existingName = await Group.exists({ name });
     if (existingName) return res.status(400).json({ message: "There already exists a group with this name" });
@@ -43,14 +43,11 @@ router.get('/:groupname', verifyTokenNotStrict, async (req, res) => {
     const logged = !!req.user;
     const member = group.members.includes(req.user?._id);
 
+    const isAdmin = group.admins.includes(req.user?._id);
+
     let canUserPost = false;
-    if (req.user && member) {
-      if (group.everyoneCanPost) canUserPost = true;
-      else {
-        const isAdmin = group.admins.includes(req.user?._id);
-        if (isAdmin) canUserPost = true;
-      }
-    }
+    if (req.user && member && (group.everyoneCanPost || isAdmin)) canUserPost = true;
+
     return res.json({
       _id: group._id,
       name: group.name,
@@ -63,9 +60,10 @@ router.get('/:groupname', verifyTokenNotStrict, async (req, res) => {
       everyoneCanPost: group.everyoneCanPost,
       canUserPost,
       member,
-      admin: group.admins.includes(req.user?._id),
+      admin: isAdmin,
       owner: group.owner.toString() === req.user?._id,
       banned: group.banned.includes(req.user?._id),
+      bans: isAdmin ? group.banned.length : null,
       logged
     });
   } catch (err) {
@@ -153,6 +151,44 @@ router.get('/:groupname/members', verifyTokenNotStrict, async (req, res) => {
         name: group.name
       }};
     res.json(groupMembers)
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({message: "Server error"});
+  }
+})
+
+router.get('/:groupname/banned', verifyToken, async (req, res) => {
+  const groupname = req.params.groupname;
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const group = await Group.findOne({name: groupname}).select('banned admins owner name');
+    if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
+    if (!group.admins.includes(req.user._id)) return res.status(400).json({ message: "You need to be an admin to see banned users" });
+    const banned = await Promise.all(group.banned.slice(skip, skip + limit).map(async bannedId => {
+      const bannedUser = await User.findById(bannedId);
+      if (!bannedUser) return returnDeleted();
+      const follows = await Follow.findOne({ follower: req.user?._id, following: bannedId });
+      return {
+        username: bannedUser.username,
+        pfp: bannedId,
+        follows: !!follows,
+        notify: follows?.notify,
+        banned: true
+      }
+    }));
+    const groupBanned = {
+      userList: banned, 
+      logged: !!req.user, 
+      hasMore: skip + banned.length < group.banned.length,
+      group: {
+        _id: group._id,
+        name: group.name,
+        admin: true
+      }};
+    res.json(groupBanned)
   } catch (err) {
     console.log(err);
     res.status(500).json({message: "Server error"});
@@ -393,6 +429,7 @@ router.put('/:groupname/ban/:userId', verifyToken, async (req, res) => {
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
     if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to ban people" });
     if (group.owner.equals(userId)) return res.status(403).json({ message: "You cannot ban the owner" });
+    if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ message: "Invalid user id" });
 
     const user = await User.exists({ _id: userId });
     if (!user) return res.status(404).json({ message: "We didn't find that user" });

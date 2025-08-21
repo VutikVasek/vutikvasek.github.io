@@ -141,8 +141,8 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
                   <FaReply className='text-gray-500 hover:text-black' />
                 </div>
               </Descriptor>
-              {postId && (
-                <ShareButton url={`${BASE}/p/${postId}?sort=newest&c=${comment._id}`} />
+              {(postId || comment.parent._id) && (
+                <ShareButton url={`${BASE}/p/${postId || comment.parent._id}?sort=newest&c=${comment._id}`} />
               )}
               <More>
                 {comment.itsme && <DeleteButton url={`${API}/comment/${comment._id}`} word="comment" />}

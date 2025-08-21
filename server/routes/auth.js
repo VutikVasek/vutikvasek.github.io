@@ -95,7 +95,14 @@ router.post('/google', async (req, res) => {
 
     let user = await User.findOne({ email });
     if (!user) {
-      user = new User({ googleId: sub, email: email, username: name, verified: true });
+      let username = name;
+      let existing = await User.exists({ username });
+      let i = 1;
+      while (existing) {
+        username = name + i++;
+        existing = await User.exists({ username });
+      }
+      user = new User({ googleId: sub, email, username, verified: true });
       await user.save();
     } else if (!user.googleId) {
       await User.findOneAndUpdate({ email }, { googleId: sub });

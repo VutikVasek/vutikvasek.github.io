@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { MdKeyboardArrowDown, MdNotificationsActive, MdNotificationsOff } from "react-icons/md";
 import { RiUserUnfollowLine } from "react-icons/ri";
 import SmartLink from "../basic/SmartLink";
+import FullScreen from "../basic/FullScreen";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -90,13 +91,16 @@ export default function FollowButton({ userData, simple, logged }) {
               Following <MdKeyboardArrowDown />
             </button>
             {changingFollowing && (
-              <div className="w-0 h-0 overflow-visible">
+              <>
+              <FullScreen onClick={() => setChangingFollowing(false)} invis />
+              <div className="w-0 h-0 overflow-visible z-50">
                 <div className="bg-gray-300 w-fit p-2 relative flex flex-col whitespace-nowrap">
                   <button className="flex w-fit items-center gap-1" onClick={() => handleChangeFollow(true)}><MdNotificationsActive />All</button>
                   <button className="flex w-fit items-center gap-1" onClick={() => handleChangeFollow(false)}><MdNotificationsOff />Silent</button>
                   <button className="flex w-fit items-center gap-1" onClick={handleUnfollow}><RiUserUnfollowLine />Unfollow</button>
                 </div>
-              </div>)}
+              </div>
+              </>)}
           </>
         )
     }

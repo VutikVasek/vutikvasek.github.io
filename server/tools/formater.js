@@ -45,6 +45,7 @@ const formatAuthorPost = async (post, userId) => {
     post.adminGroups = [];
     post.pinnedGroups = [];
     post.bannedGroups = [];
+    post.ownedGroups = [];
     post.groups = (await Promise.all(post.groups.map(async (groupId, index) => {
       if (!mongoose.Types.ObjectId.isValid(groupId)) return { name: "" };
       const group = await Group.findById(groupId);
@@ -58,6 +59,8 @@ const formatAuthorPost = async (post, userId) => {
           post.pinnedGroups.push(index);
         if (group.banned?.includes(post.author._id))
           post.bannedGroups.push(index)
+        if (group.owner.equals(post.author._id))
+          post.ownedGroups.push(index);
       }
       if (post.canReply && (!group.members.includes(userId) || 
         !(group.everyoneCanPost || group.admins.includes(userId)))) post.canReply = false;

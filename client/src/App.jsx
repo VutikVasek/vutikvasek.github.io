@@ -2,22 +2,27 @@ import React, { useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 
+import FeedPage from './pages/FeedPage';
+import PostPage from './pages/PostPage';
+import PostFull from './pages/PostFull';
+
 import Signup from './pages/account/Signup';
 import Login from './pages/account/Login';
-import FeedPage from './pages/FeedPage';
 import Account from './pages/account/Account';
-import PostPage from './pages/PostPage';
 import Credentials from './pages/account/Credentials';
 import Verified from './pages/account/Verified';
-import Profile from './pages/Profile';
-import PostFull from './pages/PostFull';
-import NotFound from './pages/NotFound';
 import Notifications from './pages/Notifications';
 import NotificationSettings from './pages/account/NotificationSettings';
+
+import NotFound from './pages/NotFound';
+
+import Profile from './pages/Profile';
 import CreateGroup from './pages/group/CreateGroup';
 import GroupPage from './pages/group/GroupPage';
-import HashtagPage from './pages/HashtagPage';
 import GroupSettingsPage from './pages/group/GroupSettingsPage';
+
+import HashtagPage from './pages/HashtagPage';
+import Search from './pages/Search'
 
 import Toast from './components/info/Toast';
 import SmartLink from './components/basic/SmartLink';
@@ -54,6 +59,9 @@ function App() {
           <div className="panel flex items-middle gap-6">
             <SmartLink to="/" className='px-4 py-2 rounded-md hover:bg-slate-600'>
               <h3>Feed</h3>
+            </SmartLink>
+            <SmartLink to="/search" className='px-4 py-2 rounded-md hover:bg-slate-600'>
+              <h3>Search</h3>
             </SmartLink>
             {isLoggedIn ? (
               <>
@@ -92,6 +100,7 @@ function App() {
           <Route path="/verify" element={<Verified />} />
           <Route path="/post" element={<PostPage />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/account">
             <Route index element={<Account />} />
             <Route path="/account/credentials" element={<Credentials />} />

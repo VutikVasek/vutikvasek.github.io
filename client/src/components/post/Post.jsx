@@ -93,7 +93,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
       }
     });
     const data = await res.json();
-    if (!res.ok) console.log(data.message);
+    if (!res.ok) return showErrorToast(data.message);
 
     showInfoToast("User has been " + (ban ? "banned" : "unbanned"));
   }
@@ -114,18 +114,6 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
             <p className='text-xs text-gray-600'>{formatRelativeTime(post.createdAt)}</p>
           </div>
         </SmartLink>
-        {post.mentions?.length > 0 && 
-        <div className='flex gap-2'>
-          {post.mentions.map((mention, index) => {
-            if (mention._id) return (
-              <SmartLink to={`/u/${mention.username}`} className='text-blue-500 font-semibold' key={index}>@{mention.username}</SmartLink>
-            ); else return (
-              <div key={index}>@{mention.username}</div>
-            )
-          }
-          )}
-        </div>
-        }
         {post.groups?.length > 0 && 
         <div className='flex gap-2'>
           {post.groups.map((group, index) => {
@@ -133,6 +121,18 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
               <SmartLink to={`/g/${group.name}`} className='text-blue-500 font-semibold' key={index}>&{group.name}</SmartLink>
             ); else return (
               <div key={index}>&{group.name}</div>
+            )
+          }
+          )}
+        </div>
+        }
+        {post.mentions?.length > 0 && 
+        <div className='flex gap-2'>
+          {post.mentions.map((mention, index) => {
+            if (mention._id) return (
+              <SmartLink to={`/u/${mention.username}`} className='text-blue-500 font-semibold' key={index}>@{mention.username}</SmartLink>
+            ); else return (
+              <div key={index}>@{mention.username}</div>
             )
           }
           )}
@@ -181,9 +181,10 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
                   <button key={"pin" + key} onClick={e => handlePinPost(e, post.groups[index].name, !post.pinnedGroups?.includes(key))}>
                     {post.pinnedGroups?.includes(key) ? `Unpin from group ${post.groups[index].name}` : `Pin to group ${post.groups[index].name}`}
                   </button>,
-                  <button key={"ban" + key} onClick={e => handleBan(e, post.groups[index].name, !post.bannedGroups?.includes(key))}>
-                    {post.bannedGroups?.includes(key) ? `Unban user from ${post.groups[index].name}` : `Ban user from ${post.groups[index].name}`}
-                  </button>
+                  !post.ownedGroups?.includes(key) &&
+                    <button key={"ban" + key} onClick={e => handleBan(e, post.groups[index].name, !post.bannedGroups?.includes(key))}>
+                      {post.bannedGroups?.includes(key) ? `Unban user from ${post.groups[index].name}` : `Ban user from ${post.groups[index].name}`}
+                    </button>
                 ]),
               ) ?? []),
               post.canReply && (<SmartLink to={`/post?author=${post.author.username}&rep=${post._id}`} key={"reply"}>

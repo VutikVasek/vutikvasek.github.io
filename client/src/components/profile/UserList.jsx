@@ -6,9 +6,10 @@ import SmartLink from "../basic/SmartLink";
 import More from "../basic/More";
 import ProfilePicture from "../media/ProfilePicture";
 import { useAppContext } from "@/context/AppContext";
+import Descriptor from "../info/Descriptor";
 const API = import.meta.env.VITE_API_BASE_URL;
 
-export default function UserList({url, source}) {
+export default function UserList({url, source, query, reloadState, max}) {
   const [users, setUsers] = useState([]);
   const [logged, setLogged] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -21,7 +22,7 @@ export default function UserList({url, source}) {
 const { showInfoToast } = useAppContext();
 
   const loadUsers = (reload) => {
-    fetch(url + `?page=${reload ? 1 : page}&limit=5`, {
+    fetch(url + `?page=${reload ? 1 : page}&limit=${max || 5}&${query}`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
@@ -45,11 +46,8 @@ const { showInfoToast } = useAppContext();
       loadUsers();
   }, [page]);
   useEffect(() => {
-    loadUsers();
-  }, [])
-  useEffect(() => {
     loadUsers(true);
-  }, [url])
+  }, [url, reloadState])
   
   const lastPostRef = useCallback((node) => {
     if (!hasMore) return;
@@ -61,7 +59,7 @@ const { showInfoToast } = useAppContext();
       }
     });
 
-    if (node) observer.current.observe(node);
+    if (node && max == null) observer.current.observe(node);
   }, [hasMore]);
 
   const handleMakeAdmin = async (e, userId, action) => {
@@ -79,9 +77,10 @@ const { showInfoToast } = useAppContext();
       showInfoToast(`The user has been ${action}ed`);
   }
 
-  const handleBan = async (e, userId) => {
+  const handleBan = async (e, userId, unban = false) => {
       e.preventDefault();
-      const res = await fetch(`${API}/group/${group.name}/ban/${userId}`, {
+      const pre = unban ? "un" : "";
+      const res = await fetch(`${API}/group/${group.name}/${pre}ban/${userId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -91,30 +90,37 @@ const { showInfoToast } = useAppContext();
       const data = await res.json();
       if (!res.ok) console.log(data.message);
       setUsers(prev => prev.filter(user => user.pfp !== userId ));
-      showInfoToast(`The user has been banned`);
+      showInfoToast(`The user has been ${pre}banned`);
   }
 
   return (
     <div className="w-fit">
-      <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button>
+      {query == null &&<Descriptor text="Back" offset="-1rem">
+        <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button>
+      </Descriptor>}
       <p>{users.length === 0 && ('No one yet!')}</p>
       {users.map((user, index) => (
         <div className="flex items-center gap-4" ref={index === users.length - 1 ? lastPostRef : null} key={user.pfp}>
           <SmartLink to={"/u/" + user.username} className="flex w-full items-center gap-4">
             <ProfilePicture pfp={user.pfp} className="w-10" />
-            <p className={"w-full" + (user.admin ? " font-semibold" : "")}>{user.username}</p>
+            <div>
+              <p className={"w-full" + (user.admin ? " font-semibold" : "")}>{user.username}</p>
+              {user.bio && <p className="truncate max-w-[20rem] text-gray-500">{user.bio}</p>}
+            </div>
           </SmartLink>
           <FollowButton userData={user} simple={true} logged={logged} />
           {group?.admin && !user.owner && (
             <More>
-              {!user.admin ? 
-                <button onClick={e => handleMakeAdmin(e, user.pfp, "admin")}>Make user admin</button>
-                :
-                <button onClick={e => handleMakeAdmin(e, user.pfp, "deadmin")}>Revoke users admin status</button>
-              }
-              <button onClick={e => handleBan(e, user.pfp)}>Ban user</button>
-              {(group.owner) && 
-                <button>Transfer ownership</button>}
+              {user.banned ? <button onClick={e => handleBan(e, user.pfp, true)} key="unban">Unban user</button> :
+              [
+                !user.admin ? 
+                    <button onClick={e => handleMakeAdmin(e, user.pfp, "admin")} key="admin">Make user admin</button>
+                    :
+                    <button onClick={e => handleMakeAdmin(e, user.pfp, "deadmin")} key="deadmin">Revoke users admin status</button>,
+                <button onClick={e => handleBan(e, user.pfp)} key="ban">Ban user</button>,
+                (group.owner) && 
+                    <button key="owner ">Transfer ownership</button>
+              ]}
             </More>
           )}
         </div>

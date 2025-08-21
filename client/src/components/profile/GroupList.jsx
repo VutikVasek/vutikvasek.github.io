@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import FollowButton from "./FollowButton";
 import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import SmartLink from "../basic/SmartLink";
-import More from "../basic/More";
 import ProfilePicture from "../media/ProfilePicture";
 import JoinButton from "../group/JoinButton";
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
-export default function GroupList({url, source, setGroupsParent}) {
+export default function GroupList({url, source, setGroupsParent, reloadState, query, max}) {
   const [groups, setGroups] = useState([]);
   const [logged, setLogged] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -18,7 +16,7 @@ export default function GroupList({url, source, setGroupsParent}) {
   const navigate = useNavigate();
 
   const loadGroups = (reload) => {
-    fetch(url + `?page=${reload ? 1 : page}&limit=5`, {
+    fetch(url + `?page=${reload ? 1 : page}&limit=${max || 5}&${query}`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
@@ -32,6 +30,7 @@ export default function GroupList({url, source, setGroupsParent}) {
               ));
         setLogged(data.logged);
         setHasMore(data.hasMore);
+        // setPage(prev => prev + 1);
       })
       .catch(err => console.log(err));
   }
@@ -41,11 +40,8 @@ export default function GroupList({url, source, setGroupsParent}) {
       loadGroups();
   }, [page]);
   useEffect(() => {
-    loadGroups();
-  }, [])
-  useEffect(() => {
     loadGroups(true);
-  }, [url])
+  }, [url, reloadState])
 
   useEffect(() => {
     if (setGroupsParent) setGroupsParent(groups);
@@ -61,7 +57,7 @@ export default function GroupList({url, source, setGroupsParent}) {
       }
     });
 
-    if (node) observer.current.observe(node);
+    if (node && max == null) observer.current.observe(node);
   }, [hasMore]);
 
   return (
@@ -72,7 +68,10 @@ export default function GroupList({url, source, setGroupsParent}) {
         <div className="flex items-center gap-4" ref={index === groups.length - 1 ? lastPostRef : null} key={index}>
           <SmartLink to={"/g/" + group.name} className="flex w-full items-center gap-4">
             <ProfilePicture pfp={group.gp} path="gp" className="w-10" />
-            <p className="w-full">{group.name}</p>
+            <div>
+              <p className="w-full">{group.name}</p>
+              {group.description && <p className="truncate max-w-[20rem] text-gray-500">{group.description}</p>}
+            </div>
           </SmartLink>
           {!setGroupsParent && 
           <JoinButton group={group} logged={logged} />}

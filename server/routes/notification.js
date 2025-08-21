@@ -25,11 +25,13 @@ router.get('/', verifyToken, async (req, res) => {
 
     const formated = await Promise.all(notifications.map(async notif => {
       let notification = notif.toObject();
-      notif.seen = true;
-      await notif.save();
+      if (!notif.seen) { 
+        notif.seen = true;
+        await notif.save();
+      }
       switch (notification.type) {
         case NotificationType.NEW_FOLLOWER:
-          notification.author = (await User.findById(notification.context[NotificationContext.FOLLOWER_ID]).select('username')).username;
+          notification.author = (await User.findById(notification.context[NotificationContext.FOLLOWER_ID]).select('username'))?.username ?? "<deleted>";
           notification.pfp = notification.context[NotificationContext.FOLLOWER_ID];
           break;
         case NotificationType.NEW_REPLY:
@@ -40,34 +42,36 @@ router.get('/', verifyToken, async (req, res) => {
           notification.pfp = comment?.author?._id;
           break;
         case NotificationType.NEW_POST:
-          notification.author = (await User.findById(notification.context[NotificationContext.FOLLOWING_ID]).select('username')).username;
+          notification.author = (await User.findById(notification.context[NotificationContext.FOLLOWING_ID]).select('username'))?.username ?? "<deleted>";
           notification.pfp = notification.context[NotificationContext.FOLLOWING_ID];
           break;
         case NotificationType.MENTION:
-          notification.author = (await User.findById(notification.context[NotificationContext.MENTIONER_ID]).select('username')).username;
+          notification.author = (await User.findById(notification.context[NotificationContext.MENTIONER_ID]).select('username'))?.username ?? "<deleted>";
           notification.pfp = notification.context[NotificationContext.MENTIONER_ID];
           break;
         case NotificationType.COMMENT_MENTION:
-          notification.author = (await User.findById(notification.context[NotificationContext.POST_AUTHOR_ID]).select('username')).username;
+          notification.author = (await User.findById(notification.context[NotificationContext.POST_AUTHOR_ID]).select('username'))?.username ?? "<deleted>";
           notification.pfp = notification.context[NotificationContext.POST_AUTHOR_ID];
           break;
         case NotificationType.NEW_MEMBER:
-          notification.username = (await User.findById(notification.context[NotificationContext.MEMBER_ID]).select('username')).username;
-          notification.groupname = (await Group.findById(notification.context[NotificationContext.GROUP_ID]).select('name')).name;
+          notification.username = (await User.findById(notification.context[NotificationContext.MEMBER_ID]).select('username'))?.username ?? "<deleted>";
+          notification.groupname = (await Group.findById(notification.context[NotificationContext.GROUP_ID]).select('name'))?.name ?? "<deleted>";
           notification.pfp = notification.context[NotificationContext.MEMBER_ID];
           break;
         case NotificationType.GROUP_JOIN_REQUEST:
-          notification.username = (await User.findById(notification.context[NotificationContext.MEMBER_ID]).select('username')).username;
-          notification.groupname = (await Group.findById(notification.context[NotificationContext.GROUP_ID]).select('name')).name;
+          notification.username = (await User.findById(notification.context[NotificationContext.MEMBER_ID]).select('username'))?.username ?? "<deleted>";
+          notification.groupname = (await Group.findById(notification.context[NotificationContext.GROUP_ID]).select('name'))?.name ?? "<deleted>";
           notification.pfp = notification.context[NotificationContext.MEMBER_ID];
           break;
-        case NotificationType.GROUP_JOIN_ACCEPT || NotificationType.GROUP_JOIN_DENY 
-                 || NotificationType.MADE_ADMIN || NotificationType.REVOKED_ADMIN:
+        case NotificationType.GROUP_JOIN_ACCEPT: 
+        case NotificationType.GROUP_JOIN_DENY:
+        case NotificationType.MADE_ADMIN: 
+        case NotificationType.REVOKED_ADMIN:
           notification.groupname = (await Group.findById(notification.context[NotificationContext.GROUP_ID]).select('name'))?.name ?? "<deleted>";
           notification.gp = notification.context[NotificationContext.GROUP_ID];
           break;
         case NotificationType.GROUP_POST:
-          notification.author = (await User.findById(notification.context[NotificationContext.MEMBER_ID]).select('username')).username;
+          notification.author = (await User.findById(notification.context[NotificationContext.MEMBER_ID]).select('username'))?.username ?? "<deleted>";
           const postGroups = (await Post.findById(notification.context[NotificationContext.POST_ID]).select('groups')).groups;
           const groups = await Group.find({_id: { $in: postGroups }, members: req.user._id}).select('name');
           let myGroups = [];

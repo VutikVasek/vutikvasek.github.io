@@ -145,6 +145,7 @@ router.delete('/delete', verifyToken, async (req, res) =>  {
     await Follow.deleteMany({follower: userId});
     await Follow.deleteMany({following: userId});
     await Notification.deleteMany({for: userId});
+    await Notification.deleteMany({context: userId});
     const ownedGroups = await Group.find({ owner: userId }).select('owner admins');
     ownedGroups.forEach(async group => {
       if (!group.admins || group.admins.length === 0) {

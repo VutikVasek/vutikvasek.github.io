@@ -4,7 +4,7 @@ import Descriptor from "../info/Descriptor";
 import FullScreen from "./FullScreen";
 
 export default function More({ children }) {
-  if (!children || !children.length) return "";
+  if (!children || children.length === 0) return "";
   const childrenArray = Array.isArray(children) ? children : [children];
   const [showMore, setShowMore] = useState(false);
 

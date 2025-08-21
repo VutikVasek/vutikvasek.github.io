@@ -73,15 +73,6 @@ export default function TextInput({text, setText, setDBMentions, setDBGroups, sh
 
   return (
     <div>
-      <div className="flex">
-        {mentions.map((mention, index) => (
-          <MentionSelector mention={mention} setMention={(mention) =>
-                setMentions(prev => prev.map((m, i) => i === index ? mention : m))
-              } key={index} destroy={() => setMentions(prev => prev.filter((_, i) => i !== index))}
-              onEnter={(e) => { e.preventDefault(); textareaRef.current?.focus() }} />
-        ))}
-        <button onClick={addMention}>Add new mention</button>
-      </div>
       {supportGroups && 
       <div className="flex">
         {groups.map((group, index) => (
@@ -93,6 +84,15 @@ export default function TextInput({text, setText, setDBMentions, setDBGroups, sh
         <button onClick={addGroup}>Add new group</button>
       </div>
       }
+      <div className="flex">
+        {mentions.map((mention, index) => (
+          <MentionSelector mention={mention} setMention={(mention) =>
+                setMentions(prev => prev.map((m, i) => i === index ? mention : m))
+              } key={index} destroy={() => setMentions(prev => prev.filter((_, i) => i !== index))}
+              onEnter={(e) => { e.preventDefault(); textareaRef.current?.focus() }} />
+        ))}
+        <button onClick={addMention}>Add new mention</button>
+      </div>
       <textarea
         className="border border-black resize-none"
         value={text}

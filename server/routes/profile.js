@@ -66,7 +66,7 @@ router.get('/user/:username/groups', verifyTokenNotStrict, async (req, res) => {
     if (!user) return res.status(404).json({ message: `No user with username ${username} was found`});
 
     const groups = await Group.find({ members: user._id }).skip(skip).limit(limit);
-    const total = await Group.find({ members: user._id });
+    const total = await Group.countDocuments({ members: user._id });
 
     const myGroups = groups.map(group => 
       ({
@@ -82,7 +82,7 @@ router.get('/user/:username/groups', verifyTokenNotStrict, async (req, res) => {
     res.json({
       groupList: myGroups,
       logged: !!req.user, 
-      hasMore: skip + myGroups.length < total
+      hasMore: skip + groups.length < total
     })
   } catch (err) {
     console.log(err);
