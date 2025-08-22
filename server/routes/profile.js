@@ -44,6 +44,7 @@ router.get("/posts/:username", verifyTokenNotStrict, async (req, res) => {
 })
 
 router.get("/comments/:id", verifyTokenNotStrict, async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({message: "Invalid id"});
   getComments(req, res, { author: new Types.ObjectId(req.params.id) })
 })
 

@@ -74,6 +74,7 @@ router.get('/:groupname', verifyTokenNotStrict, async (req, res) => {
 
 router.post('/:groupId/update', verifyToken, async (req, res) => {
   const groupId = req.params.groupId;
+    if (!mongoose.Types.ObjectId.isValid(groupId)) return res.status(400).json({message: "Invalid group id"});
   const { name, description, isPrivate, requestJoin, everyoneCanPost } = req.body;
   const userId = req.user._id;
   try {
@@ -207,6 +208,8 @@ const returnDeleted = () => {
 
 router.delete('/:groupId/p/:postId', verifyToken, async (req, res) => {
   const { postId, groupId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(postId)) return res.status(400).json({message: "Invalid post id"});
+  if (!mongoose.Types.ObjectId.isValid(groupId)) return res.status(400).json({message: "Invalid group id"});
   try {
     const group = await Group.findById(groupId).select('admins');
     if (!group) return res.status(404).json({ message: "We didn't find a group with the id " + groupId });
@@ -286,6 +289,7 @@ router.post('/:groupname/request', verifyToken, async (req, res) => {
 router.post('/:groupname/accept/:userId', verifyToken, async (req, res) => {
   const groupname = req.params.groupname;
   const userId = req.params.userId;
+  if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({message: "Invalid user id"});
   try {
     const group = await Group.findOne({name: groupname});
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
@@ -317,6 +321,7 @@ router.post('/:groupname/accept/:userId', verifyToken, async (req, res) => {
 router.post('/:groupname/deny/:userId', verifyToken, async (req, res) => {
   const groupname = req.params.groupname;
   const userId = req.params.userId;
+  if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({message: "Invalid user id"});
   try {
     const group = await Group.findOne({name: groupname});
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
@@ -342,6 +347,7 @@ router.post('/:groupname/deny/:userId', verifyToken, async (req, res) => {
 router.patch('/:groupname/admin/:userId', verifyToken, async (req, res) => {
   const groupname = req.params.groupname;
   const userId = req.params.userId;
+  if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({message: "Invalid user id"});
   try {
     const group = await Group.findOne({name: groupname});
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
@@ -365,6 +371,7 @@ router.patch('/:groupname/admin/:userId', verifyToken, async (req, res) => {
 router.patch('/:groupname/deadmin/:userId', verifyToken, async (req, res) => {
   const groupname = req.params.groupname;
   const userId = req.params.userId;
+  if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({message: "Invalid user id"});
   try {
     const group = await Group.findOne({name: groupname});
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
@@ -387,6 +394,7 @@ router.patch('/:groupname/deadmin/:userId', verifyToken, async (req, res) => {
 router.put('/:groupname/pin/:postId', verifyToken, async (req, res) => {
   const groupname = req.params.groupname;
   const postId = req.params.postId;
+  if (!mongoose.Types.ObjectId.isValid(postId)) return res.status(400).json({message: "Invalid post id"});
   try {
     const group = await Group.findOne({name: groupname});
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
@@ -424,12 +432,12 @@ router.put('/:groupname/unpin', verifyToken, async (req, res) => {
 router.put('/:groupname/ban/:userId', verifyToken, async (req, res) => {
   const groupname = req.params.groupname;
   const userId = req.params.userId;
+    if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ message: "Invalid user id" });
   try {
     const group = await Group.findOne({name: groupname});
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
     if (!group.admins.includes(req.user._id)) return res.status(403).json({ message: "You have to be admin to ban people" });
     if (group.owner.equals(userId)) return res.status(403).json({ message: "You cannot ban the owner" });
-    if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ message: "Invalid user id" });
 
     const user = await User.exists({ _id: userId });
     if (!user) return res.status(404).json({ message: "We didn't find that user" });
@@ -455,6 +463,7 @@ router.put('/:groupname/ban/:userId', verifyToken, async (req, res) => {
 router.put('/:groupname/unban/:userId', verifyToken, async (req, res) => {
   const groupname = req.params.groupname;
   const userId = req.params.userId;
+  if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({message: "Invalid user id"});
   try {
     const group = await Group.findOne({name: groupname});
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });
@@ -493,6 +502,7 @@ router.delete('/:groupname', verifyToken, async (req, res) => {
 
 router.patch('/:groupId/notification', verifyToken, async (req, res) => {
   const groupId = req.params.groupId;
+  if (!mongoose.Types.ObjectId.isValid(groupId)) return res.status(400).json({message: "Invalid group id"});
   const notification = parseInt(req.body.notification);
   try {
     const user = await User.findById(req.user._id).select('groupsNotifications');

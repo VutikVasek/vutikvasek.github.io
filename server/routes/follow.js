@@ -8,6 +8,7 @@ import Notification from '../models/Notification.js';
 const router = express.Router();
 
 router.post('/', verifyToken, async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.body.following)) return res.status(400).json({message: "Invalid following id"});
   const user  = await User.findById(req.body.following).select('notifications _id');
   if (!user) return res.status(404).json({ message: "Trying to follow non-existent user"});
   if (user._id == req.user._id) return res.status(400).json({ message: "You cannot follow yourself" });
@@ -30,6 +31,7 @@ router.post('/', verifyToken, async (req, res) => {
 })
 
 router.delete('/delete', verifyToken, async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.body.following)) return res.status(400).json({message: "Invalid following id"});
   try {
     await Follow.findOneAndDelete({ follower: req.user._id, following: req.body.following });
     try {
@@ -44,6 +46,7 @@ router.delete('/delete', verifyToken, async (req, res) => {
 });
 
 router.patch('/change', verifyToken, async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.body.following)) return res.status(400).json({message: "Invalid following id"});
   try {
     await Follow.findOneAndUpdate({ follower: req.user._id, following: req.body.following }, { notify: req.body.notify });
     res.status(201).json({ message: "Notification changed" });

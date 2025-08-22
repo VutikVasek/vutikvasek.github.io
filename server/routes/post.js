@@ -133,6 +133,7 @@ const filterGroup = async group => {
 // Get post
 router.get('/:post', verifyTokenNotStrict, async (req, res) => {
   const postId = req.params.post;
+  if (!mongoose.Types.ObjectId.isValid(postId)) return res.status(400).json({message: "Invalid post id"});
 
   const unpost = await Post.findById(postId);
   if (!unpost) return res.status(404).json({message: "Post not found"});
@@ -166,6 +167,7 @@ router.patch('/:post/like', verifyToken, async (req, res) => {
 // Delete post
 router.delete('/:post', verifyToken, async (req, res) => {
   const postId = req.params.post;
+  if (!mongoose.Types.ObjectId.isValid(postId)) return res.status(400).json({message: "Invalid post id"});
   try {
     const post = await Post.findByIdAndDelete(postId);
     const path = `media/image/${postId}`;
@@ -188,7 +190,7 @@ router.delete('/:post', verifyToken, async (req, res) => {
 
 // Get groups
 router.get('/:id/groups', async (req, res) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: "Not valid post id" })
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: "Invalid post id" })
   const post = await Post.findById(req.params.id).select('groups');
   const groups = await Group.find({ _id: { $in: post.groups } }).select('name');
   res.json(groups.map(group => group.name));
@@ -196,6 +198,7 @@ router.get('/:id/groups', async (req, res) => {
 
 // Get comments
 router.get('/:id/comments', verifyTokenNotStrict, async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({message: "Invalid post id"});
   getComments(req, res, { parent: new Types.ObjectId(req.params.id) });
 })
 

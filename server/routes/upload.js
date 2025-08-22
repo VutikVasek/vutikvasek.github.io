@@ -59,6 +59,7 @@ router.post('/image', verifyToken, upload.single('image'), async (req, res) => {
 
 router.post('/gp/:groupId', verifyToken, upload.single('gp'), async (req, res) => {
   const groupId = req.params.groupId;
+    if (!mongoose.Types.ObjectId.isValid(groupId)) return res.status(400).json({message: "Invalid group id"});
   try {
     const group = await Group.findById(groupId).select('admins');
     if (!group) return res.status(404).json({ message: "We didn't find that group" });

@@ -15,6 +15,7 @@ const router = express.Router();
 router.post('/', verifyToken, async (req, res) => {
   try {
     const parentId = req.body.parent;
+    if (!mongoose.Types.ObjectId.isValid(parentId)) return res.status(400).json({message: "Invalid parent"});
 
     const user = await User.findById(req.user._id);
     user.commentTimes = getTimes(user.commentTimes);
@@ -85,6 +86,7 @@ const getTimes = (times) => {
 // Like comment
 router.patch('/:comment/like', verifyToken, async (req, res) => {
   const commentId = req.params.comment;
+  if (!mongoose.Types.ObjectId.isValid(commentId)) return res.status(400).json({message: "Invalid comment id"});
   const comment = await Comment.findById(commentId);
   const userId = req.user._id;
 
@@ -102,6 +104,7 @@ router.patch('/:comment/like', verifyToken, async (req, res) => {
 // Delete comment
 router.delete('/:comment', verifyToken, async (req, res) => {
   const commentId = req.params.comment;
+  if (!mongoose.Types.ObjectId.isValid(commentId)) return res.status(400).json({message: "Invalid comment id"});
   try {
     const replies = await Comment.exists({ parent: commentId })
     let comment;
@@ -132,6 +135,7 @@ router.delete('/:comment', verifyToken, async (req, res) => {
 router.get('/:comment/tree', async (req, res) => {
   try {
     const commentId = req.params.comment;
+    if (!mongoose.Types.ObjectId.isValid(commentId)) return res.status(400).json({message: "Invalid comment id"});
     const comment = await Comment.findById(commentId).select('parent');
     if (!comment) return res.json({pinnedTree: []});
     const parent = comment.parent;

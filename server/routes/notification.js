@@ -99,6 +99,7 @@ router.get('/', verifyToken, async (req, res) => {
 
 router.delete('/:id', verifyToken, async (req, res) => {
   const notificationId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(notificationId)) return res.status(400).json({message: "Invalid notification id"});
   try {
     await Notification.findByIdAndDelete(notificationId);
     res.json({ message: "Notification cleared"});
