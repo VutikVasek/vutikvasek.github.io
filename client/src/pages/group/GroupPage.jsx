@@ -64,7 +64,7 @@ export default function GroupPage({}) {
         <p className="max-w-max overflow-x-clip">{group.description}</p>
         {group.owner && <SmartLink to={`/g/${group.name}/settings`}>Settings</SmartLink>}
         <SmartLink to={`/g/${group.name}/members`}>{group.members} member{group.members > 1 && "s"}</SmartLink>
-        {group.bans && <SmartLink to={`/g/${group.name}/banned`}>{group.bans} banned</SmartLink>}
+        {group.bans > 0 && <SmartLink to={`/g/${group.name}/banned`}>{group.bans} banned</SmartLink>}
         {!deleted && (<>
           <p>{group._id ? "Since" : ""} {date}</p>
           <JoinButton group={group} logged={group.logged} />

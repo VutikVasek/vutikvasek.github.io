@@ -46,7 +46,7 @@ export default function Profile() {
       <div className="flex flex-col">
         <ProfilePicture pfp={userData.pfp} className="w-36" />
         <p>{userData.username}</p>
-        <p>{userData.bio}</p>
+        <p className="whitespace-pre-wrap">{userData.bio}</p>
         {!deleted && (<>
           <SmartLink to={`/u/${username}/followers`}>Followers: {userData.followers}</SmartLink>
           <SmartLink to={`/u/${username}/following`}>Following: {userData.following}</SmartLink>

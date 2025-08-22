@@ -6,7 +6,7 @@ import ProfilePicture from "../media/ProfilePicture";
 import JoinButton from "../group/JoinButton";
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
-export default function GroupList({url, source, setGroupsParent, reloadState, query, max}) {
+export default function GroupList({url, source, setGroupsParent, reloadState, query, max, horizontal = false}) {
   const [groups, setGroups] = useState([]);
   const [logged, setLogged] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -64,19 +64,21 @@ export default function GroupList({url, source, setGroupsParent, reloadState, qu
     <div className="w-fit">
       {source && <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button> }
       <p>{groups?.length === 0 && ('No one yet!')}</p>
-      {groups?.map((group, index) => (
-        <div className="flex items-center gap-4" ref={index === groups.length - 1 ? lastPostRef : null} key={index}>
-          <SmartLink to={"/g/" + group.name} className="flex w-full items-center gap-4">
-            <ProfilePicture pfp={group.gp} path="gp" className="w-10" />
-            <div>
-              <p className="w-full">{group.name}</p>
-              {group.description && <p className="truncate max-w-[20rem] text-gray-500">{group.description}</p>}
-            </div>
-          </SmartLink>
-          {!setGroupsParent && 
-          <JoinButton group={group} logged={logged} />}
-        </div>
-      ))}
+      <div className={horizontal ? "flex gap-4" : ""}>
+        {groups?.map((group, index) => (
+          <div className="flex items-center gap-4 text-center" ref={index === groups.length - 1 ? lastPostRef : null} key={index}>
+            <SmartLink to={"/g/" + group.name} className={"flex w-full items-center gap-4 " + (horizontal ? "flex-col items-center" : "")}>
+              <ProfilePicture pfp={group.gp} path="gp" className={"w-10" + (horizontal ? " m-auto" : "")} />
+              <div className={horizontal ? "max-w-20" : ""}>
+                <p className={"w-full" + (horizontal ? " truncate" : "")}>{group.name}</p>
+                {group.description && <p className="truncate max-w-[20rem] text-gray-500">{group.description}</p>}
+              </div>
+            </SmartLink>
+            {!setGroupsParent && 
+            <JoinButton group={group} logged={logged} />}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
