@@ -35,7 +35,7 @@ export default function TextInput({text, setText, setDBMentions, setDBGroups, sh
 
   useEffect(() => {
     if (replyingTo && (reset === null || reset === undefined)) 
-      fetch(`${API}/post/${replyingTo}/groups`)
+      fetch(`${API}/post/${encodeURIComponent(replyingTo)}/groups`)
         .then(res => res.json())
         .then(data => setGroups(data.map(groupname => ({query: groupname, locked: true}))))
         .catch(err => console.log(err));

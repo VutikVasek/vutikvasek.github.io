@@ -12,7 +12,7 @@ export default function Notifications() {
   const [page, setPage] = useState(1);
 
   const loadNotifications = async (reload) => {
-    const res = await fetch(`${API}/notification/?page=${reload ? 1 : page}&limit=6`, {
+    const res = await fetch(`${API}/notification/?page=${reload ? 1 : encodeURIComponent(page)}&limit=6`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',

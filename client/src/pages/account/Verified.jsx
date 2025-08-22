@@ -1,3 +1,4 @@
+import SmartLink from "@/components/basic/SmartLink";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -17,7 +18,7 @@ export default function Verified() {
       const token = queryParams.get('token');
       const email = queryParams.get('email');
 
-      const res = await fetch(`${API}/auth/verify?token=${token}${email ? (`&email=${email}`) : (``)}`);
+      const res = await fetch(`${API}/auth/verify?token=${token}${email ? (`&email=${encodeURIComponent(email)}`) : (``)}`);
 
       const data = await res.json();
       setVerState(data.message);
@@ -34,7 +35,7 @@ export default function Verified() {
       <p>{verState}</p>
       {showLogin ? (
         <>
-          <button onClick={() => navigate("/login")}>You can now Log in</button>
+          <SmartLink to="/login">You can now Log in</SmartLink>
         </>
       ) : (<></>)}
     </>

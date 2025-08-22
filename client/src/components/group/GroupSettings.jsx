@@ -16,7 +16,7 @@ export default function GroupSettings({ group }) {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
     
-    const res = await fetch(`${API}/group${group ? `/${group._id}/update` : ""}`, {
+    const res = await fetch(`${API}/group${group ? `/${encodeURIComponent(group._id)}/update` : ""}`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ export default function GroupSettings({ group }) {
       const imageData = new FormData();
       imageData.append('gp', data.gp);
 
-      const res = await fetch(`${API}/upload/gp/${resData.group._id}`, {
+      const res = await fetch(`${API}/upload/gp/${encodeURIComponent(resData.group._id)}`, {
         method: 'POST',
         body: imageData,
         headers: { 

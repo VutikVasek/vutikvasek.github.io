@@ -35,7 +35,7 @@ export default function PostFull() {
   if (postId == "<deleted>") return "This post was deleted";
 
   const loadPost = async () => {
-    const res = await fetch(`${API}/post/${postId}`, {
+    const res = await fetch(`${API}/post/${encodeURIComponent(postId)}`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export default function PostFull() {
   }
 
   const loadPinnedTree = async () => {
-    await fetch(`${API}/comment/${pinned}/tree`).then((res) => res.json()).then((data) => {
+    await fetch(`${API}/comment/${encodeURIComponent(pinned)}/tree`).then((res) => res.json()).then((data) => {
       setPinnedTree(data.pinnedTree)
     }).catch(err => console.log(err));
   }

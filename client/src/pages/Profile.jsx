@@ -21,7 +21,7 @@ export default function Profile() {
       setDeleted(true);
       return;
     }
-    fetch(`${API}/profile/user/${username}`, {
+    fetch(`${API}/profile/user/${encodeURIComponent(username)}`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
@@ -48,9 +48,9 @@ export default function Profile() {
         <p>{userData.username}</p>
         <p className="whitespace-pre-wrap">{userData.bio}</p>
         {!deleted && (<>
-          <SmartLink to={`/u/${username}/followers`}>Followers: {userData.followers}</SmartLink>
-          <SmartLink to={`/u/${username}/following`}>Following: {userData.following}</SmartLink>
-          <SmartLink to={`/u/${username}/groups`}>Groups: {userData.groups}</SmartLink>
+          <SmartLink to={`/u/${encodeURIComponent(username)}/followers`}>Followers: {userData.followers}</SmartLink>
+          <SmartLink to={`/u/${encodeURIComponent(username)}/following`}>Following: {userData.following}</SmartLink>
+          <SmartLink to={`/u/${encodeURIComponent(username)}/groups`}>Groups: {userData.groups}</SmartLink>
           <p>{userData.pfp ? "Since" : ""} {date}</p>
           <div><FollowButton userData={userData} /></div>
         </>)}
@@ -59,23 +59,23 @@ export default function Profile() {
       {!deleted && (
         <>
           {(show == "followers" || show == "following") && (
-            <UserList url={`${API}/profile/user/${username}/${show}`} source={`/u/${username}`} />
+            <UserList url={`${API}/profile/user/${encodeURIComponent(username)}/${encodeURIComponent(show)}`} source={`/u/${encodeURIComponent(username)}`} />
           )}
           {show == "groups" && (
             <>
             {userData.itsme && 
               <SmartLink to="/create-group">Create new group</SmartLink>
             }
-            <GroupList url={`${API}/profile/user/${username}/${show}`} source={`/u/${username}`} />
+            <GroupList url={`${API}/profile/user/${encodeURIComponent(username)}/${encodeURIComponent(show)}`} source={`/u/${encodeURIComponent(username)}`} />
             </>
           )}
           {(!show || show == "replies") &&
           <div className='flex gap-4'>
-            <SmartLink to={"/u/" + username} className={!show ? 'font-semibold' : ''}>Posts</SmartLink>
-            <SmartLink to={`/u/${username}/replies`} className={show=="replies" ? 'font-semibold' : ''}>Replies</SmartLink>
+            <SmartLink to={"/u/" + encodeURIComponent(username)} className={!show ? 'font-semibold' : ''}>Posts</SmartLink>
+            <SmartLink to={`/u/${encodeURIComponent(username)}/replies`} className={show=="replies" ? 'font-semibold' : ''}>Replies</SmartLink>
           </div>}
           {!show && (
-            <Feed url={`${API}/profile/posts/${username}`} />
+            <Feed url={`${API}/profile/posts/${encodeURIComponent(username)}`} />
           )}
           {show == "replies" && userData.pfp &&
             <Replies userData={userData} /> }

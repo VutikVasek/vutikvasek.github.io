@@ -11,14 +11,15 @@ export default function CommentThread({ parentId, userId, comments, setComments,
 
   const loadComments = async (reload) => {
     if (pinned === "wait") return;
-    const url = API + (userId ? `/profile/comments/${userId}` : (query != null ? `/search/for/replies` : `/post/${parentId}/comments`)) + 
-      `?page=${reload ? 1 : page}`+
+    const url = API + (userId ? `/profile/comments/${encodeURIComponent(userId)}` : 
+      (query != null ? `/search/for/replies` : `/post/${encodeURIComponent(parentId)}/comments`)) + 
+      `?page=${reload ? 1 : encodeURIComponent(page)}`+
        `&limit=3`+
-       `${sort && "&sort=" + sort}`+
-       `${timeframe && "&time=" + timeframe}`+
-       `&link=${linkParent}`+
-       `${pinned ? `&pinned=${pinned}` : ""}`+
-       `${(query != null) ? `&${query}` : ""}`;
+       `${sort && "&sort=" + encodeURIComponent(sort)}`+
+       `${timeframe && "&time=" + encodeURIComponent(timeframe)}`+
+       `&link=${encodeURIComponent(linkParent)}`+
+       `${pinned ? `&pinned=${encodeURIComponent(pinned)}` : ""}`+
+       `${(query != null) ? `&${encodeURIComponent(query)}` : ""}`;
     const res = await fetch(url, {
       method: 'GET',
       headers: { 

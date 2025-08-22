@@ -62,20 +62,20 @@ export default function GroupPage({}) {
         <ProfilePicture path="gp" pfp={group._id} className="w-36" />
         <p>{group.name}</p>
         <p className="max-w-max overflow-x-clip">{group.description}</p>
-        {group.owner && <SmartLink to={`/g/${group.name}/settings`}>Settings</SmartLink>}
-        <SmartLink to={`/g/${group.name}/members`}>{group.members} member{group.members > 1 && "s"}</SmartLink>
-        {group.bans > 0 && <SmartLink to={`/g/${group.name}/banned`}>{group.bans} banned</SmartLink>}
+        {group.owner && <SmartLink to={`/g/${encodeURIComponent(group.name)}/settings`}>Settings</SmartLink>}
+        <SmartLink to={`/g/${encodeURIComponent(group.name)}/members`}>{group.members} member{group.members > 1 && "s"}</SmartLink>
+        {group.bans > 0 && <SmartLink to={`/g/${encodeURIComponent(group.name)}/banned`}>{group.bans} banned</SmartLink>}
         {!deleted && (<>
           <p>{group._id ? "Since" : ""} {date}</p>
           <JoinButton group={group} logged={group.logged} />
         </>)}
       </div>
       {group.canUserPost &&
-      <SmartLink to={`/post?g=${groupname}`}>Post on group</SmartLink>
+      <SmartLink to={`/post?g=${encodeURIComponent(groupname)}`}>Post on group</SmartLink>
       }
       <div>
         {(show === "members" || show === "banned") && (
-          <UserList url={`${API}/group/${groupname}/${show}`} source={`/g/${groupname}`} />
+          <UserList url={`${API}/group/${encodeURIComponent(groupname)}/${encodeURIComponent(show)}`} source={`/g/${encodeURIComponent(groupname)}`} />
         )}
         {!show && (
           group.private && !group.member ? 
@@ -84,7 +84,7 @@ export default function GroupPage({}) {
               {pinnedPost && 
               <Post post={pinnedPost} cut={true} pinned />
               }
-              <Feed url={`${API}/group/${groupname}/posts`} />
+              <Feed url={`${API}/group/${encodeURIComponent(groupname)}/posts`} />
             </>
         )}
       </div>

@@ -33,7 +33,7 @@ export default function Sorter({url, sortBy, time, defaultSort = SortType.newest
     else delete query.time;
 
     const entries = Object.entries(query);
-    navigate(entries.length ? `${url}?${entries.map(pair => pair[0] + "=" + pair[1]).join('&')}` : url);
+    navigate(entries.length ? `${url}?${entries.map(pair => pair[0] + "=" + encodeURIComponent(pair[1])).join('&')}` : url);
   }
   
   const getTimeframe = (frame) => {

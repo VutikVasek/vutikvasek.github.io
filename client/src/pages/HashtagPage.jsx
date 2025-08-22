@@ -1,4 +1,3 @@
-import SmartLink from '@/components/basic/SmartLink';
 import Feed from '../components/feed/Feed';
 import { useParams } from 'react-router-dom';
 
@@ -11,7 +10,7 @@ export default function HashtagPage() {
     <>
       <h1 className="text-2xl p-4">#{hashtag}</h1>
       <div className='flex justify-center'>
-        <Feed url={`${API}/feed/hash/${hashtag}`} reloadState={hashtag} />
+        <Feed url={`${API}/feed/hash/${encodeURIComponent(hashtag)}`} reloadState={hashtag} />
       </div>
     </>
   );

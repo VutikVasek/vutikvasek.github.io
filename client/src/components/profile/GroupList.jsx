@@ -16,7 +16,7 @@ export default function GroupList({url, source, setGroupsParent, reloadState, qu
   const navigate = useNavigate();
 
   const loadGroups = (reload) => {
-    fetch(url + `?page=${reload ? 1 : page}&limit=${max || 5}&${query}`, {
+    fetch(url + `?page=${reload ? 1 : encodeURIComponent(page)}&limit=${encodeURIComponent(max) || 5}&${query}`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ export default function GroupList({url, source, setGroupsParent, reloadState, qu
       <div className={horizontal ? "flex gap-4" : ""}>
         {groups?.map((group, index) => (
           <div className="flex items-center gap-4 text-center" ref={index === groups.length - 1 ? lastPostRef : null} key={index}>
-            <SmartLink to={"/g/" + group.name} className={"flex w-full items-center gap-4 " + (horizontal ? "flex-col items-center" : "")}>
+            <SmartLink to={"/g/" + encodeURIComponent(group.name)} className={"flex w-full items-center gap-4 " + (horizontal ? "flex-col items-center" : "")}>
               <ProfilePicture pfp={group.gp} path="gp" className={"w-10" + (horizontal ? " m-auto" : "")} />
               <div className={horizontal ? "max-w-20" : ""}>
                 <p className={"w-full" + (horizontal ? " truncate" : "")}>{group.name}</p>

@@ -35,7 +35,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
   const { showErrorToast } = useAppContext();
   
   const handleLike = async () => {
-    const res = await fetch(`${API}/comment/${comment._id}/like`, {
+    const res = await fetch(`${API}/comment/${encodeURIComponent(comment._id)}/like`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
@@ -87,21 +87,21 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
 
   return (
     <div className="whitespace-pre-wrap">
-      { link && (<SmartLink to={`/p/${comment.parent._id}?sort=newest&c=${comment._id}`} className="p-4">
+      { link && (<SmartLink to={`/p/${encodeURIComponent(comment.parent._id)}?sort=newest&c=${encodeURIComponent(comment._id)}`} className="p-4">
           Replying {comment.parent.author.username == "<deleted post>" ? "on " : "to "} 
             {comment.parent.directParent && `${comment.parent.directParent.author?.username || "<deleted>"} on a post from `}
             <div className="inline font-semibold">{comment.parent.author.username}:</div>
         </SmartLink>)}
       <div className={"w-full p-4 m-2 shadow flex" + ((pinned && pinnedTree?.length === 0) ? "  bg-cyan-200" : "")}>
         <div className="flex gap-2">
-          <SmartLink to={`/u/${comment.author.username}`} className='flex items-start w-fit min-w-10'>
-            <img src={`${MEDIA}/pfp/${comment.author.pfp}.jpeg`} alt="pfp" className='rounded-full w-10 h-10'
+          <SmartLink to={`/u/${encodeURIComponent(comment.author.username)}`} className='flex items-start w-fit min-w-10'>
+            <img src={`${MEDIA}/pfp/${encodeURIComponent(comment.author.pfp)}.jpeg`} alt="pfp" className='rounded-full w-10 h-10'
               onError={(e) => {e.target.onError = null;e.target.src=`${MEDIA}/pfp/default.jpeg`}}
               onDragStart={e => e.preventDefault()} />
           </SmartLink>
           <div>
             <div className="flex items-center gap-2">
-              <SmartLink to={`/u/${comment.author.username}`} className="text-md font-semibold">{comment.author.username}</SmartLink>
+              <SmartLink to={`/u/${encodeURIComponent(comment.author.username)}`} className="text-md font-semibold">{comment.author.username}</SmartLink>
               <p className='text-xs text-gray-600'>{formatRelativeTime(comment.createdAt)}</p>
             </div>
 
@@ -109,7 +109,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
             <div className='flex gap-2'>
               {comment.mentions.map((mention, index) => {
                 if (mention._id) return (
-                  <SmartLink to={`/u/${mention.username}`} className='text-blue-500 font-semibold' key={index}>@{mention.username}</SmartLink>
+                  <SmartLink to={`/u/${encodeURIComponent(mention.username)}`} className='text-blue-500 font-semibold' key={index}>@{mention.username}</SmartLink>
                 ); else return (
                   <div key={index}>@{mention.username}</div>
                 )
@@ -119,7 +119,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
             }
             <ExpandableText text={comment.text} />
 
-            <Gallery images={[`${MEDIA}/image/${comment._id}0.webp`]} />
+            <Gallery images={[`${MEDIA}/image/${encodeURIComponent(comment._id)}0.webp`]} />
             <div className='flex gap-6 items-center mt-2'>
               <Descriptor text={liked ? "Unlike" : "Like"}>
                 <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 
@@ -142,10 +142,10 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
                 </div>
               </Descriptor>
               {(postId || comment.parent._id) && (
-                <ShareButton url={`${BASE}/p/${postId || comment.parent._id}?sort=newest&c=${comment._id}`} />
+                <ShareButton url={`${BASE}/p/${encodeURIComponent(postId || comment.parent._id)}?sort=newest&c=${encodeURIComponent(comment._id)}`} />
               )}
               <More>
-                {comment.itsme && <DeleteButton url={`${API}/comment/${comment._id}`} word="comment" />}
+                {comment.itsme && <DeleteButton url={`${API}/comment/${encodeURIComponent(comment._id)}`} word="comment" />}
               </More>
             </div>
           </div>

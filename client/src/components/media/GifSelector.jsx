@@ -3,6 +3,7 @@ import { useState } from "react";
 import { PiGifFill } from "react-icons/pi";
 import FullScreen from "../basic/FullScreen";
 import { useFloating, flip, shift, offset } from '@floating-ui/react-dom';
+const TENOR_API_KEY = import.meta.env.TENOR_API_KEY;
 
 export default function GifSelector({ onSelect, ...params }) {
   const [showPicker, setShowPicker] = useState(false);
@@ -23,7 +24,7 @@ export default function GifSelector({ onSelect, ...params }) {
           <>
             <FullScreen onClick={() => setShowPicker(false)} />
             <div ref={refs.setFloating} style={floatingStyles} className="z-50">
-              <GifPicker tenorApiKey='AIzaSyABsUMduz73uFxUg1nY-p2NF8e3_2WozD0' onGifClick={onSelect} />
+              <GifPicker tenorApiKey={TENOR_API_KEY} onGifClick={onSelect} />
             </div>
           </>
         )}

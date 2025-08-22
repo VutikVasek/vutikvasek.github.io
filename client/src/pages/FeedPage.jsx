@@ -22,13 +22,13 @@ export default function FeedPage() {
       {subpage === "groups" &&
         <div className='flex items-center justify-between w-full overflow-clip'>
           <div className='overflow-clip w-[calc(100%-5rem)]'>
-            <GroupList url={`${API}/profile/user/${username}/groups`} horizontal={true} />
+            <GroupList url={`${API}/profile/user/${encodeURIComponent(username)}/groups`} horizontal={true} />
           </div>
-          <SmartLink to={`/u/${username}/groups`} className="px-8">All</SmartLink>
+          <SmartLink to={`/u/${encodeURIComponent(username)}/groups`} className="px-8">All</SmartLink>
         </div>
       }
       <div className='flex justify-center'>
-        <Feed url={`${API}/feed${subpage ? ("/" + subpage) : ''}`} reloadState={subpage} />
+        <Feed url={`${API}/feed${subpage ? ("/" + encodeURIComponent(subpage)) : ''}`} reloadState={subpage} />
       </div>
     </>
   );

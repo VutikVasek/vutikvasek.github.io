@@ -18,7 +18,7 @@ export default function Feed({url, reloadState, query, showReplies = false, defa
   
   const loadPosts = async (reload) => {
     // console.log(url + `?page=${reload ? 1 : page}&limit=4&sort=${sort}&time=${timeframe}&${query}`);
-    const res = await fetch(url + `?page=${reload ? 1 : page}&limit=4&sort=${sort}&time=${timeframe}&${query}`, {
+    const res = await fetch(url + `?page=${reload ? 1 : encodeURIComponent(page)}&limit=4&sort=${encodeURIComponent(sort)}&time=${encodeURIComponent(timeframe)}&${query}`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',

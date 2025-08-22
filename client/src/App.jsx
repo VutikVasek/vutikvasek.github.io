@@ -35,7 +35,7 @@ gsap.registerPlugin(useGSAP);
 
 function App() {
   const { isLoggedIn, user } = useAuth();
-  const profile = `/u/${user}`;
+  const profile = `/u/${encodeURIComponent(user)}`;
   const [toastText, setToastText] = useState('');
   const [toastColor, setToastColor] = useState('');
   const [toastReshow, setToastReshow] = useState(false);

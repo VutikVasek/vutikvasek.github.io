@@ -10,7 +10,7 @@ export default function GroupSettingsPage() {
 
   useEffect(() => {
     if (!groupname) return;
-    fetch(`${API}/group/${groupname}`)
+    fetch(`${API}/group/${encodeURIComponent(groupname)}`)
     .then(res => res.json())
     .then(data => setGroup(data))
     .catch(err => showErrorToast(err));
@@ -22,7 +22,7 @@ export default function GroupSettingsPage() {
   return (
     <>
     <GroupSettings group={group} />
-    <DeleteButton word="group" url={`${API}/group/${groupname}`} />
+    <DeleteButton word="group" url={`${API}/group/${encodeURIComponent(groupname)}`} />
     </>
   )
 }

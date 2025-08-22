@@ -36,7 +36,7 @@ export default function Selector({selected, setSelected, search, symbol = "@", d
     const timeout = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${API}/search/${search}?query=${query}`, {
+        const res = await fetch(`${API}/search/${encodeURIComponent(search)}?query=${encodeURIComponent(query)}`, {
           method: 'GET',
           headers: { 
             'Content-Type': 'application/json',

@@ -18,7 +18,7 @@ export default function PfpUpload({type = "pfp"}) {
     const formData = new FormData();
     formData.append(type, file);
 
-    const res = await fetch(`${API}/upload/${type}`, {
+    const res = await fetch(`${API}/upload/${encodeURIComponent(type)}`, {
       method: 'POST',
       body: formData,
       headers: {

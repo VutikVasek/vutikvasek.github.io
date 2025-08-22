@@ -30,7 +30,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
   const loadReplyingTo = async () => {
     if (!post.replyingTo) return
     
-    const res = await fetch(`${API}/post/${post.replyingTo}`, {
+    const res = await fetch(`${API}/post/${encodeURIComponent(post.replyingTo)}`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
 
   const handleLike = async (e) => {
     e.stopPropagation();
-    const res = await fetch(`${API}/post/${post._id}/like`, {
+    const res = await fetch(`${API}/post/${encodeURIComponent(post._id)}/like`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
   const handlePinPost = async (e, group, pin) => {
     e.preventDefault();
     const res = await fetch(
-        `${API}/group/${group}/${pin ? `pin/${post._id}` : "unpin"}`, {
+        `${API}/group/${encodeURIComponent(group)}/${pin ? `pin/${encodeURIComponent(post._id)}` : "unpin"}`, {
       method: 'PUT',
       headers: { 
         'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
   const handleBan = async (e, group, ban) => {
     e.preventDefault();
     const res = await fetch(
-        `${API}/group/${group}/${ban ? `ban` : "unban"}/${post.author.pfp}`, {
+        `${API}/group/${encodeURIComponent(group)}/${ban ? `ban` : "unban"}/${encodeURIComponent(post.author.pfp)}`, {
       method: 'PUT',
       headers: { 
         'Content-Type': 'application/json',
@@ -100,14 +100,14 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
 
   return (
     <div className={`w-[calc(100%-0.5rem)] p-4 m-2 shadow whitespace-pre-wrap flex ${className}`} ref={ref} {...params}>
-      <SmartLink as={shouldLink ? "span" : "div"} className='gap-2 flex flex-col w-full' to={`/p/${post._id}`}>
+      <SmartLink as={shouldLink ? "span" : "div"} className='gap-2 flex flex-col w-full' to={`/p/${encodeURIComponent(post._id)}`}>
         {pinned && (
           <div className='flex items-center'>
             <GrFormPin className='text-xl' />
             <p> pinned post</p>
           </div>
         )}
-        <SmartLink to={`/u/${post.author.username}`} className='flex items-center gap-2 w-fit'>
+        <SmartLink to={`/u/${encodeURIComponent(post.author.username)}`} className='flex items-center gap-2 w-fit'>
           <ProfilePicture pfp={post.author.pfp} className="w-10" />
           <div>
             <p className="text-md font-semibold">{post.author.username}</p>
@@ -118,7 +118,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
         <div className='flex gap-2'>
           {post.groups.map((group, index) => {
             if (group._id) return (
-              <SmartLink to={`/g/${group.name}`} className='text-blue-500 font-semibold' key={index}>&{group.name}</SmartLink>
+              <SmartLink to={`/g/${encodeURIComponent(group.name)}`} className='text-blue-500 font-semibold' key={index}>&{group.name}</SmartLink>
             ); else return (
               <div key={index}>&{group.name}</div>
             )
@@ -130,7 +130,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
         <div className='flex gap-2'>
           {post.mentions.map((mention, index) => {
             if (mention._id) return (
-              <SmartLink to={`/u/${mention.username}`} className='text-blue-500 font-semibold' key={index}>@{mention.username}</SmartLink>
+              <SmartLink to={`/u/${encodeURIComponent(mention.username)}`} className='text-blue-500 font-semibold' key={index}>@{mention.username}</SmartLink>
             ); else return (
               <div key={index}>@{mention.username}</div>
             )
@@ -139,7 +139,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
         </div>
         }
         {shouldLink ? (
-          <SmartLink to={`/p/${post._id}`} as="span">
+          <SmartLink to={`/p/${encodeURIComponent(post._id)}`} as="span">
             <ExpandableText text={post.text} />
           </SmartLink>
         ):(
@@ -147,7 +147,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
             <ExpandableText text={post.text} maxHeight={Infinity} />
           </div>
         )}
-        <Gallery images={[0, 1].map((num) => `${MEDIA}/image/${post._id + num}.webp`)} link={`/p/${post._id}`} />
+        <Gallery images={[0, 1].map((num) => `${MEDIA}/image/${encodeURIComponent(post._id + num)}.webp`)} link={`/p/${encodeURIComponent(post._id)}`} />
         {replyingToPost && 
           <div className='m-2 w-full'>
             <Post post={replyingToPost} bar={false} />
@@ -164,19 +164,19 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
           </Descriptor>
           {shouldLink ? (
             <Descriptor text="Comment">
-              <SmartLink to={`/p/${post._id}?focus=true`} className='flex gap-2 items-center'>
+              <SmartLink to={`/p/${encodeURIComponent(post._id)}?focus=true`} className='flex gap-2 items-center'>
                 <FaRegComments className='text-gray-500 hover:text-black' />
                 <p className='text-black'>{post.comments}</p>
               </SmartLink>
             </Descriptor>
           ):("")}
-          <ShareButton url={`${BASE}/p/${post._id}`} />
+          <ShareButton url={`${BASE}/p/${encodeURIComponent(post._id)}`} />
           <More>
             {[
-              post.itsme && <DeleteButton url={`${API}/post/${post._id}`} word="post" key={"delete post"} />,
+              post.itsme && <DeleteButton url={`${API}/post/${encodeURIComponent(post._id)}`} word="post" key={"delete post"} />,
               ...(post.adminGroups?.flatMap((index, key) => (
                 [
-                  <DeleteButton url={`${API}/group/${post.groups[index]._id}/p/${post._id}`} key={"delete" + key} 
+                  <DeleteButton url={`${API}/group/${encodeURIComponent(post.groups[index]._id)}/p/${encodeURIComponent(post._id)}`} key={"delete" + key} 
                     deleteWord='Remove' word={`post from group ${post.groups[index].name}`} />,
                   <button key={"pin" + key} onClick={e => handlePinPost(e, post.groups[index].name, !post.pinnedGroups?.includes(key))}>
                     {post.pinnedGroups?.includes(key) ? `Unpin from group ${post.groups[index].name}` : `Pin to group ${post.groups[index].name}`}
@@ -187,7 +187,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
                     </button>
                 ]),
               ) ?? []),
-              post.canReply && (<SmartLink to={`/post?author=${post.author.username}&rep=${post._id}`} key={"reply"}>
+              post.canReply && (<SmartLink to={`/post?author=${encodeURIComponent(post.author.username)}&rep=${encodeURIComponent(post._id)}`} key={"reply"}>
                   Reply with a post
                 </SmartLink>),
             ].filter(val => !!val)}

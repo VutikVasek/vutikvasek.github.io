@@ -45,7 +45,7 @@ export default function NotificationSettings() {
   }, [groups])
 
   const updateGroupNotification = async (groupId, notification) => {
-    const res = await fetch(`${API}/group/${groupId}/notification`, {
+    const res = await fetch(`${API}/group/${encodeURIComponent(groupId)}/notification`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export default function NotificationSettings() {
         <div>
           Groups:
           <div className="flex">
-            <GroupList url={`${API}/profile/user/${user}/groups`} setGroupsParent={setGroups} />
+            <GroupList url={`${API}/profile/user/${encodeURIComponent(user)}/groups`} setGroupsParent={setGroups} />
             <div className="flex flex-col justify-end">
               {groups.map((group, index) => 
                 <Dropdown 

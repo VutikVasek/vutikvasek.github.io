@@ -17,12 +17,12 @@ export default function ExpandableText({ text, maxHeight = 200 }) {
 
   return (
     <div>
-      <p ref={textRef} className={"overflow-clip"} style={{maxHeight: expanded ? "initial" : maxHeight + "px"}}>
+      <div ref={textRef} className={"overflow-clip"} style={{maxHeight: expanded ? "initial" : maxHeight + "px"}}>
         {textElements.map((element, index) => 
           element.split('')[0] !== '#' ? 
             <Fragment key={index}>{element}</Fragment> : 
-            <SmartLink to={`/h/${element.split('').slice(1).join('')}`} key={index} className='text-blue-500 font-semibold'>{element}</SmartLink>)}
-      </p>
+            <SmartLink to={`/h/${encodeURIComponent(element.split('').slice(1).join(''))}`} key={index} className='text-blue-500 font-semibold'>{element}</SmartLink>)}
+      </div>
       {isOverflowing && (
         <button onClick={() => setExpanded(val => !val)}>
           {expanded ? "Show less" : "Show more"}
