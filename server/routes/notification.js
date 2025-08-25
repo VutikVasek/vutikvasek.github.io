@@ -7,6 +7,7 @@ import Post from '../models/Post.js';
 import User from '../models/User.js';
 import Group from '../models/Group.js';
 import { userValidFor } from './group.js';
+import mongoose from 'mongoose';
 
 const router = express.Router();
 

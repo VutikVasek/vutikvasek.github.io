@@ -92,7 +92,7 @@ export default function NotificationSettings() {
           Groups:
           <div className="flex">
             <GroupList url={`${API}/profile/user/${encodeURIComponent(user)}/groups`} setGroupsParent={setGroups} />
-            <div className="flex flex-col justify-end">
+            <div className="flex flex-col justify-around">
               {groups.map((group, index) => 
                 <Dropdown 
                   set={(val) => {

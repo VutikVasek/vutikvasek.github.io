@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import { verifyToken } from '../middleware/auth.js';
 import Group from '../models/Group.js';
+import mongoose from 'mongoose';
 
 const router = express.Router();
 

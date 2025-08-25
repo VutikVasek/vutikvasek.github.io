@@ -4,7 +4,7 @@ import Follow from '../models/Follow.js';
 import { getFeed } from './feed.js';
 import { verifyToken, verifyTokenNotStrict } from '../middleware/auth.js';
 import { getComments } from './post.js';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import Group from '../models/Group.js';
 import { GroupNotification } from '../../shared.js';
 

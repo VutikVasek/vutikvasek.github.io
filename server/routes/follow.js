@@ -4,6 +4,7 @@ import User from '../models/User.js';
 import Follow from '../models/Follow.js';
 import { NotificationType } from '../../shared.js';
 import Notification from '../models/Notification.js';
+import mongoose from 'mongoose';
 
 const router = express.Router();
 
