@@ -19,7 +19,7 @@ export default function CommentThread({ parentId, userId, comments, setComments,
        `${timeframe && "&time=" + encodeURIComponent(timeframe)}`+
        `&link=${encodeURIComponent(linkParent)}`+
        `${pinned ? `&pinned=${encodeURIComponent(pinned)}` : ""}`+
-       `${(query != null) ? `&${encodeURIComponent(query)}` : ""}`;
+       `${(query != null) ? `&${query}` : ""}`;
     const res = await fetch(url, {
       method: 'GET',
       headers: { 

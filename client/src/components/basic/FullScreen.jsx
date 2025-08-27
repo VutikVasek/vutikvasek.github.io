@@ -3,8 +3,12 @@ import { useEffect } from "react"
 export default function FullScreen({ invis = false, onClick, ...props }) {
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; }
+    document.body.style.paddingRight = `${window.innerWidth - document.body.clientWidth}px`;
+    document.body.style.overflowY = 'hidden';
+    return () => { 
+      document.body.style.overflowY = 'scroll';
+      document.body.style.paddingRight = "initial"
+     }
   }, [])
 
   return (

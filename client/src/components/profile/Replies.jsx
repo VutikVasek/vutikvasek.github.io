@@ -13,13 +13,13 @@ export default function Replies({userData, search, query, reloadState, defaultTi
 
   return (
     <>
-      <div style={{width: '80%'}}>
+      <div className="w-[80%] mx-auto">
         {sorter &&
         <div className="flex justify-end">
           <Sorter url={location.pathname} sortBy={sort} time={timeframe} defaultTime={defaultTime} defaultSort={defaultSort} />
         </div>}
         <CommentThread userId={userData?.pfp} query={search ? query : null} comments={comments} setComments={setComments} infiniteScroll={true} reload={userData?.pfp || reloadState} sort={sort} timeframe={timeframe} />
-        <button onClick={e => setParams("s", "replies")}>Show more</button>
+        {setParams && <button onClick={e => setParams("s", "replies")}>Show more</button>}
       </div>
     </>
   )

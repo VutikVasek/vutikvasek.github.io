@@ -75,7 +75,7 @@ export default function Feed({url, reloadState, query, showReplies = false, defa
   }, [sort, timeframe]) 
 
   return (
-    <div className="flex flex-col items-center" style={{width: '50rem'}}>
+    <div className="flex flex-col items-center w-full max-w-[40rem] mx-auto">
       {sorter && <Sorter url={location.pathname} sortBy={sort} time={timeframe} defaultSort={defaultSort} defaultTime={defaultTime} />}
       {posts.map((post, index) => (
         <Post 
@@ -83,13 +83,13 @@ export default function Feed({url, reloadState, query, showReplies = false, defa
           key={post?._id ?? index}
           ref={index === posts.length - 1 ? lastPostRef : null}/>
       ))}
-      {(!hasMore && sorter && setParams) ? 
-        <p className="text-gray-400 mt-4">No more posts</p>
-        :
-        <button onClick={e => setParams("s", "posts")}>Show more</button>
-      }
+      {(hasMore && sorter && setParams) &&
+        <button onClick={e => setParams("s", "posts")}>Show more</button>}
+      {!hasMore &&
+        <p className="text-gray-400 mt-4">No more posts</p>}
+      {setParams && <button onClick={e => setParams("s", "posts")}>Show more</button>}
       {(!hasMore && showReplies) && <div className="w-full">
-        <h2 className="text-2xl">Replies</h2>
+        <h2 className="text-2xl p-3">Replies</h2>
         <Replies search={true} query={query} reloadState={reloadState} defaultTime="week" defaultSort="popular" sorter={false} setParams={setParams} />
       </div> }
       {error}

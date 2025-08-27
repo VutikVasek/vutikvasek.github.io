@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/User.js';
 import { OAuth2Client } from 'google-auth-library';
-import { sendEmail } from '../tools/mailer.js';
+import { getVerificationEmail, sendEmail } from '../tools/mailer.js';
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // import { sendVerificationEmail } from '../middleware/mailer.js';import nodemailer from 'nodemailer';
 
@@ -32,7 +32,7 @@ router.post('/signup', async (req, res) => {
   sendEmail(
     correctedEmail,
     'Verify your email',
-    `<h1>Welcome!</h1><p>Click <a href="http://localhost:5173/verify?token=${verifyToken}">here</a> to verify your account.</p>`
+    getVerificationEmail(`http://localhost:5173/verify?token=${verifyToken}`)
   );
   
   res.status(201).json({ message: 'Signup successful, please check your email to verify your account' });

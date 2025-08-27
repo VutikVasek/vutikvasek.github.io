@@ -23,8 +23,8 @@ export default function ShareButton({ url }) {
   return (
     <Descriptor text={"Share"}>
       <div onClick={handleClick} 
-          className={'w-fit flex gap-2 items-center cursor-pointer'}>
-        <LuShare2 className='text-gray-500 hover:text-black' />
+          className={'cursor-pointer p-2 rounded-full hover:bg-slate-800 text-gray-500 hover:text-white'}>
+        <LuShare2 />
       </div>
     </Descriptor>
   )

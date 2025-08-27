@@ -52,7 +52,7 @@ export default function Sorter({url, sortBy, time, defaultSort = SortType.newest
   }
 
   return (
-      <div className='flex gap-4 self-end'>
+      <div className='flex gap-4 self-end my-4'>
         Sort by:
         <div>
           <Dropdown set={setSort} get={sort == SortType.newest ? "newest" : "popular"} close={[sortBy]}>

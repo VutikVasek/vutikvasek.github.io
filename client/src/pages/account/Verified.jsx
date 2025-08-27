@@ -32,10 +32,10 @@ export default function Verified() {
 
   return (
     <>
-      <p>{verState}</p>
+      <h1 className="title">{verState}</h1>
       {showLogin ? (
         <>
-          <SmartLink to="/login">You can now Log in</SmartLink>
+          <SmartLink to="/login">You can now <span className="link text-cyan-400">Log in</span></SmartLink>
         </>
       ) : (<></>)}
     </>

@@ -22,7 +22,9 @@ export default function GroupSettingsPage() {
   return (
     <>
     <GroupSettings group={group} />
-    <DeleteButton word="group" url={`${API}/group/${encodeURIComponent(groupname)}`} />
+    <div className="mt-4 button w-fit" onClick={e => e.currentTarget.children[0].children[0].click()}>
+        <DeleteButton word="group" url={`${API}/group/${encodeURIComponent(groupname)}`} />
+    </div>
     </>
   )
 }

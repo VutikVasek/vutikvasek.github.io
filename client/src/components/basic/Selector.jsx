@@ -82,24 +82,24 @@ export default function Selector({selected, setSelected, search, symbol = "@", d
   }
 
   return (
-    <div ref={refs.setReference} className="flex" onFocus={() => setFocused(true)} onBlur={handleOnBlur} >
-      <p>{symbol}</p>
+    <div ref={refs.setReference} className="flex items-center" onFocus={() => setFocused(true)} onBlur={handleOnBlur} >
+      <p className={"font-semibold " + (selected.locked ? "text-blue-500" : "z-20 ml-4")}>{symbol}</p>
       <span ref={spanRef} className="absolute invisible whitespace-pre">{query || " "}</span>
       {!selected.locked ?
-        <input type="text" style={{ width }} 
+        <input type="text" className="textfield w-32 p-1 pl-6 ml-[-1.3rem]"
           value={query} onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown} autoFocus />
         :
-        <p style={{ width }}>{query}</p>
+        <p className="w-fit mr-2 text-blue-500 font-semibold">{query}</p>
       }
       {(results.length > 0 && focused) &&
-      <div className="bg-gray-300 flex flex-col p-1" ref={refs.setFloating} style={floatingStyles}>
+      <div className="bg-slate-700 flex flex-col p-1" ref={refs.setFloating} style={floatingStyles}>
         {loading && "Loading..."}
         {results.map((item, index) => (
           <div className="flex items-center gap-2 p-2 cursor-pointer" key={index} 
               onClick={() => handleSelectItem(item)}
               onMouseDown={(e) => e.preventDefault()} >
-            <ProfilePicture path={search === "group" ? "gp" : "pfp"} pfp={item._id} className="w-10" />
+            <ProfilePicture path={search === "mygroups" ? "gp" : "pfp"} pfp={item._id} className="w-10" />
             <p className="w-full">{item.name}</p>
           </div>
         ))}

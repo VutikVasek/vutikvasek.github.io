@@ -25,17 +25,15 @@ import HashtagPage from './pages/HashtagPage';
 import Search from './pages/Search'
 
 import Toast from './components/info/Toast';
-import SmartLink from './components/basic/SmartLink';
 
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { AppContext } from './context/AppContext';
+import NavBar from './components/nav/NavBar';
 
 gsap.registerPlugin(useGSAP);
 
 function App() {
-  const { isLoggedIn, user } = useAuth();
-  const profile = `/u/${encodeURIComponent(user)}`;
   const [toastText, setToastText] = useState('');
   const [toastColor, setToastColor] = useState('');
   const [toastReshow, setToastReshow] = useState(false);
@@ -51,72 +49,41 @@ function App() {
   return (
     <AppContext.Provider value={{showInfoToast, showErrorToast}}>
       <Router>
-        <nav className="w-full p-5 shadow-lg bg-slate-800 text-white flex justify-between">
-          <h1 className="text-2xl font-bold flex gap-4 items-center" onClick={() => showInfoToast("hello")}> 
-            <img src="/assets/Logo.svg" alt="LOGO" className='h-8' />
-            VUTINK
-          </h1>
-          <div className="panel flex items-middle gap-6">
-            <SmartLink to="/" className='px-4 py-2 rounded-md hover:bg-slate-600'>
-              <h3>Feed</h3>
-            </SmartLink>
-            <SmartLink to="/search" className='px-4 py-2 rounded-md hover:bg-slate-600'>
-              <h3>Search</h3>
-            </SmartLink>
-            {isLoggedIn ? (
-              <>
-                <SmartLink to="/post" className='px-4 py-2 rounded-md bg-slate-700 hover:bg-slate-600'>
-                  <h3>New Post</h3>
-                </SmartLink>
-                <SmartLink to="/notifications" className='px-4 py-2 rounded-md hover:bg-slate-600'>
-                  <h3>Notifications</h3>
-                </SmartLink>
-                <SmartLink to={profile}  className='px-4 py-2 rounded-md hover:bg-slate-600'>
-                  <h3>Profile</h3>
-                </SmartLink>
-                <SmartLink to="/account" className='px-4 py-2 rounded-md hover:bg-slate-600'>
-                  <h3>Account</h3>
-                </SmartLink>
-              </>
-            ) : (
-              <>
-                <SmartLink to="/login" className='px-4 py-2 rounded-md hover:bg-slate-600'>
-                  <h3>Login</h3>
-                </SmartLink>
-                <SmartLink to="/signup" className='px-4 py-2 rounded-md hover:bg-slate-600'>
-                  <h3>Signup</h3>
-                </SmartLink>
-              </>
-            )}
+        <div className='flex bg-slate-950 text-white min-h-screen'>
+          <div className='w-[50%] flex justify-end pr-16'>
+            <NavBar />
           </div>
-        </nav>
-        <Toast text={toastText} color={toastColor} reshow={toastReshow} />
-        <Routes>
-          <Route path="/" element={<FeedPage />} />
-          <Route path="/feed" element={<FeedPage />} />
-          <Route path="/feed/:subpage" element={<FeedPage />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/verify" element={<Verified />} />
-          <Route path="/post" element={<PostPage />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/account">
-            <Route index element={<Account />} />
-            <Route path="/account/credentials" element={<Credentials />} />
-            <Route path="/account/notification-settings" element={<NotificationSettings />} />
-          </Route>
-          <Route path="/u/:username" element={<Profile />} />
-          <Route path="/u/:username/:show" element={<Profile />} />
-          <Route path="/p/:postId" element={<PostFull />} />
-          <Route path="/g/:groupname" element={<GroupPage />} />
-          <Route path="/g/:groupname/:show" element={<GroupPage />} />
-          <Route path="/g/:groupname/settings" element={<GroupSettingsPage />} />
-          <Route path="/create-group" element={<CreateGroup />} />
-          <Route path="/h/:hashtag" element={<HashtagPage />} />
+          <div className='w-full'>
+            <Routes>
+              <Route path="/" element={<FeedPage />} />
+              <Route path="/feed" element={<FeedPage />} />
+              <Route path="/feed/:subpage" element={<FeedPage />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/verify" element={<Verified />} />
+              <Route path="/post" element={<PostPage />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/account">
+                <Route index element={<Account />} />
+                <Route path="/account/credentials" element={<Credentials />} />
+                <Route path="/account/notification-settings" element={<NotificationSettings />} />
+              </Route>
+              <Route path="/u/:username" element={<Profile />} />
+              <Route path="/u/:username/:show" element={<Profile />} />
+              <Route path="/p/:postId" element={<PostFull />} />
+              <Route path="/g/:groupname" element={<GroupPage />} />
+              <Route path="/g/:groupname/:show" element={<GroupPage />} />
+              <Route path="/g/:groupname/settings" element={<GroupSettingsPage />} />
+              <Route path="/create-group" element={<CreateGroup />} />
+              <Route path="/h/:hashtag" element={<HashtagPage />} />
 
-          <Route path="*" element={<NotFound />}></Route>
-        </Routes>
+              <Route path="*" element={<NotFound />}></Route>
+            </Routes>
+          </div>
+          <div className='w-[50%]'></div>
+        </div>
+        <Toast text={toastText} color={toastColor} reshow={toastReshow} />
       </Router>
     </AppContext.Provider>
   );

@@ -77,39 +77,41 @@ export default function NotificationSettings() {
 
   return (
     <>
-      Notify when:
-      <div>
+      <h1 className="title">Notification settings</h1>
+      <p className="text-xl">Notify when:</p>
+      <div className="my-2 ml-4">
         {notifications.map((val, type) => {
           if (!notifNames[type]) return;
           return (
-            <div className="flex gap-2" key={type}>
+            <label className="flex gap-2 items-center mt-1" key={type}>
               {notifNames[type]}
-              <Switch checked={val} onChange={(checked) => handleChange(checked, type)} />
-            </div>
+              <Switch checked={val} onChange={(checked) => handleChange(checked, type)} 
+                offColor="#444" onColor="#69b" offHandleColor="#ccc" uncheckedIcon={false} checkedIcon={false} height={20} width={40} />
+            </label>
           )
         })}
-        <div>
-          Groups:
-          <div className="flex">
-            <GroupList url={`${API}/profile/user/${encodeURIComponent(user)}/groups`} setGroupsParent={setGroups} />
-            <div className="flex flex-col justify-around">
-              {groups.map((group, index) => 
-                <Dropdown 
-                  set={(val) => {
-                    if (groupsNotifications[index] !== val) updateGroupNotification(group.gp, val);
-                    setGroupsNotifications(prev => prev.map((notif, i) => i !== index ? notif : val));
-                  }} 
-                  get={getText(groupsNotifications[index], true)}
-                  key={index}
-                >
-                  {[
-                  [GroupNotification.ALL, getText(GroupNotification.ALL)],
-                  [GroupNotification.ESSENTIAL, getText(GroupNotification.ESSENTIAL)],
-                  [GroupNotification.NONE, getText(GroupNotification.NONE)]
-                  ]}
-                </Dropdown>
-              )}
-            </div>
+      </div>
+      <div>
+        <p className="text-xl">Groups:</p>
+        <div className="flex gap-8 my-2 ml-4">
+          <GroupList url={`${API}/profile/user/${encodeURIComponent(user)}/groups`} setGroupsParent={setGroups} />
+          <div className="flex flex-col justify-around">
+            {groups.map((group, index) => 
+              <Dropdown 
+                set={(val) => {
+                  if (groupsNotifications[index] !== val) updateGroupNotification(group.gp, val);
+                  setGroupsNotifications(prev => prev.map((notif, i) => i !== index ? notif : val));
+                }} 
+                get={getText(groupsNotifications[index], true)}
+                key={index}
+              >
+                {[
+                [GroupNotification.ALL, getText(GroupNotification.ALL)],
+                [GroupNotification.ESSENTIAL, getText(GroupNotification.ESSENTIAL)],
+                [GroupNotification.NONE, getText(GroupNotification.NONE)]
+                ]}
+              </Dropdown>
+            )}
           </div>
         </div>
       </div>

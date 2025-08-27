@@ -58,7 +58,7 @@ export default function Signup() {
     <form onSubmit={handleSignup} className="max-w-md mx-auto mt-10 space-y-4">
       <h2 className="text-2xl font-bold">Signup</h2>
       <input
-        className="w-full border p-2 rounded"
+        className="textfield w-full p-2"
         type="text"
         placeholder="Username"
         value={username}
@@ -67,7 +67,7 @@ export default function Signup() {
         required
       />
       <input
-        className="w-full border p-2 rounded"
+        className="textfield w-full p-2"
         type="email"
         placeholder="Email"
         value={email}
@@ -90,17 +90,17 @@ export default function Signup() {
         maxLength={32}
         required
       />
-      <p>{error}</p>
+      <p className='text-red-400'>{error}</p>
       
       <div className="w-full flex justify-between gap-4">
-        <button className="bg-blue-500 text-white px-4 py-2 rounded w-1/3" type="submit">
+        <button className="button w-1/3" type="submit">
           Sign Up
         </button>
         <GoogleLoginButton />
       </div>
       {failed ? (
-        <div className="text-end text-md text-slate-700 pt-4">
-        Or <a onClick={redirect} className="cursor-pointer font-semibold text-slate-900">Log in</a> if you already have an account
+        <div className="text-end text-md text-slate-300 pt-4">
+        Or <a onClick={redirect} className="cursor-pointer font-semibold text-cyan-400">Log in</a> if you already have an account
         </div>
       ) : (
         <></>

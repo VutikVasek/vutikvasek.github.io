@@ -2,6 +2,7 @@ import SmartLink from '@/components/basic/SmartLink';
 import Feed from '../components/feed/Feed';
 import { useParams } from 'react-router-dom';
 import GroupList from '@/components/profile/GroupList';
+import Tabs from '@/components/nav/Tabs';
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -11,17 +12,16 @@ export default function FeedPage() {
 
   return (
     <>
-      <h1 className="text-2xl p-4">Welcome to the feed!</h1>
       { localStorage.getItem('token') &&
-        <div className='flex gap-4'>
-          <SmartLink to="/feed" className={!subpage ? 'font-semibold' : ''}>Explore</SmartLink>
-          <SmartLink to="/feed/following" className={subpage=="following" ? 'font-semibold' : ''}>Following</SmartLink>
-          <SmartLink to="/feed/groups" className={subpage=="groups" ? 'font-semibold' : ''}>Groups</SmartLink>
-        </div>
+      <Tabs selected={subpage || "feed"}>
+        <SmartLink to="/feed" id="feed">Explore</SmartLink>
+        <SmartLink to="/feed/following" id="following">Following</SmartLink>
+        <SmartLink to="/feed/groups" id="groups">Groups</SmartLink>
+      </Tabs>
       }
       {subpage === "groups" &&
-        <div className='flex items-center justify-between w-full overflow-clip'>
-          <div className='overflow-clip w-[calc(100%-5rem)]'>
+        <div className='flex items-center justify-between w-full overflow-clip my-8'>
+          <div className='overflow-clip flex flex-1 w-0'>
             <GroupList url={`${API}/profile/user/${encodeURIComponent(username)}/groups`} horizontal={true} />
           </div>
           <SmartLink to={`/u/${encodeURIComponent(username)}/groups`} className="px-8">All</SmartLink>

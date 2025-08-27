@@ -9,7 +9,7 @@ import { useAppContext } from "@/context/AppContext";
 import Descriptor from "../info/Descriptor";
 const API = import.meta.env.VITE_API_BASE_URL;
 
-export default function UserList({url, source, query, reloadState, max}) {
+export default function UserList({url, source, query, reloadState, max, className}) {
   const [users, setUsers] = useState([]);
   const [logged, setLogged] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -94,37 +94,42 @@ const { showInfoToast } = useAppContext();
   }
 
   return (
-    <div className="w-fit">
+    <div className={"w-full flex flex-col justify-center " + className}>
       {query == null &&<Descriptor text="Back" offset="-1rem">
         <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button>
       </Descriptor>}
       <p>{users.length === 0 && ('No one yet!')}</p>
-      {users.map((user, index) => (
-        <div className="flex items-center gap-4" ref={index === users.length - 1 ? lastPostRef : null} key={user.pfp}>
-          <SmartLink to={"/u/" + encodeURIComponent(user.username)} className="flex w-full items-center gap-4">
-            <ProfilePicture pfp={user.pfp} className="w-10" />
+      <div className="mx-auto">
+        {users.map((user, index) => (
+          <div className="flex items-center gap-16 mt-2 justify-around" ref={index === users.length - 1 ? lastPostRef : null} key={user.pfp}>
+            <SmartLink to={"/u/" + encodeURIComponent(user.username)} className="flex flex-1 w-fit items-center gap-4">
+              <ProfilePicture pfp={user.pfp} className="w-10" />
+              <div>
+                <p className={"w-full" + (user.admin ? " font-semibold" : "")}>{user.username}</p>
+                {user.bio && <p className="truncate max-w-[20rem] text-gray-500">{user.bio}</p>}
+              </div>
+            </SmartLink>
             <div>
-              <p className={"w-full" + (user.admin ? " font-semibold" : "")}>{user.username}</p>
-              {user.bio && <p className="truncate max-w-[20rem] text-gray-500">{user.bio}</p>}
+              <FollowButton userData={user} simple={true} logged={logged} />
+              {group?.admin && !user.owner && (
+                <More>
+                  {user.banned ? <button onClick={e => handleBan(e, user.pfp, true)} key="unban">Unban user</button> :
+                  [
+                    !user.admin ?
+                        <button onClick={e => handleMakeAdmin(e, user.pfp, "admin")} key="admin">Make user admin</button>
+                        :
+                        <button onClick={e => handleMakeAdmin(e, user.pfp, "deadmin")} key="deadmin">Revoke users admin status</button>,
+                    <button onClick={e => handleBan(e, user.pfp)} key="ban">Ban user</button>,
+                    (group.owner) &&
+                        <button key="owner ">Transfer ownership</button>
+                  ]}
+                </More>
+              )}
             </div>
-          </SmartLink>
-          <FollowButton userData={user} simple={true} logged={logged} />
-          {group?.admin && !user.owner && (
-            <More>
-              {user.banned ? <button onClick={e => handleBan(e, user.pfp, true)} key="unban">Unban user</button> :
-              [
-                !user.admin ? 
-                    <button onClick={e => handleMakeAdmin(e, user.pfp, "admin")} key="admin">Make user admin</button>
-                    :
-                    <button onClick={e => handleMakeAdmin(e, user.pfp, "deadmin")} key="deadmin">Revoke users admin status</button>,
-                <button onClick={e => handleBan(e, user.pfp)} key="ban">Ban user</button>,
-                (group.owner) && 
-                    <button key="owner ">Transfer ownership</button>
-              ]}
-            </More>
-          )}
-        </div>
-      ))}
+          </div>
+        ))}
+      </div>
     </div>
+    
   );
 }

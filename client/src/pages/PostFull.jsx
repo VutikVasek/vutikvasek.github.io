@@ -102,26 +102,20 @@ export default function PostFull() {
 
   return (
     <>
-      <div className="text-lg">
+      <div className="text-lg mt-8">
         <Post post={post} cut={true} ref={postRef} />
       </div>
       <div>
-        <p>Comments ({post.comments})</p>
-        <div className="flex gap-2">
-            <TextInput text={reply} setText={setReply} setDBMentions={setMentions} shouldFocus={shouldFocus} onDrop={mediaSelector.current?.handleDrop} reset={reset} />
-            <div className="flex flex-col gap-2">
-              <button className="bg-green-300 px-4 h-10" onClick={handleReply}>Reply</button>
-              <MediaSelector ref={mediaSelector} rerender={rerender} flex="justify-around" className="h-10 w-full py-2" />
-            </div>
-            <div className="h-20">
-              {mediaSelector.current?.getFiles()}
-            </div>
-            {replyError}
+        <div className="flex justify-between items-center mb-2">
+          <p>Comments ({post.comments})</p>
+          <Sorter url={location.pathname} sortBy={sort} time={timeframe} defaultSort={"popular"} defaultTime={"all"} />
         </div>
+        <TextInput 
+          text={reply} setText={setReply} setDBMentions={setMentions} 
+          shouldFocus={shouldFocus} onDrop={mediaSelector.current?.handleDrop} reset={reset} 
+          handleSubmit={handleReply} mediaSelector={mediaSelector} rerender={rerender} comment={true} />
+        <p className="mt-1 text-red-400">{replyError}</p>
         <div style={{width: '80%'}}>
-          <div className="flex justify-end">
-            <Sorter url={location.pathname} sortBy={sort} time={timeframe} defaultSort={"popular"} defaultTime={"all"} />
-          </div>
           <CommentThread parentId={post._id} comments={comments} setComments={setComments} infiniteScroll={true} sort={sort} timeframe={timeframe} 
             pinned={pinned ? (canExpand ? [...pinnedTree].pop() : "wait") : null} pinnedTree={canExpand && [...pinnedTree].slice(0, -1)} postId={post._id} />
         </div>

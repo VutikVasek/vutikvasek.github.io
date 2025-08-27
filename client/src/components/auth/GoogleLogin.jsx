@@ -33,7 +33,8 @@ export default function GoogleLoginButton() {
 
   return (
     <div className="w-2/3">
-      <GoogleLogin onSuccess={handleGoogleLogin} onError={() => alert('Google Sign-in failed')} />
+      <GoogleLogin onSuccess={handleGoogleLogin} onError={() => alert('Google Sign-in failed')} 
+        theme='filled_black' shape='pill' />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import LogWall from '@/components/auth/LogWall';
 import { validatePassword, validateUsername } from '@/tools/validate';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import PasswordInput from '@/components/auth/PasswordInput';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Credentials() {
@@ -179,91 +180,97 @@ export default function Credentials() {
   return (
     <>
       <LogWall />
-      Credentials
-      <p>Username: { changingUsername ? (
-          <input type="text" name="newUsername" id="newUsername" className='border border-black'
-            value={newUsername}
-            onChange={(e) => setNewUsername(e.target.value)}
-            ref={focus}
-            onKeyDown={handleKeyDown}
-            placeholder='New Username'
-          />
-        ) : user.username} {usernameError}
-      </p>
-      { changingUsername ? (
-        <>
-          <button className='pl-4' onClick={handleSetNewUsername}>Set</button>
-          <button className='pl-4' onClick={() => { setChangingUsername(false); setNewUsername(''); setUsernameError(''); }}>Cancel</button>
-        </>
-      ) : (
-        <button className='pl-4' onClick={() => { setChangingUsername(true); } }>Change</button>
-      ) }
-      <p>Email: { changingEmail ? (
+      <h1 className='title'>Credentials</h1>
+      <div>
+        <p>Username: { changingUsername ? (
+            <input type="text" name="newUsername" id="newUsername" className='textfield p-1 ml-2'
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value)}
+              ref={focus}
+              onKeyDown={handleKeyDown}
+              placeholder='New Username'
+            />
+          ) : <span className='font-semibold'>{user.username}</span>} {usernameError}
+        </p>
+        <div className='mt-2'>
+          { changingUsername ? (
+            <>
+              <button className='ml-4 button py-1' onClick={() => { setChangingUsername(false); setNewUsername(''); setUsernameError(''); }}>Cancel</button>
+              <button className='ml-4 button py-1' onClick={handleSetNewUsername}>Set</button>
+            </>
+          ) : (
+            <button className='ml-4 button py-1' onClick={() => { setChangingUsername(true); } }>Change</button>
+          ) }
+        </div>
+      </div>
+      <div className='mt-8'>
+        <p>Email: { changingEmail ? (
           <>
-            <input type="email" name="newEmail" id="newEmail" className='border border-black'
+            <input type="email" name="newEmail" id="newEmail" className='textfield p-2 ml-2'
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
               ref={emailFocus}
               onKeyDown={handleKeyDown}
-              placeholder='New Email'
-            />
-            <input type="password" name="password" id="password" className='border border-black'
+              placeholder='New Email' />
+            <input type="password" name="password" id="password" className='textfield p-2 ml-4'
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder='Your Password'
-            />
-          </>
-        ) : user.email} {emailError}
-      </p>
-      {!user.isGoogle ? 
-        (<>{ changingEmail ? (
+              placeholder='Your Password' />
+          </>) : <span className='font-semibold'>{user.email}</span>} {emailError}
+        </p>
+        <div className='mt-2'>
+          {!user.isGoogle ? 
+            (<>{ changingEmail ? (
+                <>
+                  <button className='ml-4 button py-1' onClick={() => { setChangingEmail(false); setNewEmail(''); setEmailError(''); setOldPassword(''); }}>Cancel</button>
+                  <button className='ml-4 button py-1' onClick={handleSetNewEmail}>Set</button>
+                </>
+              ) : (
+                <button className='ml-4 button py-1' onClick={() => setChangingEmail(true)}>Change</button>
+              )
+            }</>) 
+            : 
+            (<p className='pl-4'>Cannot be changed (Google login used)</p>)}
+        </div>
+      </div>
+      {!user.isGoogle && (
+      <div className='mt-8 [&>*]:mt-2'>
+        <p className='inline mr-2'>Password: </p>
+        { changingPassword ? (
+        <>
+          <PasswordInput 
+            placeholder="Current password" name="oldPassword" id="oldPassword"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            onKeyDown={handleKeyDown}
+            ref={passwordFocus}
+          />
+          <PasswordInput 
+            placeholder="New password" name="newPassword" id="newPassword"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <PasswordInput 
+            placeholder="New password again" name="newPasswordCheck" id="newPasswordCheck"
+            value={newPasswordCheck}
+            onChange={(e) => setNewPasswordCheck(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+        </>
+        ) : <span>••••••••</span>} {passwordError}
+        <div className='mt-2'>
+          { changingPassword ? (
             <>
-              <button className='pl-4' onClick={handleSetNewEmail}>Set</button>
-              <button className='pl-4' onClick={() => { setChangingEmail(false); setNewEmail(''); setEmailError(''); setOldPassword(''); }}>Cancel</button>
+              <button className='ml-4 button py-1' onClick={() => { setChangingPassword(false); setNewPassword(''); setNewPasswordCheck(''); setOldPassword(''); setPasswordError(''); }}>Cancel</button>
+              <button className='ml-4 button py-1' onClick={handleSetNewPassword}>Set</button>
             </>
           ) : (
-            <button className='pl-4' onClick={() => setChangingEmail(true)}>Change</button>
-          )
-        }</>) 
-        : 
-        (<p className='pl-4'>Cannot be changed (Google login used)</p>)}
-      
-      {!user.isGoogle ? (
-        <>
-          <p>Password: { changingPassword ? (
-          <>
-            <PasswordInput 
-              placeholder="Current password" name="oldPassword" id="oldPassword"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              onKeyDown={handleKeyDown}
-              ref={passwordFocus}
-            />
-            <PasswordInput 
-              placeholder="New password" name="newPassword" id="newPassword"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-            <PasswordInput 
-              placeholder="New password again" name="newPasswordCheck" id="newPasswordCheck"
-              value={newPasswordCheck}
-              onChange={(e) => setNewPasswordCheck(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-          </>
-        ) : "••••••••"} {passwordError}</p>
-        { changingPassword ? (
-          <>
-            <button className='pl-4' onClick={handleSetNewPassword}>Set</button>
-            <button className='pl-4' onClick={() => { setChangingPassword(false); setNewPassword(''); setNewPasswordCheck(''); setOldPassword(''); setPasswordError(''); }}>Cancel</button>
-          </>
-        ) : (
-          <button className='pl-4' onClick={() => { setChangingPassword(true); } }>Change</button>
-        ) }
-        </>
-      ) : (<></>)}
+            <button className='ml-4 button py-1' onClick={() => { setChangingPassword(true); } }>Change</button>
+          ) }
+        </div>
+      </div>)}
     </>
   );
 }

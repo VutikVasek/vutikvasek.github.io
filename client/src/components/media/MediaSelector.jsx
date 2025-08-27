@@ -1,15 +1,32 @@
 import { useAppContext } from "@/context/AppContext";
-import React, { useEffect, useImperativeHandle, useState } from "react";
-import ImageSelector from "./ImageSelector";
-import GifSelector from "./GifSelector";
+import React, { useEffect, useId, useImperativeHandle, useState } from "react";
+import GifPicker from "gif-picker-react";
+import FullScreen from "../basic/FullScreen";
 import SelectedMedia from "./SelectedMedia";
+import MediaButton from "./MediaButton";
+import { FaImage } from "react-icons/fa6";
+import { PiGifFill } from "react-icons/pi";
+import { useFloating, flip, shift, offset } from '@floating-ui/react-dom';
 const API = import.meta.env.VITE_API_BASE_URL;
+const TENOR_API_KEY = import.meta.env.VITE_TENOR_API_KEY;
 
-const MediaSelector = React.forwardRef(({ max = 1, rerender, flex = "", ...params }, ref) => {
+const MediaSelector = React.forwardRef(({ max = 1, rerender, flex = "" }, ref) => {
   const [files, setFiles] = useState([]);
   const [loadingFiles, setLoadingFiles] = useState(0);
   const [URLs, setURLs] = useState([]);
+  const [showPicker, setShowPicker] = useState(false);
+
+  const { refs, floatingStyles } = useFloating({
+    placement: 'bottom-start',
+    middleware: [
+      offset(4),
+      flip(),
+      shift(),
+    ],
+  });
   const { showErrorToast } = useAppContext();
+
+  const id = useId();
 
   useEffect(() => {
     if (rerender) rerender();
@@ -108,9 +125,32 @@ const MediaSelector = React.forwardRef(({ max = 1, rerender, flex = "", ...param
 
 
   return (
-    <div className={"flex gap-2 h-fit " + flex}>
-      <ImageSelector onChange={handleFileChange} {...params} />
-      <GifSelector onSelect={handleGifClick} {...params} />
+    <div className={"flex h-fit gap-2 " + flex}>
+      <label htmlFor={id} className="cursor-pointer rounded-full">
+        <MediaButton className="text-lg" text="Media">
+          <div className="h-fit">
+              <FaImage />
+            <input type="file" name="image" id={id} accept="image/*" multiple 
+              onChange={handleFileChange} className="hidden" 
+              />
+          </div>
+        </MediaButton>
+      </label>
+      <MediaButton className="text-xl" onClick={() => setShowPicker(val => !val)} text="GIFs">
+        <div ref={refs.setReference} className="cursor-pointer">
+          <PiGifFill />
+          <div className="w-0 h-0 overflow-visible relative">
+            {showPicker && (
+              <>
+                <FullScreen onClick={() => setShowPicker(false)} />
+                <div ref={refs.setFloating} style={floatingStyles} className="z-50" onClick={(e) => e.stopPropagation()}>
+                  <GifPicker tenorApiKey={TENOR_API_KEY} onGifClick={handleGifClick} theme="dark" />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </MediaButton>
     </div>
   )
 })

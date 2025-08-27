@@ -1,8 +1,9 @@
 import { useState } from "react";
 import Confirmation from "../basic/Confirmation";
 import { useAuth } from "@/context/AuthContext";
+import { FaTrash } from "react-icons/fa";
 
-export default function DeleteButton({url, word, deleteWord = "Delete"}) {
+export default function DeleteButton({url, word, deleteWord = "Delete", className}) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const { logout } = useAuth();
 
@@ -28,8 +29,8 @@ export default function DeleteButton({url, word, deleteWord = "Delete"}) {
   }
 
   return (
-    <div>
-      <button className="bg-red-400 text-white" onClick={() => setShowConfirmation(true)}>{deleteWord} {word}</button>
+    <div className={className}>
+      <button className="text-red-300 flex items-center gap-1" onClick={() => setShowConfirmation(true)}><FaTrash /> {deleteWord} {word}</button>
       {showConfirmation && <Confirmation text={`Do you really want to delete this ${word}?`} onConfirm={onConfirm} />}
     </div>
   )

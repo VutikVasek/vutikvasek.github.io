@@ -21,7 +21,7 @@ export default function ExpandableText({ text, maxHeight = 200 }) {
         {textElements.map((element, index) => 
           element.split('')[0] !== '#' ? 
             <Fragment key={index}>{element}</Fragment> : 
-            <SmartLink to={`/h/${encodeURIComponent(element.split('').slice(1).join(''))}`} key={index} className='text-blue-500 font-semibold'>{element}</SmartLink>)}
+            <SmartLink to={`/h/${encodeURIComponent(element.split('').slice(1).join(''))}`} key={index} className='link'>{element}</SmartLink>)}
       </div>
       {isOverflowing && (
         <button onClick={() => setExpanded(val => !val)}>

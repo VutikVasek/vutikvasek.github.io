@@ -71,13 +71,15 @@ export default function PostPage() {
     <>
       <LogWall />
       <form onSubmit={e => e.preventDefault()}>
-        {
-          replyingTo ?
-            (author ? 
-              <h1>Replying to a post from {author}</h1> :
-              <h1>Replying to a post</h1>) :
-          <h1>Make a new post!</h1>
-        }
+        <h1 className='title'>
+          {
+            replyingTo ?
+              (author ? 
+                `Replying to a post from ${author}` :
+                "Replying to a post") :
+            "New post"
+          }
+        </h1>
         
         <TextInput 
           text={text} 
@@ -86,15 +88,10 @@ export default function PostPage() {
           setDBGroups={setGroups} 
           onDrop={mediaSelector.current?.handleDrop} 
           rows={6} 
-          handleSubmit={handleSubmitingPost} />
-        <div className='flex flex-col gap-4'>
-          <MediaSelector max={2} ref={mediaSelector} rerender={rerender} flex="justify-around w-fit" className="h-10 w-10 p-2" />
-          <div className={mediaSelector.current?.getFileCount() ? "h-20" : ""}>
-            {mediaSelector.current?.getFiles()}
-          </div>
-        </div>
-        <p className="whitespace-pre-wrap">{error}</p>
-        <button type="submit" onClick={handleSubmitingPost}>{buttonText}</button>
+          handleSubmit={handleSubmitingPost}
+          mediaSelector={mediaSelector}
+          rerender={rerender} />
+        <p className="mt-1 text-red-400">{error}</p>
       </form>
     </>
   );

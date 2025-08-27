@@ -35,9 +35,9 @@ export default function Login() {
 
   return (
     <form onSubmit={handleLogin} className="max-w-md mx-auto mt-10 space-y-4">
-      <h2 className="text-2xl font-bold">Login</h2>
+      <h1 className="title">Login</h1>
       <input
-        className="w-full border p-2 rounded"
+        className="w-full textfield p-2"
         type="text"
         placeholder="Username or Email"
         value={username}
@@ -48,15 +48,15 @@ export default function Login() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <p>{error}</p>
+      <p className='text-red-400'>{error}</p>
       <div className="w-full flex justify-between gap-4">
-        <button className="bg-green-500 text-white px-4 py-2 rounded w-1/3" type="submit">
+        <button className="button w-1/3" type="submit">
           Log In
         </button>
         <GoogleLoginButton />
       </div>
-      <div className="text-end text-md text-slate-700">
-        Or <a onClick={redirect} className="cursor-pointer font-semibold text-slate-900">Sign Up</a> if you dont have an account yet
+      <div className="text-end text-md text-slate-300">
+        Or <a onClick={redirect} className="cursor-pointer font-semibold text-cyan-400">Sign Up</a> if you dont have an account yet
       </div>
     </form>
   );

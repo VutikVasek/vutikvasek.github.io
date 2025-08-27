@@ -1,3 +1,4 @@
+import SettingsButton from "@/components/basic/SettingsButton";
 import SmartLink from "@/components/basic/SmartLink";
 import Feed from "@/components/feed/Feed";
 import JoinButton from "@/components/group/JoinButton";
@@ -53,26 +54,37 @@ export default function GroupPage({}) {
     loadGroup();
   }, []);
 
-  if (deleted) return <p>This group was deleted</p>
-  if (!group) return <p>Loading...</p>;
+  if (!group) return <h1 className="title">Loading...</h1>;
+  if (deleted) return <h1 className="title">This group was deleted</h1>
 
   return  (
     <>
-      <div className="flex flex-col">
-        <ProfilePicture path="gp" pfp={group._id} className="w-36" />
-        <p>{group.name}</p>
-        <p className="max-w-max overflow-x-clip">{group.description}</p>
-        {group.owner && <SmartLink to={`/g/${encodeURIComponent(group.name)}/settings`}>Settings</SmartLink>}
-        <SmartLink to={`/g/${encodeURIComponent(group.name)}/members`}>{group.members} member{group.members > 1 && "s"}</SmartLink>
-        {group.bans > 0 && <SmartLink to={`/g/${encodeURIComponent(group.name)}/banned`}>{group.bans} banned</SmartLink>}
-        {!deleted && (<>
-          <p>{group._id ? "Since" : ""} {date}</p>
-          <JoinButton group={group} logged={group.logged} />
-        </>)}
+      <div className="flex flex-col mt-6">
+              <div className="flex m-4 gap-8 items-end">
+                <ProfilePicture path="gp" pfp={group._id} className="w-36" />
+                <div>
+                  <p className="text-4xl font-semibold">{group.name}</p>
+                  <p className="whitespace-pre-wrap mt-1 max-w-max overflow-x-clip">{group.description}</p>
+                  <p className="text-sm text-slate-300 mt-1">{group._id ? "Since" : ""} {date}</p>
+                </div>
+                <div>
+                  {group.canUserPost &&
+                  <SmartLink to={`/post?g=${encodeURIComponent(groupname)}`} className="button">Post on group</SmartLink>
+                  }
+                  <JoinButton group={group} logged={group.logged} />
+                </div>
+                {group.owner && <SettingsButton to={`/g/${encodeURIComponent(group.name)}/settings`} />}
+              </div>
+              <div className="flex gap-8 mt-2 mb-8 underline-offset-2 [&>*:hover]:underline">
+                <SmartLink to={`/g/${encodeURIComponent(group.name)}/members`} className="group/members">
+                  {group.members} <span className="text-slate-400 group-hover/members:text-white">{group.members === 1 ? "member" : "members"}</span>
+                </SmartLink>
+                {group.bans > 0 &&
+                <SmartLink to={`/g/${encodeURIComponent(group.name)}/banned`} className="group/banned">
+                  {group.bans} <span className="text-slate-400 group-hover/banned:text-white">banned</span>
+                </SmartLink>}
+              </div>
       </div>
-      {group.canUserPost &&
-      <SmartLink to={`/post?g=${encodeURIComponent(groupname)}`}>Post on group</SmartLink>
-      }
       <div>
         {(show === "members" || show === "banned") && (
           <UserList url={`${API}/group/${encodeURIComponent(groupname)}/${encodeURIComponent(show)}`} source={`/g/${encodeURIComponent(groupname)}`} />

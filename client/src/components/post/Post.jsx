@@ -5,12 +5,14 @@ import { formatRelativeTime } from '../../tools/time';
 import More from '../basic/More';
 import DeleteButton from '../basic/DeleteButton';
 import SmartLink from '../basic/SmartLink';
-import Gallery from './Gallery';
+import Gallery from '../media/Gallery';
 import ProfilePicture from '../media/ProfilePicture';
-import ShareButton from '../basic/ShareButton';
+import ShareButton from '../content/ShareButton';
 import Descriptor from '../info/Descriptor';
 import ExpandableText from '../basic/ExpandableText';
 import { useAppContext } from '@/context/AppContext';
+import LikeButton from '../content/LikeButton';
+import CommentButton from '../content/CommentButton';
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
@@ -99,7 +101,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
   }
 
   return (
-    <div className={`w-[calc(100%-0.5rem)] p-4 m-2 shadow whitespace-pre-wrap flex ${className}`} ref={ref} {...params}>
+    <div className={`w-[calc(100%-0.5rem)] p-4 shadow whitespace-pre-wrap flex ${!cut ? "hover:bg-slate-900" : ""} ${className}`} ref={ref} {...params}>
       <SmartLink as={shouldLink ? "span" : "div"} className='gap-2 flex flex-col w-full' to={`/p/${encodeURIComponent(post._id)}`}>
         {pinned && (
           <div className='flex items-center'>
@@ -110,15 +112,15 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
         <SmartLink to={`/u/${encodeURIComponent(post.author.username)}`} className='flex items-center gap-2 w-fit'>
           <ProfilePicture pfp={post.author.pfp} className="w-10" />
           <div>
-            <p className="text-md font-semibold">{post.author.username}</p>
-            <p className='text-xs text-gray-600'>{formatRelativeTime(post.createdAt)}</p>
+            <p className="text-md font-semibold hover:underline underline-offset-2">{post.author.username}</p>
+            <p className='text-xs text-slate-400'>{formatRelativeTime(post.createdAt)}</p>
           </div>
         </SmartLink>
         {post.groups?.length > 0 && 
         <div className='flex gap-2'>
           {post.groups.map((group, index) => {
             if (group._id) return (
-              <SmartLink to={`/g/${encodeURIComponent(group.name)}`} className='text-blue-500 font-semibold' key={index}>&{group.name}</SmartLink>
+              <SmartLink to={`/g/${encodeURIComponent(group.name)}`} className='link' key={index}>&{group.name}</SmartLink>
             ); else return (
               <div key={index}>&{group.name}</div>
             )
@@ -130,7 +132,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
         <div className='flex gap-2'>
           {post.mentions.map((mention, index) => {
             if (mention._id) return (
-              <SmartLink to={`/u/${encodeURIComponent(mention.username)}`} className='text-blue-500 font-semibold' key={index}>@{mention.username}</SmartLink>
+              <SmartLink to={`/u/${encodeURIComponent(mention.username)}`} className='link' key={index}>@{mention.username}</SmartLink>
             ); else return (
               <div key={index}>@{mention.username}</div>
             )
@@ -154,22 +156,9 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
           </div>
         }
         {bar &&
-        <div className='flex gap-6 items-center'>
-          <Descriptor text={liked ? "Unlike" : "Like"}>
-            <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false || liked)} onClick={handleLike} 
-                className={'w-fit flex gap-2 items-center cursor-pointer' + (liked ? ' text-red-600': '')}>
-              {hovered ? <FaHeart /> : <FaRegHeart />}
-              <p className='text-black'>{likes || '0'}</p>
-            </div>
-          </Descriptor>
-          {shouldLink ? (
-            <Descriptor text="Comment">
-              <SmartLink to={`/p/${encodeURIComponent(post._id)}?focus=true`} className='flex gap-2 items-center'>
-                <FaRegComments className='text-gray-500 hover:text-black' />
-                <p className='text-black'>{post.comments}</p>
-              </SmartLink>
-            </Descriptor>
-          ):("")}
+        <div className='flex gap-8 items-center'>
+          <LikeButton liked={liked} hovered={hovered} setHovered={setHovered} handleLike={handleLike} likes={likes} />
+          {shouldLink && <CommentButton id={post._id} comments={post.comments} />}
           <ShareButton url={`${BASE}/p/${encodeURIComponent(post._id)}`} />
           <More>
             {[

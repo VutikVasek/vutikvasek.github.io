@@ -8,7 +8,7 @@ export default function HashtagPage() {
 
   return (
     <>
-      <h1 className="text-2xl p-4">#{hashtag}</h1>
+      <h1 className="title">#{hashtag} - posts</h1>
       <div className='flex justify-center'>
         <Feed url={`${API}/feed/hash/${encodeURIComponent(hashtag)}`} reloadState={hashtag} />
       </div>

@@ -78,23 +78,23 @@ export default function FollowButton({ userData, simple, logged }) {
       case FollowType.hidden:
         return '';
       case FollowType.login:
-        return (<SmartLink to="/login">Login to follow</SmartLink>);
+        return (<SmartLink to="/login" className="button">Login to follow</SmartLink>);
       case FollowType.me:
-        return (<SmartLink to="/account">Edit profile</SmartLink>);
+        return (<SmartLink to="/account" className="button">Edit profile</SmartLink>);
       case FollowType.follow:
-        return (<button onClick={handleFollow}>Follow</button>);
+        return (<button onClick={handleFollow} className="button">Follow</button>);
       default:
         return (
           <>
-            <button onClick={() => setChangingFollowing(val => !val)} className="flex items-center gap-1">
+            <button onClick={() => setChangingFollowing(val => !val)} className={"flex items-center gap-1 button"}>
               {following == FollowType.notify ? (<MdNotificationsActive />) : (<MdNotificationsOff />)}
               Following <MdKeyboardArrowDown />
             </button>
             {changingFollowing && (
               <>
               <FullScreen onClick={() => setChangingFollowing(false)} invis />
-              <div className="w-0 h-0 overflow-visible z-50">
-                <div className="bg-gray-300 w-fit p-2 relative flex flex-col whitespace-nowrap">
+              <div className="w-0 h-0 overflow-visible z-50 mx-auto flex justify-center">
+                <div className="bg-slate-700 w-fit h-fit p-2 relative flex flex-col whitespace-nowrap right-[50%] z-50" onClick={e => e.stopPropagation()}>
                   <button className="flex w-fit items-center gap-1" onClick={() => handleChangeFollow(true)}><MdNotificationsActive />All</button>
                   <button className="flex w-fit items-center gap-1" onClick={() => handleChangeFollow(false)}><MdNotificationsOff />Silent</button>
                   <button className="flex w-fit items-center gap-1" onClick={handleUnfollow}><RiUserUnfollowLine />Unfollow</button>

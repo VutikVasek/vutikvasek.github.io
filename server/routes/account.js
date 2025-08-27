@@ -114,7 +114,7 @@ router.patch('/changeemail', verifyToken, async (req, res) => {
   sendEmail(
     email,
     'Verify your email',
-    `<h1>Welcome!</h1><p>Click <a href="http://localhost:5173/verify?token=${verifyToken}&email=${req.body.email}">here</a> to verify your account.</p>`
+    getVerificationEmail(`http://localhost:5173/verify?token=${verifyToken}&email=${req.body.email}`)
   );
   res.json({ message: 'Account updated, verification email sent' });
 })
