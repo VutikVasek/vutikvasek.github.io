@@ -1,8 +1,8 @@
 import React from "react";
 
-export default function Tabs({ children, selected, className }) {
+export default function Tabs({ children, selected, className, ...params }) {
   return (
-    <div className={`flex justify-around text-center ` + className}>
+    <div className={`flex justify-around text-center ` + className} {...params}>
       {React.Children.map(children, child =>
         React.cloneElement(child, {
           className: (child.props.className || "") + " " + 

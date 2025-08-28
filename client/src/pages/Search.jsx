@@ -4,6 +4,7 @@ import Tabs from "@/components/nav/Tabs";
 import GroupList from "@/components/profile/GroupList";
 import Replies from "@/components/profile/Replies";
 import UserList from "@/components/profile/UserList";
+import { useAppContext } from "@/context/AppContext";
 import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { IoSearchOutline } from "react-icons/io5";
@@ -13,6 +14,7 @@ const API = import.meta.env.VITE_API_BASE_URL;
 export default function Search({}) {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchbar = useRef();
+  const { addToSearchHistory } = useAppContext();
 
   useEffect(() => {
     searchbar.current?.focus();
@@ -29,15 +31,20 @@ export default function Search({}) {
     setSearchParams(searchParams, { replace: key === "q" ? true : false });
   }
 
+  const resultClick = () => {
+    if (query()) addToSearchHistory({ type: "string", text: query() })
+  }
+
   return (
     <>
       <Helmet>
         <title>Search {search()} {query(false) ? `- ${query(false)}` : ""} - Vutink</title>
       </Helmet>
-      <IoSearchOutline className="absolute my-2 mx-[0.7rem] text-2xl pointer-events-none" />
+      <IoSearchOutline className="absolute my-2 mt-[0.6rem] mx-[0.7rem] text-2xl pointer-events-none" />
       <input type="text" value={query()} onChange={e => setParams("q", e.target.value)} ref={searchbar} placeholder="Search..."
-      className="w-full py-2 px-3 pl-11 textfield" />
-      <Tabs selected={search()}>
+      className="w-full py-2 px-3 pl-11 textfield"
+        onKeyDown={e => e.key === "Enter" && query() ? addToSearchHistory({type: "string", text: query()}) : ""} />
+      <Tabs selected={search()} onClick={resultClick}>
         <button onClick={e => setParams("s", "all")} id="all">All</button>
         <button onClick={e => setParams("s", "users")} id="users">Users</button>
         <button onClick={e => setParams("s", "groups")} id="groups">Groups</button>
@@ -50,32 +57,38 @@ export default function Search({}) {
       </div>
       :
       <div>
-        {search() === "users" && <UserList url={`${API}/search/for/users`} query={"query=" + query(true)} reloadState={searchParams} className="mt-8" />}
-        {search() === "groups" && <GroupList url={`${API}/search/for/groups`} query={"query=" + query(true)} reloadState={searchParams} className="mt-8" />}
+        {search() === "users" && 
+          <UserList url={`${API}/search/for/users`} query={"query=" + query(true)} reloadState={searchParams} className="mt-8"
+            onClick={id => addToSearchHistory({type: "user", id: id})} />}
+        {search() === "groups" && 
+          <GroupList url={`${API}/search/for/groups`} query={"query=" + query(true)} reloadState={searchParams} className="mt-8"
+            onClick={id => addToSearchHistory({type: "group", id: id})} />}
         {search() === "posts" && 
-        <div className="w-full flex justify-center">
+        <div className="w-full flex justify-center" onClick={resultClick}>
           <Feed url={`${API}/search/for/posts`} query={"query=" + query(true)} reloadState={searchParams} defaultSort="popular" defaultTime="all" />
         </div>}
         {search() === "replies" &&
-        <div className="w-full flex justify-center">
+        <div className="w-full flex justify-center" onClick={resultClick}>
            <Replies search={true} query={"query=" + query(true)} reloadState={searchParams} defaultSort="popular" defaultTime="all" />
         </div>}
         {search() === "all" && 
           <>
           <div className="flex justify-between flex-wrap">
-            <div>
+            <div className="min-w-[50%]">
               <h2 className="text-2xl p-3">Users</h2>
-              <UserList url={`${API}/search/for/users`} query={"query=" + query(true)} reloadState={searchParams} max={3} />
+              <UserList url={`${API}/search/for/users`} query={"query=" + query(true)} reloadState={searchParams} max={3} 
+                onClick={id => addToSearchHistory({type: "user", id: id})} />
               <button onClick={e => setParams("s", "users")} className="w-full hover:underline pt-2 text-slate-200">Show more</button>
             </div>
-            <div>
+            <div className="w-[50%]">
               <h2 className="text-2xl p-3">Groups</h2>
-              <GroupList url={`${API}/search/for/groups`} query={"query=" + query(true)} reloadState={searchParams} max={3} />
+              <GroupList url={`${API}/search/for/groups`} query={"query=" + query(true)} reloadState={searchParams} max={3}
+                onClick={id => addToSearchHistory({type: "group", id: id})} />
               <button onClick={e => setParams("s", "groups")} className="w-full hover:underline pt-2 text-slate-200">Show more</button>
             </div>
           </div>
           <div className="w-full flex justify-center">
-            <div className="w-[40rem]">
+            <div className="w-[40rem]" onClick={resultClick}>
               <h2 className="text-2xl p-3">Posts</h2>
               <Feed url={`${API}/search/for/posts`} query={"query=" + query(true)} reloadState={searchParams} 
                 showReplies sorter={false} defaultSort="popular" defaultTime="week" setParams={setParams}  />

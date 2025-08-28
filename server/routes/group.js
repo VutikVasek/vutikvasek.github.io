@@ -72,6 +72,13 @@ router.get('/:groupname', verifyTokenNotStrict, async (req, res) => {
   }
 })
 
+router.get('/:id/name', async (req, res) => {
+  const id = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(id)) res.status(400).json({ message: "Invalid id" })
+  const group = await Group.findById(id).select('name');
+  res.json({ name: group?.name ?? "<deleted>" });
+})
+
 router.post('/:groupId/update', verifyToken, async (req, res) => {
   const groupId = req.params.groupId;
     if (!mongoose.Types.ObjectId.isValid(groupId)) return res.status(400).json({message: "Invalid group id"});

@@ -7,7 +7,7 @@ import JoinButton from "../group/JoinButton";
 import Descriptor from "../info/Descriptor";
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
-export default function GroupList({url, source, setGroupsParent, reloadState, query, max, horizontal = false, className}) {
+export default function GroupList({url, source, setGroupsParent, reloadState, query, max, horizontal = false, onClick, className}) {
   const [groups, setGroups] = useState([]);
   const [logged, setLogged] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -71,7 +71,8 @@ export default function GroupList({url, source, setGroupsParent, reloadState, qu
       <div className={horizontal ? "flex gap-4" : "mx-auto"}>
         {groups?.map((group, index) => (
           <div className="flex items-center gap-16 text-center mt-2" ref={index === groups.length - 1 ? lastPostRef : null} key={index}>
-            <SmartLink to={"/g/" + encodeURIComponent(group.name)} className={"flex w-full items-center gap-4 " + (horizontal ? "flex-col items-center" : "")}>
+            <SmartLink to={"/g/" + encodeURIComponent(group.name)} className={"flex w-full items-center gap-4 " + (horizontal ? "flex-col items-center" : "")}
+                onClick={() => onClick(group.gp)}>
               <ProfilePicture pfp={group.gp} path="gp" className={"w-10" + (horizontal ? " m-auto" : "")} />
               <div className={horizontal ? "max-w-20" : ""}>
                 <p className={"w-full" + (horizontal ? " truncate" : "")}>{group.name}</p>

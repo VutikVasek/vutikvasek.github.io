@@ -9,7 +9,7 @@ import { useAppContext } from "@/context/AppContext";
 import Descriptor from "../info/Descriptor";
 const API = import.meta.env.VITE_API_BASE_URL;
 
-export default function UserList({url, source, query, reloadState, max, className}) {
+export default function UserList({url, source, query, reloadState, max, className, onClick}) {
   const [users, setUsers] = useState([]);
   const [logged, setLogged] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -102,7 +102,7 @@ const { showInfoToast } = useAppContext();
       <div className="mx-auto">
         {users.map((user, index) => (
           <div className="flex items-center gap-16 mt-2 justify-around" ref={index === users.length - 1 ? lastPostRef : null} key={user.pfp}>
-            <SmartLink to={"/u/" + encodeURIComponent(user.username)} className="flex flex-1 w-fit items-center gap-4">
+            <SmartLink to={"/u/" + encodeURIComponent(user.username)} className="flex flex-1 w-fit items-center gap-4" onClick={() => onClick(user.pfp)}>
               <ProfilePicture pfp={user.pfp} className="w-10" />
               <div>
                 <p className={"w-full" + (user.admin ? " font-semibold" : "")}>{user.username}</p>

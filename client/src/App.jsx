@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
 
 import FeedPage from './pages/FeedPage';
 import PostPage from './pages/PostPage';
@@ -30,6 +29,8 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { AppContext } from './context/AppContext';
 import NavBar from './components/nav/NavBar';
+import SearchBar from './components/search/SearchBar';
+import SearchHistory from './components/search/SearchHistory';
 
 gsap.registerPlugin(useGSAP);
 
@@ -46,8 +47,31 @@ function App() {
     setToastReshow(val => !val);
   }
 
+  const [searchHistory, setSearchHistory] = useState(JSON.parse(localStorage.getItem('searches')));
+
+  const addToSearchHistory = (obj) => {
+    const array = JSON.parse(localStorage.getItem('searches')) || [];
+    array.unshift(obj);
+    const newHistory = array.filter((val, index, arr) => arr.findIndex(obj => JSON.stringify(obj) === JSON.stringify(val)) === index).slice(0, 30);
+    localStorage.setItem('searches', JSON.stringify(newHistory));
+    setSearchHistory(newHistory);
+  }
+
+  const deleteFromSearchHistory = (index) => {
+    const array = JSON.parse(localStorage.getItem('searches'));
+    if (!array || array.length === 0) return;
+    array.splice(index, 1);
+    localStorage.setItem('searches', JSON.stringify(array));
+    setSearchHistory(array);
+  }
+
+  const clearSearchHistory = () =>{
+    localStorage.setItem('searches', JSON.stringify([]));
+    setSearchHistory([]);
+  }
+
   return (
-    <AppContext.Provider value={{showInfoToast, showErrorToast}}>
+    <AppContext.Provider value={{showInfoToast, showErrorToast, addToSearchHistory, deleteFromSearchHistory, clearSearchHistory, searchHistory}}>
       <Router>
         <div className='flex bg-slate-950 text-white min-h-screen'>
           <div className='w-[50%] flex justify-end pr-16'>
@@ -81,7 +105,12 @@ function App() {
               <Route path="*" element={<NotFound />}></Route>
             </Routes>
           </div>
-          <div className='w-[50%]'></div>
+          <div className='w-[50%] relative justify-start pl-16 pt-4 h-screen'>
+            <div className='fixed h-[90%]'>
+              <SearchBar />
+              <SearchHistory />
+            </div>
+          </div>
         </div>
         <Toast text={toastText} color={toastColor} reshow={toastReshow} />
       </Router>

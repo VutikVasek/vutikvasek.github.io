@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-export default function SmartLink({ to, className, as, ...props }) {
+export default function SmartLink({ to, className, as, dontStop, onClick, ...props }) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -11,6 +11,7 @@ export default function SmartLink({ to, className, as, ...props }) {
     const handleClick = (e) => {
       e.stopPropagation();
       e.preventDefault();
+      if (onClick) onClick();
       if (currentPath !== targetPath) {
         navigate(to);
       }
@@ -21,10 +22,11 @@ export default function SmartLink({ to, className, as, ...props }) {
     return <div className={className} {...props} />
   } else {
     const handleClick = (e) => {
-      e.stopPropagation();
+      if (!dontStop) e.stopPropagation();
       if (currentPath === targetPath) {
         e.preventDefault();
       }
+      if (onClick) onClick();
     };
 
     return <Link to={to} onClick={handleClick} className={className} {...props} />;

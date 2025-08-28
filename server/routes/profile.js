@@ -91,6 +91,13 @@ router.get('/user/:username/groups', verifyTokenNotStrict, async (req, res) => {
   }
 })
 
+router.get('/:id/username', async (req, res) => {
+  const id = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(id)) res.status(400).json({ message: "Invalid id" })
+  const user = await User.findById(id).select('username');
+  res.json({ name: user?.username ?? "<deleted>" });
+})
+
 router.get('/groups', verifyToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;

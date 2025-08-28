@@ -1,7 +1,6 @@
 import { use, useEffect, useRef, useState } from "react";
 import { useFloating, flip, shift, offset } from '@floating-ui/react-dom';
 import ProfilePicture from "../media/ProfilePicture";
-const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Selector({selected, setSelected, search, symbol = "@", destroy, onEnter}) {
