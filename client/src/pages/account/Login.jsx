@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import GoogleLoginButton from '../../components/auth/GoogleLogin';
 import PasswordInput from '@/components/auth/PasswordInput';
+import { Helmet } from 'react-helmet-async';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Login() {
@@ -34,6 +35,10 @@ export default function Login() {
   } 
 
   return (
+    <>
+    <Helmet>
+      <title>Login - Vutink</title>
+    </Helmet>
     <form onSubmit={handleLogin} className="max-w-md mx-auto mt-10 space-y-4">
       <h1 className="title">Login</h1>
       <input
@@ -59,5 +64,6 @@ export default function Login() {
         Or <a onClick={redirect} className="cursor-pointer font-semibold text-cyan-400">Sign Up</a> if you dont have an account yet
       </div>
     </form>
+    </>
   );
 }

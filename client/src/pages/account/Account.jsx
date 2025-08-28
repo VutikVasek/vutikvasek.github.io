@@ -9,6 +9,7 @@ import SmartLink from '@/components/basic/SmartLink';
 import { PiSignIn, PiSignInBold } from 'react-icons/pi';
 import ProfilePicture from '@/components/media/ProfilePicture';
 import ProfilePictureUpload from '@/components/media/ProfilePictureUpload';
+import { Helmet } from 'react-helmet-async';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Account() {
@@ -90,6 +91,9 @@ export default function Account() {
   return (
     <>
       <LogWall />
+      <Helmet>
+        <title>Your Account - Vutink</title>
+      </Helmet>
       <h1 className="title">Your Account - {user.username}</h1>
       <div className="flex flex-col content-start flex-wrap m-8 gap-2">
         <div className="rounded-full cursor-pointer" onClick={(e) => setShowPfpUpload(true)}>

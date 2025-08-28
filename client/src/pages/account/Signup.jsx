@@ -55,6 +55,10 @@ export default function Signup() {
   };
 
   return (
+    <>
+    <Helmet>
+      <title>Signup - Vutink</title>
+    </Helmet>
     <form onSubmit={handleSignup} className="max-w-md mx-auto mt-10 space-y-4">
       <h2 className="text-2xl font-bold">Signup</h2>
       <input
@@ -106,5 +110,6 @@ export default function Signup() {
         <></>
       )}
     </form>
+    </>
   );
 }

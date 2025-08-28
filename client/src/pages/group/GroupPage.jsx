@@ -6,6 +6,7 @@ import ProfilePicture from "@/components/media/ProfilePicture";
 import Post from "@/components/post/Post";
 import UserList from "@/components/profile/UserList";
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router-dom";
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -59,6 +60,9 @@ export default function GroupPage({}) {
 
   return  (
     <>
+      <Helmet>
+        <title>{group.name || "deleted"} - Vutink</title>
+      </Helmet>
       <div className="flex flex-col mt-6">
               <div className="flex m-4 gap-8 items-end">
                 <ProfilePicture path="gp" pfp={group._id} className="w-36" />

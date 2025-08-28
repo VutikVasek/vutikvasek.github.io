@@ -4,6 +4,7 @@ import { validatePassword, validateUsername } from '@/tools/validate';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import PasswordInput from '@/components/auth/PasswordInput';
+import { Helmet } from 'react-helmet-async';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Credentials() {
@@ -180,6 +181,9 @@ export default function Credentials() {
   return (
     <>
       <LogWall />
+      <Helmet>
+        <title>Your Credentials - Vutink</title>
+      </Helmet>
       <h1 className='title'>Credentials</h1>
       <div>
         <p>Username: { changingUsername ? (

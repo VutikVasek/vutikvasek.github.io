@@ -32,6 +32,9 @@ export default function Verified() {
 
   return (
     <>
+      <Helmet>
+        <title>Verification - Vutink</title>
+      </Helmet>
       <h1 className="title">{verState}</h1>
       {showLogin ? (
         <>

@@ -6,6 +6,7 @@ import { validateComment } from "../tools/validate";
 import Sorter from "../components/basic/Sorter";
 import MediaSelector from "@/components/media/MediaSelector";
 import TextInput from "@/components/basic/TextInput";
+import { Helmet } from "react-helmet-async";
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function PostFull() {
@@ -102,6 +103,9 @@ export default function PostFull() {
 
   return (
     <>
+      <Helmet>
+        <title>Post by {post.author.username} - Vutink</title>
+      </Helmet>
       <div className="text-lg mt-8">
         <Post post={post} cut={true} ref={postRef} />
       </div>

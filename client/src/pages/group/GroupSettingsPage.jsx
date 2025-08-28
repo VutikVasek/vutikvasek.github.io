@@ -2,6 +2,7 @@ import GroupSettings from "@/components/group/GroupSettings";
 import DeleteButton from "@/components/basic/DeleteButton";
 import { useLocation, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function GroupSettingsPage() {
@@ -21,6 +22,9 @@ export default function GroupSettingsPage() {
   if (!group) return "Loading";
   return (
     <>
+    <Helmet>
+      <title>{groupname} Settings - Vutink</title>
+    </Helmet>
     <GroupSettings group={group} />
     <div className="mt-4 button w-fit" onClick={e => e.currentTarget.children[0].children[0].click()}>
         <DeleteButton word="group" url={`${API}/group/${encodeURIComponent(groupname)}`} />

@@ -3,6 +3,7 @@ import Feed from '../components/feed/Feed';
 import { useParams } from 'react-router-dom';
 import GroupList from '@/components/profile/GroupList';
 import Tabs from '@/components/nav/Tabs';
+import { Helmet } from 'react-helmet-async';
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -12,6 +13,9 @@ export default function FeedPage() {
 
   return (
     <>
+      <Helmet>
+        <title>{subpage ? (String(subpage).charAt(0).toUpperCase() + String(subpage).slice(1)) : "Explore"} - Vutink</title>
+      </Helmet>
       { localStorage.getItem('token') &&
       <Tabs selected={subpage || "feed"}>
         <SmartLink to="/feed" id="feed">Explore</SmartLink>

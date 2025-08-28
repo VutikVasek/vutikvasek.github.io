@@ -5,6 +5,7 @@ import GroupList from "@/components/profile/GroupList";
 import Replies from "@/components/profile/Replies";
 import UserList from "@/components/profile/UserList";
 import { useEffect, useRef, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { IoSearchOutline } from "react-icons/io5";
 import { useLocation, useSearchParams } from "react-router-dom";
 const API = import.meta.env.VITE_API_BASE_URL;
@@ -30,6 +31,9 @@ export default function Search({}) {
 
   return (
     <>
+      <Helmet>
+        <title>Search {search()} {query(false) ? `- ${query(false)}` : ""} - Vutink</title>
+      </Helmet>
       <IoSearchOutline className="absolute my-2 mx-[0.7rem] text-2xl pointer-events-none" />
       <input type="text" value={query()} onChange={e => setParams("q", e.target.value)} ref={searchbar} placeholder="Search..."
       className="w-full py-2 px-3 pl-11 textfield" />

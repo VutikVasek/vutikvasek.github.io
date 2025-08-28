@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async';
 import Feed from '../components/feed/Feed';
 import { useParams } from 'react-router-dom';
 
@@ -8,6 +9,9 @@ export default function HashtagPage() {
 
   return (
     <>
+      <Helmet>
+        <title>#{hashtag} - Posts - Vutink</title>
+      </Helmet>
       <h1 className="title">#{hashtag} - posts</h1>
       <div className='flex justify-center'>
         <Feed url={`${API}/feed/hash/${encodeURIComponent(hashtag)}`} reloadState={hashtag} />

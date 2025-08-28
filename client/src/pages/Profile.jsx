@@ -10,6 +10,7 @@ import GroupList from "@/components/profile/GroupList";
 import Tabs from "@/components/nav/Tabs";
 import Lightbox from "yet-another-react-lightbox";
 import { allowScroll, disableScroll } from "@/tools/document";
+import { Helmet } from "react-helmet-async";
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
@@ -49,8 +50,21 @@ export default function Profile() {
   if (!userData) return <h1 className="title">Loading...</h1>;
   if (deleted) return <h1 className="title">This account was deleted</h1>;
 
+  const getText = () => {
+    switch (show) {
+      case "replies": return "Replies by ";
+      case "followers": return "Followers of ";
+      case "following": return "Followed by ";
+      case "groups": return "Groups of ";
+      default: return "";
+    }
+  }
+
   return (
     <>
+      <Helmet>
+        <title>{getText()}{username} - Vutink</title>
+      </Helmet>
       <div className="flex flex-col mt-6">
         <div className="flex m-4 gap-8 items-end">
           <ProfilePicture pfp={userData.pfp} className="w-36 cursor-pointer" onClick={() => { setOpenPfp(true); disableScroll() }} />

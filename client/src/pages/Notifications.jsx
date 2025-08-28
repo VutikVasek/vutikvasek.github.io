@@ -1,6 +1,7 @@
 import ManageNotificationsButton from "@/components/notification/ManageNotificationsButton";
 import Notification from "@/components/notification/Notification";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Helmet } from "react-helmet-async";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -59,19 +60,24 @@ export default function Notifications() {
   }, [hasMore]);
 
   return (
-    <div>
-      <h1 className="title">Notifications</h1>
-      <div className="flex justify-end my-4">
-        <ManageNotificationsButton />
+    <>
+      <Helmet>
+        <title>Notifications ({notifications.filter(notif => !notif.seen).length.toString()}) - Vutink</title>
+      </Helmet>
+      <div>
+        <h1 className="title">Notifications</h1>
+        <div className="flex justify-end my-4">
+          <ManageNotificationsButton />
+        </div>
+        <div className="flex flex-col gap-4">
+          {notifications.map((notif, index) => (
+            <div ref={index === notifications.length - 1 ? lastNotificationRef : null} key={notif._id}>
+              <Notification notification={notif} />
+            </div>
+          ))}
+        </div>
+        {error}
       </div>
-      <div className="flex flex-col gap-4">
-        {notifications.map((notif, index) => (
-          <div ref={index === notifications.length - 1 ? lastNotificationRef : null} key={notif._id}>
-            <Notification notification={notif} />
-          </div>
-        ))}
-      </div>
-      {error}
-    </div>
+    </>
   )
 }

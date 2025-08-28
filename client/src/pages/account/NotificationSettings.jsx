@@ -77,6 +77,9 @@ export default function NotificationSettings() {
 
   return (
     <>
+    <Helmet>
+      <title>Notification Settings - Vutink</title>
+    </Helmet>
       <h1 className="title">Notification settings</h1>
       <p className="text-xl">Notify when:</p>
       <div className="my-2 ml-4">

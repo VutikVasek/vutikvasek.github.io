@@ -15,6 +15,7 @@ import ExpandableText from "../basic/ExpandableText";
 import TextInput from "../basic/TextInput";
 import LikeButton from "../content/LikeButton";
 import ProfilePicture from "../media/ProfilePicture";
+import { Helmet } from "react-helmet-async";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
@@ -88,6 +89,11 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
   const rerender = () => setRerenderState(val => !val);
 
   return (
+    <>
+    {pinned && 
+    <Helmet>
+      <title>Comment by {comment.author.username || "deleted"} - Vutink</title>
+    </Helmet>}
     <div className="whitespace-pre-wrap">
       { link && (<SmartLink to={`/p/${encodeURIComponent(comment.parent._id)}?sort=newest&c=${encodeURIComponent(comment._id)}`} className="p-4">
           Replying {comment.parent.author.username == "<deleted post>" ? "on " : "to "} 
@@ -162,5 +168,6 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
         ):('')}
       </div>
     </div>
+    </>
   )
 }

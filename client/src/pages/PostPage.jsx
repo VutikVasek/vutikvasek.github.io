@@ -5,6 +5,7 @@ import { validatePost } from '../tools/validate';
 import MediaSelector from '@/components/media/MediaSelector';
 import { useAppContext } from '@/context/AppContext';
 import TextInput from '@/components/basic/TextInput';
+import { Helmet } from 'react-helmet-async';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function PostPage() {
@@ -70,6 +71,9 @@ export default function PostPage() {
   return (
     <>
       <LogWall />
+      <Helmet>
+        <title>New Post - Vutink</title>
+      </Helmet>
       <form onSubmit={e => e.preventDefault()}>
         <h1 className='title'>
           {

@@ -153,7 +153,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, lighter, classNa
         )}
         <Gallery images={[0, 1].map((num) => `${MEDIA}/image/${encodeURIComponent(post._id + num)}.webp`)} link={`/p/${encodeURIComponent(post._id)}`} />
         {replyingToPost && 
-          <div className='w-[100%] border-2 border-slate-700'>
+          <div className='w-full border-2 border-slate-700'>
             <Post post={replyingToPost} bar={false} lighter={cut ? lighter : !lighter} />
           </div>
         }
