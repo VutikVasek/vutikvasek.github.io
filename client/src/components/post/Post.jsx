@@ -104,7 +104,8 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, lighter, classNa
   return (
     <div className={`w-full whitespace-pre-wrap flex ${!cut ? `hover:${lighter ? "bg-slate-800" : "bg-slate-900"}` : ""} ${className}`} 
         ref={ref} {...params}>
-      <div className='hover:bg-slate-800 hover:bg-slate-900 hidden'></div>
+      <div className='hover:bg-slate-800 hidden'></div>
+      <div className='hover:bg-slate-900 hidden'></div>
       <SmartLink as={shouldLink ? "span" : "div"} className='gap-2 p-4 flex flex-col w-full' to={`/p/${encodeURIComponent(post._id)}`}>
         {pinned && (
           <div className='flex items-center'>

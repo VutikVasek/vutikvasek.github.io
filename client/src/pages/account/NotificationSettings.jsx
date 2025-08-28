@@ -3,6 +3,7 @@ import GroupList from "@/components/profile/GroupList";
 import { useAuth } from "@/context/AuthContext";
 import { GroupNotification, NotificationType } from "^/shared";
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import Switch from "react-switch";
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -96,8 +97,10 @@ export default function NotificationSettings() {
       </div>
       <div>
         <p className="text-xl">Groups:</p>
-        <div className="flex gap-8 my-2 ml-4">
-          <GroupList url={`${API}/profile/user/${encodeURIComponent(user)}/groups`} setGroupsParent={setGroups} />
+        <div className="flex justify-center gap-16 my-2 ml-4">
+          <div>
+            <GroupList url={`${API}/profile/user/${encodeURIComponent(user)}/groups`} setGroupsParent={setGroups} />
+          </div>
           <div className="flex flex-col justify-around">
             {groups.map((group, index) => 
               <Dropdown 

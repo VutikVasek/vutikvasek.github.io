@@ -40,11 +40,11 @@ function App() {
 
   return (
     <Router>
-      <div className='flex bg-slate-950 text-white min-h-screen'>
+      <div className='flex bg-slate-950 text-white min-h-screen [&>*]:stiff'>
         <div className='w-[50%] flex justify-end pr-16'>
           <NavBar />
         </div>
-        <div className='w-full'>
+        <div className='w-full  [&>*]:stiff'>
           <Routes>
             <Route path="/" element={<FeedPage />} />
             <Route path="/feed" element={<FeedPage />} />

@@ -2,11 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  box-sizing: border-box;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    @apply transition-all;
+  }
 }
 
 @layer components {
+  .stiff, body, img {
+    @apply transition-none
+  }
   .textfield {
     @apply border-2 border-slate-700 focus:border-slate-500 outline-none bg-slate-700
   }
