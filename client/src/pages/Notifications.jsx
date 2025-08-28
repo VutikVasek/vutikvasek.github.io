@@ -66,7 +66,7 @@ export default function Notifications() {
         <div className="flex justify-end my-4">
           <ManageNotificationsButton />
         </div>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col">
           {notifications.map((notif, index) => (
             <div ref={index === notifications.length - 1 ? lastNotificationRef : null} key={notif._id}>
               <Notification notification={notif} />

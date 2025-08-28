@@ -23,7 +23,7 @@ export default function SelectedMedia({loadingFiles, files, URLs, handleRemoveFi
                 setIndex(index);
                 setOpen(true);
               }}>
-            <img src={URLs[index]} alt="preview" className="object-cover w-full h-full" />
+            <img src={URLs[index]} alt="preview" className="object-cover w-full h-full rounded-md" />
             <div className="absolute top-0 left-0 w-full h-full group-hover:shadow-inner-xl"></div>
             <div className='cursor-pointer absolute top-0 right-0 m-1' onClick={(e) => { e.stopPropagation(); handleRemoveFile(index) }}>
               <IoClose className="p-1 bg-black bg-opacity-50 rounded-full h-full w-full text-gray-300" />

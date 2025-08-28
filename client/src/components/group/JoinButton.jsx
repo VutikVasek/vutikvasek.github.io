@@ -48,7 +48,7 @@ export default function JoinButton({ group, logged }) {
   return(
     <>
       {(!group.owner && logged) &&
-        (<div>
+        (<div onClick={e => e.stopPropagation()}>
           {getButton()} 
         </div>)}
     </>

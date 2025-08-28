@@ -42,7 +42,7 @@ export default function Login() {
     <form onSubmit={handleLogin} className="max-w-md mx-auto mt-10 space-y-4">
       <h1 className="title">Login</h1>
       <input
-        className="w-full textfield p-2"
+        className="w-full textfield p-2 rounded-[0.25rem]"
         type="text"
         placeholder="Username or Email"
         value={username}

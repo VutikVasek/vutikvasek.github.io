@@ -187,7 +187,7 @@ export default function Credentials() {
       <h1 className='title'>Credentials</h1>
       <div>
         <p>Username: { changingUsername ? (
-            <input type="text" name="newUsername" id="newUsername" className='textfield p-1 ml-2'
+            <input type="text" name="newUsername" id="newUsername" className='textfield p-1 ml-2 rounded-[0.25rem]'
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
               ref={focus}
@@ -210,13 +210,13 @@ export default function Credentials() {
       <div className='mt-8'>
         <p>Email: { changingEmail ? (
           <>
-            <input type="email" name="newEmail" id="newEmail" className='textfield p-2 ml-2'
+            <input type="email" name="newEmail" id="newEmail" className='textfield p-2 ml-2 rounded-[0.25rem]'
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
               ref={emailFocus}
               onKeyDown={handleKeyDown}
               placeholder='New Email' />
-            <input type="password" name="password" id="password" className='textfield p-2 ml-4'
+            <input type="password" name="password" id="password" className='textfield p-2 ml-4 rounded-[0.25rem]'
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               onKeyDown={handleKeyDown}

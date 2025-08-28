@@ -82,7 +82,7 @@ export default function SearchHistory({}) {
       <div className="flex flex-col gap-1 pt-4 h-[96%] overflow-y-auto scrollbar-dark">
         {searchHistory?.map((item, index) => 
           <Fragment key={index}>
-            <SmartLink as="span" to={getLink(item)} className={"flex items-center gap-4 hover:bg-slate-900 py-4 " + (item.type === "string" ? "h-6" : "h-10")} >
+            <SmartLink as="span" to={getLink(item)} className={"flex items-center gap-4 hover:bg-slate-900 py-4 rounded-full h-10"} >
               <div className="w-10">
                 {getIcon(item)}
               </div>

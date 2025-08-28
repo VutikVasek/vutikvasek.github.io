@@ -102,7 +102,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, lighter, classNa
   }
 
   return (
-    <div className={`w-full whitespace-pre-wrap flex ${!cut ? `hover:${lighter ? "bg-slate-800" : "bg-slate-900"}` : ""} ${className}`} 
+    <div className={`w-full whitespace-pre-wrap flex rounded-md ${!cut ? `hover:${lighter ? "bg-slate-800" : "bg-slate-900"}` : ""} ${className}`} 
         ref={ref} {...params}>
       <div className='hover:bg-slate-800 hidden'></div>
       <div className='hover:bg-slate-900 hidden'></div>
@@ -155,7 +155,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, lighter, classNa
         )}
         <Gallery images={[0, 1].map((num) => `${MEDIA}/image/${encodeURIComponent(post._id + num)}.webp`)} link={`/p/${encodeURIComponent(post._id)}`} />
         {replyingToPost && 
-          <div className='w-full border-2 border-slate-700'>
+          <div className='w-full border-2 border-slate-700 rounded-lg'>
             <Post post={replyingToPost} bar={false} lighter={cut ? lighter : !lighter} />
           </div>
         }

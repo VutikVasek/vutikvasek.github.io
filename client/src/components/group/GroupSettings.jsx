@@ -76,11 +76,11 @@ export default function GroupSettings({ group }) {
           <div className="flex flex-col justify-end gap-4">
             <div className="flex gap-4 items-center">
               <p>Name:</p>
-              <input type="text" name="name" id="name" className="textfield p-2" defaultValue={group?.name ?? ''} placeholder="Group name" required />
+              <input type="text" name="name" id="name" className="textfield p-2 rounded-[0.25rem]" defaultValue={group?.name ?? ''} placeholder="Group name" required />
             </div>
             <div className="flex gap-4 items-center">
               <p>Description:</p>
-              <input type="text" name="description" id="description" className="textfield p-2" maxLength={100} defaultValue={group?.description ?? ''} placeholder="Grroup description" />
+              <input type="text" name="description" id="description" className="textfield p-2 rounded-[0.25rem]" maxLength={100} defaultValue={group?.description ?? ''} placeholder="Grroup description" />
             </div>
           </div>
         </div>

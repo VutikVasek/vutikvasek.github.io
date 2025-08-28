@@ -85,17 +85,17 @@ export default function Selector({selected, setSelected, search, symbol = "@", d
       <p className={"font-semibold " + (selected.locked ? "text-blue-500" : "z-20 ml-4")}>{symbol}</p>
       <span ref={spanRef} className="absolute invisible whitespace-pre">{query || " "}</span>
       {!selected.locked ?
-        <input type="text" className="textfield w-32 p-1 pl-6 ml-[-1.3rem]"
+        <input type="text" className="textfield w-32 p-1 pl-6 ml-[-1.3rem] rounded-[0.2rem]"
           value={query} onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown} autoFocus />
         :
         <p className="w-fit mr-2 text-blue-500 font-semibold">{query}</p>
       }
       {(results.length > 0 && focused) &&
-      <div className="bg-slate-700 flex flex-col p-1" ref={refs.setFloating} style={floatingStyles}>
+      <div className="bg-slate-800 flex flex-col rounded-md overflow-hidden" ref={refs.setFloating} style={floatingStyles}>
         {loading && "Loading..."}
         {results.map((item, index) => (
-          <div className="flex items-center gap-2 p-2 cursor-pointer" key={index} 
+          <div className="flex items-center gap-2 p-2 cursor-pointer hover:bg-slate-700" key={index} 
               onClick={() => handleSelectItem(item)}
               onMouseDown={(e) => e.preventDefault()} >
             <ProfilePicture path={search === "mygroups" ? "gp" : "pfp"} pfp={item._id} className="w-10" />

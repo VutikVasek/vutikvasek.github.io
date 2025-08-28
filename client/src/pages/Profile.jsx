@@ -110,7 +110,7 @@ export default function Profile() {
         </>
       )}
       {(!show || show == "replies") &&
-      <Tabs selected={show || "posts"}>
+      <Tabs selected={show || "posts"} className="rounded-t-lg">
         <SmartLink id="posts" to={"/u/" + encodeURIComponent(username)}>Posts</SmartLink>
         <SmartLink id="replies" to={`/u/${encodeURIComponent(username)}/replies`}>Replies</SmartLink>
       </Tabs>}

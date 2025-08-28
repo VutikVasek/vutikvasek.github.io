@@ -106,7 +106,7 @@ export default function Account() {
             <button className="button" onClick={handleUpdateBio}>Update bio</button>}
           </div>
           <textarea
-            className='resize-none w-full p-2 pl-3 textfield'
+            className='resize-none w-full p-2 pl-3 textfield rounded-md'
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             maxLength={512}

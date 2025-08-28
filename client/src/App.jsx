@@ -41,10 +41,10 @@ function App() {
   return (
     <Router>
       <div className='flex bg-slate-950 text-white min-h-screen [&>*]:stiff'>
-        <div className='w-[50%] flex justify-end pr-16'>
+        <div className='w-[25%] flex justify-end pr-16'>
           <NavBar />
         </div>
-        <div className='w-full  [&>*]:stiff'>
+        <div className='w-[50%]  [&>*]:stiff'>
           <Routes>
             <Route path="/" element={<FeedPage />} />
             <Route path="/feed" element={<FeedPage />} />
@@ -72,7 +72,7 @@ function App() {
             <Route path="*" element={<NotFound />}></Route>
           </Routes>
         </div>
-        <div className='w-[50%] relative justify-start pl-16 pt-4 h-screen'>
+        <div className='w-[25%] relative justify-start pl-16 pt-4 h-screen'>
           <div className='fixed h-[90%]'>
             <SearchBar />
             <SearchHistory />

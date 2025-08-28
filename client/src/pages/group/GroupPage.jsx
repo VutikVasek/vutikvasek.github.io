@@ -71,11 +71,11 @@ export default function GroupPage({}) {
                   <p className="whitespace-pre-wrap mt-1 max-w-max overflow-x-clip">{group.description}</p>
                   <p className="text-sm text-slate-300 mt-1">{group._id ? "Since" : ""} {date}</p>
                 </div>
-                <div>
-                  {group.canUserPost &&
-                  <SmartLink to={`/post?g=${encodeURIComponent(groupname)}`} className="button">Post on group</SmartLink>
-                  }
+                <div className="flex flex-col gap-2">
                   <JoinButton group={group} logged={group.logged} />
+                  {group.canUserPost &&
+                  <SmartLink to={`/post?g=${encodeURIComponent(groupname)}`} className="button inline-block">Post on group</SmartLink>
+                  }
                 </div>
                 {group.owner && <SettingsButton to={`/g/${encodeURIComponent(group.name)}/settings`} />}
               </div>

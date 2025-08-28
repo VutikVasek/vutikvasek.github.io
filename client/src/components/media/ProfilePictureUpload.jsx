@@ -58,7 +58,7 @@ export default function ProfilePictureUpload({type = "pfp", id, close}) {
 
   return (
     <FullScreen onClick={close}>
-      <div className="bg-slate-800 p-8" onClick={e => e.stopPropagation()}>
+      <div className="bg-slate-800 p-8 rounded-lg" onClick={e => e.stopPropagation()}>
         <h1 className="text-xl text-center mb-8">Change your profile picture</h1>
         <div className="flex gap-8">
           <label htmlFor="pfpSelect">

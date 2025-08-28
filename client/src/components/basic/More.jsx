@@ -19,14 +19,14 @@ export default function More({ children }) {
           <>
           <FullScreen onClick={() => setShowMore(false)} invis></FullScreen>
           <div className="w-0 h-0 overflow-visible">
-            <div className="bg-slate-700 w-fit p-2 gap-2 relative flex flex-col whitespace-nowrap z-50">
+            <div className="bg-slate-800 w-fit relative flex flex-col whitespace-nowrap z-50 rounded-md overflow-hidden">
               {childrenArray.map((item, index) => (
                 <Fragment key={index}>
-                <div className="flex w-fit items-center gap-1" onClick={e => e.stopPropagation()} key={index}>
+                <div className="flex w-full items-center hover:bg-slate-700 p-2" onClick={e => e.stopPropagation()} key={index}>
                   {item}
                 </div>
                 {index !== childrenArray.length - 1 &&
-                <div className="bg-slate-500 w-full h-[2px]"></div>}
+                <div className="bg-slate-600 w-full h-[2px]"></div>}
                 </Fragment>
               ))}
             </div>

@@ -65,7 +65,7 @@ export default function SearchBar({}) {
     {location.pathname !== "/search" &&
     <div className='w-full'>
       <IoSearchOutline className="absolute my-2 mt-[0.6rem] mx-[0.7rem] text-2xl pointer-events-none" />
-      <input type="text" placeholder="Search..." className="py-2 px-3 pl-11 textfield peer/search w-full" value={query} onChange={e => setQuery(e.target.value)}
+      <input type="text" placeholder="Search..." className="py-2 px-3 pl-11 textfield peer/search w-full rounded-md" value={query} onChange={e => setQuery(e.target.value)}
         onKeyDown={handleKeyDown} ref={inputRef} />
       {users.length > 0 &&
       <div className="bg-slate-700 hidden peer-focus/search:flex flex-col p-1">

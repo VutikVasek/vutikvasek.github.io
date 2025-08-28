@@ -104,7 +104,7 @@ export default function TextInput({text, setText, setDBMentions, setDBGroups,
       </div>
       <div className="flex gap-4">
         <textarea
-          className="textfield resize-none p-2 h-fit w-full"
+          className="textfield resize-none p-2 h-fit w-full rounded-md"
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={comment ? 'Reply...' : 'Post...'}
@@ -117,7 +117,7 @@ export default function TextInput({text, setText, setDBMentions, setDBGroups,
         ></textarea>
         <div className={"flex h-20 " + (setReplying ? "" : "flex-col")}>
           <div className="w-full">
-            <button className="bg-slate-900 border-2 border-slate-600 px-4 h-10 hover:bg-slate-800 hover:border-slate-500 w-full"
+            <button className="bg-slate-900 border-2 border-slate-600 px-4 h-10 hover:bg-slate-800 hover:border-slate-500 w-full rounded-md"
                 onClick={handleSubmit}>
               {comment ? "Reply" : "Post"}
             </button>

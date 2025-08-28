@@ -117,7 +117,7 @@ export default function Notification({ notification }) {
   }
 
   return (
-    <div className={`flex items-center gap-2 ${!notification.seen && "font-semibold"}`}>
+    <div className={`flex items-center gap-2 hover:bg-slate-900 p-2 rounded-md ${!notification.seen && "font-semibold"}`}>
       <More>
         <button onClick={handleDelete}>Clear Notification</button>
       </More>

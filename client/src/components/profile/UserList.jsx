@@ -99,33 +99,38 @@ const { showInfoToast } = useAppContext();
         <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button>
       </Descriptor>}
       <p>{users.length === 0 && ('No one yet!')}</p>
-      <div className="mx-auto">
+      <div className="mx-auto w-full">
         {users.map((user, index) => (
-          <div className="flex items-center gap-16 mt-2 justify-around" ref={index === users.length - 1 ? lastPostRef : null} key={user.pfp}>
-            <SmartLink to={"/u/" + encodeURIComponent(user.username)} className="flex flex-1 w-fit items-center gap-4" onClick={() => onClick(user.pfp)}>
-              <ProfilePicture pfp={user.pfp} className="w-10" />
+          <div ref={index === users.length - 1 ? lastPostRef : null} key={user.pfp}>
+            <SmartLink to={"/u/" + encodeURIComponent(user.username)} onClick={() => onClick ? onClick(user.pfp) : ""}
+                className="flex w-full items-center gap-16 hover:bg-slate-900 py-2 px-3 rounded-md" as="span" >
+              <div className="flex flex-1 items-center gap-4 min-w-[0%]">
+                <ProfilePicture pfp={user.pfp} className="w-10" />
+                <div className="w-[calc(100%-3.5rem)]">
+                  <p className={"w-fit" + (user.admin ? " font-semibold" : "")}>{user.username}</p>
+                  {user.bio && <p className="truncate text-gray-500">{user.bio}</p>}
+                </div>
+              </div>
               <div>
-                <p className={"w-full" + (user.admin ? " font-semibold" : "")}>{user.username}</p>
-                {user.bio && <p className="truncate max-w-[20rem] text-gray-500">{user.bio}</p>}
+                <div onClick={e => e.stopPropagation()}>
+                  <FollowButton userData={user} simple={true} logged={logged} />
+                </div>
+                {group?.admin && !user.owner && (
+                  <More>
+                    {user.banned ? <button onClick={e => handleBan(e, user.pfp, true)} key="unban">Unban user</button> :
+                    [
+                      !user.admin ?
+                          <button onClick={e => handleMakeAdmin(e, user.pfp, "admin")} key="admin">Make user admin</button>
+                          :
+                          <button onClick={e => handleMakeAdmin(e, user.pfp, "deadmin")} key="deadmin">Revoke users admin status</button>,
+                      <button onClick={e => handleBan(e, user.pfp)} key="ban">Ban user</button>,
+                      (group.owner) &&
+                          <button key="owner ">Transfer ownership</button>
+                    ]}
+                  </More>
+                )}
               </div>
             </SmartLink>
-            <div>
-              <FollowButton userData={user} simple={true} logged={logged} />
-              {group?.admin && !user.owner && (
-                <More>
-                  {user.banned ? <button onClick={e => handleBan(e, user.pfp, true)} key="unban">Unban user</button> :
-                  [
-                    !user.admin ?
-                        <button onClick={e => handleMakeAdmin(e, user.pfp, "admin")} key="admin">Make user admin</button>
-                        :
-                        <button onClick={e => handleMakeAdmin(e, user.pfp, "deadmin")} key="deadmin">Revoke users admin status</button>,
-                    <button onClick={e => handleBan(e, user.pfp)} key="ban">Ban user</button>,
-                    (group.owner) &&
-                        <button key="owner ">Transfer ownership</button>
-                  ]}
-                </More>
-              )}
-            </div>
           </div>
         ))}
       </div>

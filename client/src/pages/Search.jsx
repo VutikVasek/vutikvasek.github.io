@@ -74,7 +74,7 @@ export default function Search({}) {
         {search() === "all" && 
           <>
           <div className="flex justify-between flex-wrap">
-            <div className="min-w-[50%]">
+            <div className="w-[50%]">
               <h2 className="text-2xl p-3">Users</h2>
               <UserList url={`${API}/search/for/users`} query={"query=" + query(true)} reloadState={searchParams} max={3} 
                 onClick={id => addToSearchHistory({type: "user", id: id})} />

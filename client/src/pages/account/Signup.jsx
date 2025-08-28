@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import GoogleLoginButton from '../../components/auth/GoogleLogin';
 import { validatePassword, validateUsername } from '../../tools/validate';
 import PasswordInput from '@/components/auth/PasswordInput';
+import { Helmet } from 'react-helmet-async';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Signup() {
@@ -62,7 +63,7 @@ export default function Signup() {
     <form onSubmit={handleSignup} className="max-w-md mx-auto mt-10 space-y-4">
       <h2 className="text-2xl font-bold">Signup</h2>
       <input
-        className="textfield w-full p-2"
+        className="textfield w-full p-2 rounded-[0.25rem]"
         type="text"
         placeholder="Username"
         value={username}
@@ -71,7 +72,7 @@ export default function Signup() {
         required
       />
       <input
-        className="textfield w-full p-2"
+        className="textfield w-full p-2 rounded-[0.25rem]"
         type="email"
         placeholder="Email"
         value={email}

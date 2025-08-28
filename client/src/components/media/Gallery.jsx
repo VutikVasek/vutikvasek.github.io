@@ -22,7 +22,7 @@ export default function Gallery({ images, link }) {
               key={i}
               src={url}
               alt=""
-              className='object-cover w-full h-full cursor-pointer' 
+              className='object-cover w-full h-full cursor-pointer rounded-lg' 
               onError={(e) => {
                 e.target.className = "w-0 h-0";
                 setSlides(prev => prev.filter((val) => val.src != url));

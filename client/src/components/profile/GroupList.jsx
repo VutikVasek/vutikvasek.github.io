@@ -68,19 +68,23 @@ export default function GroupList({url, source, setGroupsParent, reloadState, qu
         <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button> 
       </Descriptor>}
       <p>{groups?.length === 0 && ('No one yet!')}</p>
-      <div className={horizontal ? "flex gap-4" : "mx-auto"}>
+      <div className={horizontal ? "flex" : "mx-auto w-full"}>
         {groups?.map((group, index) => (
-          <div className="flex items-center gap-16 text-center mt-2" ref={index === groups.length - 1 ? lastPostRef : null} key={index}>
-            <SmartLink to={"/g/" + encodeURIComponent(group.name)} className={"flex w-full items-center gap-4 " + (horizontal ? "flex-col items-center" : "")}
-                onClick={() => onClick(group.gp)}>
-              <ProfilePicture pfp={group.gp} path="gp" className={"w-10" + (horizontal ? " m-auto" : "")} />
-              <div className={horizontal ? "max-w-20" : ""}>
-                <p className={"w-full" + (horizontal ? " truncate" : "")}>{group.name}</p>
-                {group.description && <p className="truncate max-w-[20rem] text-gray-500">{group.description}</p>}
+          <div ref={index === groups.length - 1 ? lastPostRef : null} key={index}>
+            <SmartLink to={"/g/" + encodeURIComponent(group.name)}  as="span"
+                className={"flex w-full items-center gap-16 hover:bg-slate-900 py-2 px-3 rounded-md " 
+                  + (horizontal ? "flex-col items-center" : "")}
+                onClick={() => onClick ? onClick(group.gp) : ""}>
+              <div className="flex flex-1 items-center gap-4 min-w-[0%]">
+                <ProfilePicture pfp={group.gp} path="gp" className={"w-10" + (horizontal ? " m-auto" : "")} />
+                <div className={horizontal ? "" : "text-left w-[calc(100%-3.5rem)]"}>
+                  <p className={"w-full" + (horizontal ? " truncate" : "")}>{group.name}</p>
+                  {group.description && <p className="truncate text-gray-500">{group.description}</p>}
+                </div>
               </div>
+              {!setGroupsParent && 
+              <JoinButton group={group} logged={logged} />}
             </SmartLink>
-            {!setGroupsParent && 
-            <JoinButton group={group} logged={logged} />}
           </div>
         ))}
       </div>

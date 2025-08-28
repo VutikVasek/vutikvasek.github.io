@@ -95,12 +95,12 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
       <title>Comment by {comment.author.username || "deleted"} - Vutink</title>
     </Helmet>}
     <div className="whitespace-pre-wrap">
-      { link && (<SmartLink to={`/p/${encodeURIComponent(comment.parent._id)}?sort=newest&c=${encodeURIComponent(comment._id)}`} className="p-4">
+      { link && (<SmartLink to={`/p/${encodeURIComponent(comment.parent._id)}?sort=newest&c=${encodeURIComponent(comment._id)}`} className="p-4 hover:underline underline-offset-2">
           Replying {comment.parent.author.username == "<deleted post>" ? "on " : "to "} 
             {comment.parent.directParent && `${comment.parent.directParent.author?.username || "<deleted>"} on a post from `}
             <div className="inline font-semibold">{comment.parent.author.username}:</div>
         </SmartLink>)}
-      <div className={"w-full p-4 m-2 shadow flex" + ((pinned && pinnedTree?.length === 0) ? "  border-cyan-900 border-4" : "")}>
+      <div className={"w-full p-4 m-2 shadow flex" + ((pinned && pinnedTree?.length === 0) ? "  border-cyan-900 border-4 rounded-lg" : "")}>
         <div className="flex gap-2">
           <SmartLink to={`/u/${encodeURIComponent(comment.author.username)}`} className='flex items-start w-fit min-w-10'>
             <ProfilePicture pfp={comment.author.pfp} className="w-10" />

@@ -13,7 +13,7 @@ export default function PasswordInput({...params}) {
   return (
     <div className="flex w-fit items-center gap-3">
       <input
-        className="textfield w-full p-2"
+        className="textfield w-full p-2 rounded-[0.25rem]"
         type="password"
         ref={input}
         {...params}
