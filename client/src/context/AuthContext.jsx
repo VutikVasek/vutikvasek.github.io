@@ -25,9 +25,6 @@ export const AuthProvider = ({ children }) => {
     setId(null);
   };
 
-  useEffect(() => {
-  }, []);
-
   return (
     <AuthContext.Provider value={{ token, login, logout, isLoggedIn: !!token, user, id }}>
       {children}
