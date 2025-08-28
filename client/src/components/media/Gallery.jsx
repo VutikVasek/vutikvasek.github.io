@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 import SmartLink from "../basic/SmartLink";
+import { allowScroll, disableScroll } from "@/tools/document";
 
 export default function Gallery({ images, link }) {
   const [open, setOpen] = useState(false);
@@ -10,9 +11,11 @@ export default function Gallery({ images, link }) {
 
   const [slides, setSlides] = useState(images.map((url) => ({ src: url })));
 
+  useEffect(() => () => allowScroll(), []);
+
   return (
     <>
-      <div className='flex w-full gap-2 max-h-96'>
+      <div className='flex w-full gap-2 max-h-96' onClick={e => e.stopPropagation()}>
         {images.map((url, i) => (
           <div className='w-fit' key={i}>
             <img
@@ -27,6 +30,7 @@ export default function Gallery({ images, link }) {
               onClick={() => {
                 setIndex(i);
                 setOpen(true);
+                disableScroll();
               }}
             />
           </div>
@@ -36,21 +40,23 @@ export default function Gallery({ images, link }) {
         )}
       </div>
 
-      <Lightbox
-        open={open}
-        close={() => setOpen(false)}
-        slides={slides}
-        index={index}
-        on={{ view: ({ index }) => setIndex(index) }}
-        controller={{closeOnPullUp: true, closeOnPullDown: true, closeOnBackdropClick: true}}
-        plugins={[Zoom]}
-        zoom={{
-          maxZoomPixelRatio: 3,
-          wheelZoomDistanceFactor: 300,
-          pinchZoomDistanceFactor: 300,
-          scrollToZoom: true
-        }}
-      />
+      <div onClick={e => e.stopPropagation()} className="hidden">
+        <Lightbox
+          open={open}
+          close={() => {setOpen(false); allowScroll(true)}}
+          slides={slides}
+          index={index}
+          on={{ view: ({ index }) => setIndex(index) }}
+          controller={{closeOnPullUp: true, closeOnPullDown: true, closeOnBackdropClick: true}}
+          plugins={[Zoom]}
+          zoom={{
+            maxZoomPixelRatio: 3,
+            wheelZoomDistanceFactor: 300,
+            pinchZoomDistanceFactor: 300,
+            scrollToZoom: true
+          }}
+        />
+      </div>
     </>
   );
 }

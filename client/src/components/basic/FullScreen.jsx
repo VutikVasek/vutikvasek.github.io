@@ -1,14 +1,11 @@
+import { allowScroll, disableScroll } from "@/tools/document";
 import { useEffect } from "react"
 
 export default function FullScreen({ invis = false, onClick, ...props }) {
 
   useEffect(() => {
-    document.body.style.paddingRight = `${window.innerWidth - document.body.clientWidth}px`;
-    document.body.style.overflowY = 'hidden';
-    return () => { 
-      document.body.style.overflowY = 'scroll';
-      document.body.style.paddingRight = "initial"
-     }
+    disableScroll();
+    return () => allowScroll();
   }, [])
 
   return (

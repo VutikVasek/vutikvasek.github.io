@@ -13,12 +13,13 @@ import ExpandableText from '../basic/ExpandableText';
 import { useAppContext } from '@/context/AppContext';
 import LikeButton from '../content/LikeButton';
 import CommentButton from '../content/CommentButton';
+import { getBackgroundFromLevel } from '@/tools/document';
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 const BASE = import.meta.env.VITE_BASE_URL;
 
-const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...params }, ref) => {
+const Post = React.forwardRef(({ post, cut, bar = true, pinned, lighter, className, ...params}, ref) => {
   if (!post || !post._id) return "Error post";
   const [hovered, setHovered] = useState(post.liked);
   const [likes, setLikes] = useState(post.likes);
@@ -30,7 +31,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
   const shouldLink = !cut;
 
   const loadReplyingTo = async () => {
-    if (!post.replyingTo) return
+    if (!post.replyingTo) return setReplyingToPost(false);
     
     const res = await fetch(`${API}/post/${encodeURIComponent(post.replyingTo)}`, {
       method: 'GET',
@@ -47,7 +48,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
   
   useEffect(() => {
     loadReplyingTo();
-  }, [])
+  }, [post])
 
   const handleLike = async (e) => {
     e.stopPropagation();
@@ -101,8 +102,9 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
   }
 
   return (
-    <div className={`w-[calc(100%-0.5rem)] p-4 shadow whitespace-pre-wrap flex ${!cut ? "hover:bg-slate-900" : ""} ${className}`} ref={ref} {...params}>
-      <SmartLink as={shouldLink ? "span" : "div"} className='gap-2 flex flex-col w-full' to={`/p/${encodeURIComponent(post._id)}`}>
+    <div className={`w-full whitespace-pre-wrap flex ${!cut ? `hover:${lighter ? "bg-slate-800" : "bg-slate-900"}` : ""} ${className}`} 
+        ref={ref} {...params}>
+      <SmartLink as={shouldLink ? "span" : "div"} className='gap-2 p-4 flex flex-col w-full' to={`/p/${encodeURIComponent(post._id)}`}>
         {pinned && (
           <div className='flex items-center'>
             <GrFormPin className='text-xl' />
@@ -151,8 +153,8 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, className, ...pa
         )}
         <Gallery images={[0, 1].map((num) => `${MEDIA}/image/${encodeURIComponent(post._id + num)}.webp`)} link={`/p/${encodeURIComponent(post._id)}`} />
         {replyingToPost && 
-          <div className='m-2 w-full'>
-            <Post post={replyingToPost} bar={false} />
+          <div className='w-[100%] border-2 border-slate-700'>
+            <Post post={replyingToPost} bar={false} lighter={cut ? lighter : !lighter} />
           </div>
         }
         {bar &&

@@ -4,7 +4,7 @@ const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
 export default function ProfilePicture({ pfp, url, path = "pfp", showCamera, className, ...params }) {
   return (
-    <div className={"relative group/pfp " + className} {...params}>
+    <div className={"relative group/pfp rounded-full " + className} {...params}>
       <img src={url ? url : `${MEDIA}/${encodeURIComponent(path)}/${encodeURIComponent(pfp)}.jpeg`} alt={path} 
         className='rounded-full h-full w-full aspect-square group-hover/pfp:opacity-80'
         onError={(e) => {e.target.onError = null;e.target.src=`${MEDIA}/${encodeURIComponent(path)}/default.jpeg`}}

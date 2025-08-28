@@ -8,14 +8,17 @@ import SmartLink from "../components/basic/SmartLink";
 import ProfilePicture from "@/components/media/ProfilePicture";
 import GroupList from "@/components/profile/GroupList";
 import Tabs from "@/components/nav/Tabs";
-import ProfilePictureUpload from "@/components/media/ProfilePictureUpload";
+import Lightbox from "yet-another-react-lightbox";
+import { allowScroll, disableScroll } from "@/tools/document";
 const API = import.meta.env.VITE_API_BASE_URL;
+const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
 export default function Profile() {
   const { username, show } = useParams();
   const [userData, setUserData] = useState({});
   const [date, setDate] = useState('1846');
   const [deleted, setDeleted] = useState(false);
+  const [openPfp, setOpenPfp] = useState(false);
 
   useEffect(() => {
     if (username == "<deleted>") {
@@ -41,6 +44,8 @@ export default function Profile() {
       }))
     , [userData]);
 
+  useEffect(() => () => allowScroll(), []);
+
   if (!userData) return <h1 className="title">Loading...</h1>;
   if (deleted) return <h1 className="title">This account was deleted</h1>;
 
@@ -48,7 +53,16 @@ export default function Profile() {
     <>
       <div className="flex flex-col mt-6">
         <div className="flex m-4 gap-8 items-end">
-          <ProfilePicture pfp={userData.pfp} className="w-36" />
+          <ProfilePicture pfp={userData.pfp} className="w-36 cursor-pointer" onClick={() => { setOpenPfp(true); disableScroll() }} />
+          <div className="hidden">
+            <Lightbox 
+              slides={[{ src: `${MEDIA}/pfp/${encodeURIComponent(userData.pfp)}.jpeg` }]}
+              open={openPfp}
+              close={() => { setOpenPfp(false); allowScroll() }}
+              index={0}
+              controller={{closeOnPullUp: true, closeOnPullDown: true, closeOnBackdropClick: true}}
+               />
+          </div>
           <div>
             <p className="text-4xl font-semibold">{userData.username}</p>
             <p className="whitespace-pre-wrap mt-1">{userData.bio}</p>

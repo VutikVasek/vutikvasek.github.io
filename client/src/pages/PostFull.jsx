@@ -94,7 +94,7 @@ export default function PostFull() {
     loadPost();
     if (pinned)
       loadPinnedTree();
-  }, []);
+  }, [postId]);
 
   if (!post) return (replyError || "Loading...");
 
