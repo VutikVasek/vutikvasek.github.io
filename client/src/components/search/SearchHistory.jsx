@@ -43,6 +43,7 @@ export default function SearchHistory({}) {
   }
 
   const getNamed = async ()  => {
+    if (!searchHistory) return;
     const filteredUsers = searchHistory.filter(item => item.type === "user");
     const namedUsers = await Promise.all(filteredUsers.map(async item => {
       const res = await fetch(`${API}/profile/${item.id}/username`);
@@ -79,7 +80,7 @@ export default function SearchHistory({}) {
         <p className="cursor-pointer hover:underline underline-offset-2" onClick={clearSearchHistory}>Clear all</p>
       </div>
       <div className="flex flex-col gap-1 pt-4 h-[96%] overflow-y-auto scrollbar-dark">
-        {searchHistory.map((item, index) => 
+        {searchHistory?.map((item, index) => 
           <Fragment key={index}>
             <SmartLink as="span" to={getLink(item)} className={"flex items-center gap-4 hover:bg-slate-900 py-4 " + (item.type === "string" ? "h-6" : "h-10")} >
               <div className="w-10">

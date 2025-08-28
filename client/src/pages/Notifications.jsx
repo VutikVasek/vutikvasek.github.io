@@ -41,9 +41,6 @@ export default function Notifications() {
 
   useEffect(() => {
     loadNotifications();
-  }, [])
-  useEffect(() => {
-    loadNotifications();
   }, [page])
     
   const lastNotificationRef = useCallback((node) => {

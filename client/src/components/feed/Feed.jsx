@@ -48,14 +48,10 @@ export default function Feed({url, reloadState, query, showReplies = false, defa
     if (page != 1)
       loadPosts();
   }, [page]);
-
-  useEffect(() => {
-    loadPosts();
-  }, []);
   
   useEffect(() => {
     loadPosts(true);
-  }, [reloadState, url]);
+  }, [reloadState, url, sort, timeframe]);
   
   const lastPostRef = useCallback((node) => {
     if (!hasMore) return;
@@ -69,10 +65,6 @@ export default function Feed({url, reloadState, query, showReplies = false, defa
 
     if (node) observer.current.observe(node);
   }, [hasMore]);
-
-  useEffect(() => {
-    loadPosts(true);
-  }, [sort, timeframe]) 
 
   return (
     <div className="flex flex-col items-center w-full max-w-[40rem] mx-auto">

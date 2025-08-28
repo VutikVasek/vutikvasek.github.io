@@ -14,7 +14,7 @@ export default function CommentThread({ parentId, userId, comments, setComments,
     const url = API + (userId ? `/profile/comments/${encodeURIComponent(userId)}` : 
       (query != null ? `/search/for/replies` : `/post/${encodeURIComponent(parentId)}/comments`)) + 
       `?page=${reload ? 1 : encodeURIComponent(page)}`+
-       `&limit=3`+
+       `&limit=5`+
        `${sort && "&sort=" + encodeURIComponent(sort)}`+
        `${timeframe && "&time=" + encodeURIComponent(timeframe)}`+
        `&link=${encodeURIComponent(linkParent)}`+

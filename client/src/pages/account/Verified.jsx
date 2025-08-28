@@ -1,14 +1,13 @@
 import SmartLink from "@/components/basic/SmartLink";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Verified() {
   const [verState, setVerState] = useState('Loading');
   const [showLogin, setShowLogin] = useState(false);
 
-  const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
 
