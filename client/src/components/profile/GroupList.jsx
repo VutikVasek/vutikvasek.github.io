@@ -72,17 +72,16 @@ export default function GroupList({url, source, setGroupsParent, reloadState, qu
         {groups?.map((group, index) => (
           <div ref={index === groups.length - 1 ? lastPostRef : null} key={index}>
             <SmartLink to={"/g/" + encodeURIComponent(group.name)}  as="span"
-                className={"flex w-full items-center gap-16 hover:bg-slate-900 py-2 px-3 rounded-md " 
-                  + (horizontal ? "flex-col items-center" : "")}
+                className={"flex w-full items-center gap-16 hover:bg-slate-900 py-2 px-3 rounded-md "}
                 onClick={() => onClick ? onClick(group.gp) : ""}>
-              <div className="flex flex-1 items-center gap-4 min-w-[0%]">
-                <ProfilePicture pfp={group.gp} path="gp" className={"w-10" + (horizontal ? " m-auto" : "")} />
-                <div className={horizontal ? "" : "text-left w-[calc(100%-3.5rem)]"}>
-                  <p className={"w-full" + (horizontal ? " truncate" : "")}>{group.name}</p>
+              <div className={"flex flex-1 gap-4 min-w-[0%] items-center " + (horizontal ? "flex-col" : "")}>
+                <ProfilePicture pfp={group.gp} path="gp" className={(horizontal ? " m-auto w-12" : "w-10")} />
+                <div className={horizontal ? "max-w-24" : "text-left w-[calc(100%-3.5rem)]"}>
+                  <p className={"w-full truncate"}>{group.name}</p>
                   {group.description && <p className="truncate text-gray-500">{group.description}</p>}
                 </div>
               </div>
-              {!setGroupsParent && 
+              {(!setGroupsParent && !horizontal) && 
               <JoinButton group={group} logged={logged} />}
             </SmartLink>
           </div>

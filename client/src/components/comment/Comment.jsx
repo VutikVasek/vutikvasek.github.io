@@ -101,18 +101,18 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
             <div className="inline font-semibold">{comment.parent.author.username}:</div>
         </SmartLink>)}
       <div className={"w-full p-4 m-2 shadow flex" + ((pinned && pinnedTree?.length === 0) ? "  border-cyan-900 border-4 rounded-lg" : "")}>
-        <div className="flex gap-2">
+        <div className="flex gap-2 max-w-full">
           <SmartLink to={`/u/${encodeURIComponent(comment.author.username)}`} className='flex items-start w-fit min-w-10'>
             <ProfilePicture pfp={comment.author.pfp} className="w-10" />
           </SmartLink>
-          <div>
-            <SmartLink to={`/u/${encodeURIComponent(comment.author.username)}`} className="flex items-center gap-2 w-fit">
-              <p className="text-md font-semibold hover:underline underline-offset-2">{comment.author.username}</p>
+          <div className="max-w-full">
+            <SmartLink to={`/u/${encodeURIComponent(comment.author.username)}`} className="flex items-center gap-2 w-fit whitespace-nowrap max-w-full">
+              <p className="text-md font-semibold hover:underline underline-offset-2 truncate">{comment.author.username}</p>
               <p className='text-xs text-slate-400'>{formatRelativeTime(comment.createdAt)}</p>
             </SmartLink>
 
             {comment.mentions?.length > 0 && 
-            <div className='flex gap-2'>
+            <div className='flex gap-2 whitespace-nowrap max-w-full [&>*]:truncate flex-wrap'>
               {comment.mentions.map((mention, index) => {
                 if (mention._id) return (
                   <SmartLink to={`/u/${encodeURIComponent(mention.username)}`} className='link' key={index}>@{mention.username}</SmartLink>
@@ -123,7 +123,9 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
               )}
             </div>
             }
-            <ExpandableText text={comment.text} />
+            <div className="max-w-full">
+              <ExpandableText text={comment.text} />
+            </div>
 
             <Gallery images={[`${MEDIA}/image/${encodeURIComponent(comment._id)}0.webp`]} />
             <div className='flex gap-6 items-center mt-2'>

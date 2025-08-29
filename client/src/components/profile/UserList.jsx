@@ -107,27 +107,29 @@ const { showInfoToast } = useAppContext();
               <div className="flex flex-1 items-center gap-4 min-w-[0%]">
                 <ProfilePicture pfp={user.pfp} className="w-10" />
                 <div className="w-[calc(100%-3.5rem)]">
-                  <p className={"w-fit" + (user.admin ? " font-semibold" : "")}>{user.username}</p>
+                  <p className={"w-full truncate" + (user.admin ? " font-semibold" : "")}>{user.username}</p>
                   {user.bio && <p className="truncate text-gray-500">{user.bio}</p>}
                 </div>
               </div>
-              <div>
+              <div className="flex gap-4 items-center">
                 <div onClick={e => e.stopPropagation()}>
                   <FollowButton userData={user} simple={true} logged={logged} />
                 </div>
                 {group?.admin && !user.owner && (
-                  <More>
-                    {user.banned ? <button onClick={e => handleBan(e, user.pfp, true)} key="unban">Unban user</button> :
-                    [
-                      !user.admin ?
-                          <button onClick={e => handleMakeAdmin(e, user.pfp, "admin")} key="admin">Make user admin</button>
-                          :
-                          <button onClick={e => handleMakeAdmin(e, user.pfp, "deadmin")} key="deadmin">Revoke users admin status</button>,
-                      <button onClick={e => handleBan(e, user.pfp)} key="ban">Ban user</button>,
-                      (group.owner) &&
-                          <button key="owner ">Transfer ownership</button>
-                    ]}
-                  </More>
+                  <div>
+                    <More>
+                      {user.banned ? <button onClick={e => handleBan(e, user.pfp, true)} key="unban">Unban user</button> :
+                      [
+                        !user.admin ?
+                            <button onClick={e => handleMakeAdmin(e, user.pfp, "admin")} key="admin">Make user admin</button>
+                            :
+                            <button onClick={e => handleMakeAdmin(e, user.pfp, "deadmin")} key="deadmin">Revoke users admin status</button>,
+                        <button onClick={e => handleBan(e, user.pfp)} key="ban">Ban user</button>,
+                        (group.owner) &&
+                            <button key="owner ">Transfer ownership</button>
+                      ]}
+                    </More>
+                  </div>
                 )}
               </div>
             </SmartLink>

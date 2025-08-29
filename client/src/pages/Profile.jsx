@@ -67,7 +67,7 @@ export default function Profile() {
       </Helmet>
       <div className="flex flex-col mt-6">
         <div className="flex m-4 gap-8 items-end">
-          <ProfilePicture pfp={userData.pfp} className="w-36 cursor-pointer" onClick={() => { setOpenPfp(true); disableScroll() }} />
+          <ProfilePicture pfp={userData.pfp} className="w-36 cursor-pointer self-start" onClick={() => { setOpenPfp(true); disableScroll() }} />
           <div className="hidden">
             <Lightbox 
               slides={[{ src: `${MEDIA}/pfp/${encodeURIComponent(userData.pfp)}.jpeg` }]}
@@ -77,23 +77,25 @@ export default function Profile() {
               controller={{closeOnPullUp: true, closeOnPullDown: true, closeOnBackdropClick: true}}
                />
           </div>
-          <div>
-            <p className="text-4xl font-semibold">{userData.username}</p>
-            <p className="whitespace-pre-wrap mt-1">{userData.bio}</p>
+          <div className="max-w-[calc(100%-11rem)]">
+            <p className="text-4xl font-semibold break-words">{userData.username}</p>
+            <p className="whitespace-pre-wrap mt-1 break-words">{userData.bio}</p>
             <p className="text-sm text-slate-300 mt-1">{userData.pfp ? "Since" : ""} {date}</p>
           </div>
-          <div><FollowButton userData={userData} /></div>
         </div>
-        <div className="flex gap-8 mt-2 mb-8 underline-offset-2 [&>*:hover]:underline">
-          <SmartLink to={`/u/${encodeURIComponent(username)}/followers`} className="group/followers">
-            {userData.followers} <span className="text-slate-400 group-hover/followers:text-white">{userData.followers === 1 ? "follower" : "followers"}</span>
-          </SmartLink>
-          <SmartLink to={`/u/${encodeURIComponent(username)}/following`} className="group/following">
-            {userData.following} <span className="text-slate-400 group-hover/following:text-white">following</span>
-          </SmartLink>
-          <SmartLink to={`/u/${encodeURIComponent(username)}/groups`} className="group/groups">
-            {userData.groups} <span className="text-slate-400 group-hover/groups:text-white">{userData.groups === 1 ? "group" : "groups"}</span>
-          </SmartLink>
+        <div className="flex justify-between mb-6 items-center">
+          <div className="flex gap-8 underline-offset-2 [&>*:hover]:underline">
+            <SmartLink to={`/u/${encodeURIComponent(username)}/followers`} className="group/followers">
+              {userData.followers} <span className="text-slate-400 group-hover/followers:text-white">{userData.followers === 1 ? "follower" : "followers"}</span>
+            </SmartLink>
+            <SmartLink to={`/u/${encodeURIComponent(username)}/following`} className="group/following">
+              {userData.following} <span className="text-slate-400 group-hover/following:text-white">following</span>
+            </SmartLink>
+            <SmartLink to={`/u/${encodeURIComponent(username)}/groups`} className="group/groups">
+              {userData.groups} <span className="text-slate-400 group-hover/groups:text-white">{userData.groups === 1 ? "group" : "groups"}</span>
+            </SmartLink>
+          </div>
+          <div><FollowButton userData={userData} /></div>
         </div>
       </div>
       {(show == "followers" || show == "following") && (

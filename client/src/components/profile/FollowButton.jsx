@@ -78,11 +78,11 @@ export default function FollowButton({ userData, simple, logged }) {
       case FollowType.hidden:
         return '';
       case FollowType.login:
-        return (<SmartLink to="/login" className="button">Login to follow</SmartLink>);
+        return (<SmartLink to="/login" className="button inline-block">Login to follow</SmartLink>);
       case FollowType.me:
-        return (<SmartLink to="/account" className="button">Edit profile</SmartLink>);
+        return (<SmartLink to="/account" className="button inline-block">Edit profile</SmartLink>);
       case FollowType.follow:
-        return (<button onClick={handleFollow} className="button">Follow</button>);
+        return (<button onClick={handleFollow} className="button inline-block">Follow</button>);
       default:
         return (
           <>

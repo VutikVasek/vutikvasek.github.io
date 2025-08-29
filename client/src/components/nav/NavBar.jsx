@@ -19,12 +19,12 @@ export default function NavBar({}) {
   const profile = (location.pathname.split('/').slice(0,3).join('/')) === profileURL;
 
   return (
-  <nav className=" p-5 shadow-lg flex flex-col h-screen fixed gap-6">
+  <nav className=" p-5 shadow-lg flex flex-col h-screen fixed gap-6 max-w-[calc(25%-4rem)]">
     <h1 className="text-2xl font-bold flex gap-4 items-center">
       <img src="/assets/Logo.svg" alt="LOGO" className='h-8' />
       VUTINK
     </h1>
-    <div className="panel flex flex-col items-middle gap-6 whitespace-pre-wrap">
+    <div className="panel flex flex-col items-middle gap-6 whitespace-pre-wrap max-w-full">
       <NavLink to="/" text={"Feed"} icon={pathname === "feed" ? <AiFillHome /> : <AiOutlineHome />} />
       <NavLink to="/search" text={"Search"} icon={pathname === "search" ? <IoSearch /> : <IoSearchOutline />} />
       {isLoggedIn ? (
@@ -32,7 +32,7 @@ export default function NavBar({}) {
         <NavLink to="/post" text={"New Post"} icon={pathname === "post" ? <MdCreate /> : <MdOutlineCreate />} />
         <NavLink to="/notifications" text={"Notifications"} icon={notifications ? <IoMdNotifications /> : <IoMdNotificationsOutline />} />
         <NavLink to={profileURL} text={"Profile"} icon={profile ? <RiUser3Fill /> : <RiUser3Line />} />
-        <NavLink to="/account" text={`Account\n${user}`} icon={<ProfilePicture pfp={id} />} />
+        <NavLink to="/account" title={"Account"} text={`${user}`} icon={<ProfilePicture pfp={id} />} />
         </>
       ) : (
         <>

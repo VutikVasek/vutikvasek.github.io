@@ -34,7 +34,7 @@ router.get('/mygroups', verifyToken, async (req, res) => {
   if (!query) return res.json([]);
 
   try {
-    const groups = await Group.find({ members: req.user._id, name: { $regex: query, $options: "i" }  }).select('name everyoneCanPost admins').limit(10);
+    const groups = await Group.find({ members: req.user._id, name: { $regex: query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: "i" }  }).select('name everyoneCanPost admins');
     const sorted = groups.filter(group => group.everyoneCanPost || group.admins.includes(req.user._id))
       .map(group => ({
         ...group.toObject(),

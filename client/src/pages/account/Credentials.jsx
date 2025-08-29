@@ -193,6 +193,7 @@ export default function Credentials() {
               ref={focus}
               onKeyDown={handleKeyDown}
               placeholder='New Username'
+              maxLength={32}
             />
           ) : <span className='font-semibold'>{user.username}</span>} {usernameError}
         </p>

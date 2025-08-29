@@ -9,9 +9,6 @@ export default function Selector({selected, setSelected, search, symbol = "@", d
   const [loading, setLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState(selected.item || null);
   const [focused, setFocused] = useState(false);
-  const [width, setWidth] = useState(0);
-
-  const spanRef = useRef(null);
   
   const { refs, floatingStyles } = useFloating({
     placement: 'bottom-start',
@@ -27,8 +24,6 @@ export default function Selector({selected, setSelected, search, symbol = "@", d
 
   useEffect(() => {
     if (selectedItem?._id && selectedItem?.name !== query) setSelectedItem({});
-
-    setWidth(Math.max(spanRef.current?.offsetWidth + 20, 80));
 
     if (!query.trim()) return setResults([]);
 
@@ -83,7 +78,6 @@ export default function Selector({selected, setSelected, search, symbol = "@", d
   return (
     <div ref={refs.setReference} className="flex items-center" onFocus={() => setFocused(true)} onBlur={handleOnBlur} >
       <p className={"font-semibold w-4 text-center " + (selected.locked ? "text-blue-500" : "z-20 ml-4")}>{symbol}</p>
-      <span ref={spanRef} className="absolute invisible whitespace-pre">{query || " "}</span>
       {!selected.locked ?
         <input type="text" className="textfield w-32 p-1 pl-6 ml-[-1.3rem] rounded-[0.2rem]"
           value={query} onChange={(e) => setQuery(e.target.value)}
@@ -99,7 +93,7 @@ export default function Selector({selected, setSelected, search, symbol = "@", d
               onClick={() => handleSelectItem(item)}
               onMouseDown={(e) => e.preventDefault()} >
             <ProfilePicture path={search === "mygroups" ? "gp" : "pfp"} pfp={item._id} className="w-10" />
-            <p className="w-full">{item.name}</p>
+            <p className="w-full max-w-md truncate">{item.name}</p>
           </div>
         ))}
       </div>}

@@ -40,7 +40,7 @@ export default function JoinButton({ group, logged }) {
 
   const getButton = () => {
     if (group.member) return <button onClick={handleLeave} className="button">Leave group</button>
-    if (group.banned) return <div className="button hover:bg-slate-800 hover:border-slate-700">Banned</div>
+    if (group.banned) return <div className="button hover:bg-slate-800 hover:border-slate-700 cursor-default">Banned</div>
     if (group.requestJoin) return <button onClick={handleRequest} className="button">Request join</button>
     return <button onClick={handleJoin} className="button">Join</button>
   }

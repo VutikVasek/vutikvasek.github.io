@@ -113,15 +113,15 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, lighter, classNa
             <p> pinned post</p>
           </div>
         )}
-        <SmartLink to={`/u/${encodeURIComponent(post.author.username)}`} className='flex items-center gap-2 w-fit'>
+        <SmartLink to={`/u/${encodeURIComponent(post.author.username)}`} className='flex items-center gap-2 w-fit max-w-full'>
           <ProfilePicture pfp={post.author.pfp} className="w-10" />
-          <div>
-            <p className="text-md font-semibold hover:underline underline-offset-2">{post.author.username}</p>
+          <div className='max-w-[calc(100%-3rem)] whitespace-nowrap'>
+            <p className="text-md font-semibold hover:underline underline-offset-2 truncate">{post.author.username}</p>
             <p className='text-xs text-slate-400'>{formatRelativeTime(post.createdAt)}</p>
           </div>
         </SmartLink>
         {post.groups?.length > 0 && 
-        <div className='flex gap-2'>
+        <div className='flex gap-2 whitespace-nowrap max-w-full [&>*]:truncate flex-wrap'>
           {post.groups.map((group, index) => {
             if (group._id) return (
               <SmartLink to={`/g/${encodeURIComponent(group.name)}`} className='link' key={index}>&{group.name}</SmartLink>
@@ -133,7 +133,7 @@ const Post = React.forwardRef(({ post, cut, bar = true, pinned, lighter, classNa
         </div>
         }
         {post.mentions?.length > 0 && 
-        <div className='flex gap-2'>
+        <div className='flex gap-2 whitespace-nowrap max-w-full [&>*]:truncate flex-wrap'>
           {post.mentions.map((mention, index) => {
             if (mention._id) return (
               <SmartLink to={`/u/${encodeURIComponent(mention.username)}`} className='link' key={index}>@{mention.username}</SmartLink>

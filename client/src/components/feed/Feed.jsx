@@ -45,6 +45,7 @@ export default function Feed({url, reloadState, query, showReplies = false, defa
   };
   
   useEffect(() => {
+    console.log("will i load?", page);
     if (page != 1)
       loadPosts();
   }, [page]);
@@ -58,7 +59,9 @@ export default function Feed({url, reloadState, query, showReplies = false, defa
 
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver((entries) => {
+      console.log(entries, entries.length, "x");
       if (entries[0].isIntersecting) {
+        console.log("new page", entries[0].target.innerText);
         setPage((prev) => prev + 1);
       }
     });

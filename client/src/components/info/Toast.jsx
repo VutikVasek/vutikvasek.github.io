@@ -38,8 +38,8 @@ export default function Toast({ text, color, reshow, ...params }) {
   }, [text, color, reshow])
 
   return (
-    <div className="relative">
-      <div className="fixed bottom-0 bg-slate-700 p-2 mb-2 right-[-10rem] rounded-l-md" style={{color: {color}}} {...params} ref={toast}>
+    <div className="relative stiff">
+      <div className="fixed bottom-0 bg-slate-700 p-2 mb-2 right-[-10rem] rounded-l-md stiff" style={{color: {color}}} {...params} ref={toast}>
         {text}
       </div>
     </div>
