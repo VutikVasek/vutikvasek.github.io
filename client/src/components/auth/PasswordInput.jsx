@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { BiShowAlt } from "react-icons/bi";
 import { BiHide } from "react-icons/bi";
+import Descriptor from "../info/Descriptor";
 
 export default function PasswordInput({...params}) {
   const input = useRef(null);
@@ -18,13 +19,15 @@ export default function PasswordInput({...params}) {
         ref={input}
         {...params}
       />
-      <div onClick={() => setShow(prev => !prev)}>
-        {
-          show ?
-          <BiHide /> :
-          <BiShowAlt />
-        }
-      </div>
+      <Descriptor text={show ? "Hide" : "Show"} className="rounded-full">
+        <div onClick={() => setShow(prev => !prev)} className="p-2 hover:bg-slate-900 cursor-pointer rounded-full">
+          {
+            show ?
+            <BiHide /> :
+            <BiShowAlt />
+          }
+        </div>
+      </Descriptor>
     </div>
   )
 }

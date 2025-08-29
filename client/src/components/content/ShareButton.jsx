@@ -21,7 +21,7 @@ export default function ShareButton({ url }) {
   }
 
   return (
-    <Descriptor text={"Share"}>
+    <Descriptor text={"Share"} className="rounded-full">
       <div onClick={handleClick} 
           className={'cursor-pointer p-2 rounded-full hover:bg-slate-800 text-gray-500 hover:text-white'}>
         <LuShare2 />

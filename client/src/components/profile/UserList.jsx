@@ -95,8 +95,8 @@ const { showInfoToast } = useAppContext();
 
   return (
     <div className={"w-full flex flex-col justify-center " + className}>
-      {query == null &&<Descriptor text="Back" offset="-1rem">
-        <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button>
+      {query == null &&<Descriptor text="Back" offset="-1rem" className="rounded-full">
+        <button onClick={() => navigate(source || -1)} className="p-3 m-1 text-xl rounded-full hover:bg-slate-900"><IoMdArrowRoundBack /></button>
       </Descriptor>}
       <p>{users.length === 0 && ('No one yet!')}</p>
       <div className="mx-auto w-full">

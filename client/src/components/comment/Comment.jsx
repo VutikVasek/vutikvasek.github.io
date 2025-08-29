@@ -129,7 +129,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
             <div className='flex gap-6 items-center mt-2'>
               <LikeButton liked={liked} hovered={hovered} setHovered={setHovered} handleLike={handleLike} likes={likes} />
               { !link && (
-                <Descriptor text={showComments ? "Hide comments" : "Comments"}>
+                <Descriptor text={showComments ? "Hide comments" : "Comments"} className="rounded-full">
                   <div className='cursor-pointer flex gap-2 items-center group/commentcount ' 
                       onClick={() => setShowComments(val => !val)}>
                     <div className="p-2 rounded-full text-gray-500 group-hover/commentcount:bg-slate-800 group-hover/commentcount:text-white">
@@ -139,7 +139,7 @@ export default function Comment({ comment, link, pinned, pinnedTree, postId }) {
                   </div>
                 </Descriptor>
               )}
-              <Descriptor text={!replying && "reply"}>
+              <Descriptor text={!replying && "reply"} className="rounded-full">
                 <div className='cursor-pointer items-center p-2 rounded-full hover:bg-slate-800 text-gray-500 hover:text-white' onClick={() => setReplying(val => !val)}>
                   <FaReply />
                 </div>

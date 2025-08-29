@@ -64,8 +64,8 @@ export default function GroupList({url, source, setGroupsParent, reloadState, qu
   return (
     <div className={"w-full flex flex-col justify-center " + className}>
       {source && 
-      <Descriptor text="Back" offset="-1rem">
-        <button onClick={() => navigate(source || -1)} className="p-4 text-xl"><IoMdArrowRoundBack /></button> 
+      <Descriptor text="Back" offset="-1rem" className="rounded-full">
+        <button onClick={() => navigate(source || -1)} className="p-3 m-1 text-xl hover:bg-slate-900 rounded-full"><IoMdArrowRoundBack /></button> 
       </Descriptor>}
       <p>{groups?.length === 0 && ('No one yet!')}</p>
       <div className={horizontal ? "flex" : "mx-auto w-full"}>

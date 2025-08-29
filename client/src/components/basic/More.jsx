@@ -9,7 +9,7 @@ export default function More({ children }) {
   const [showMore, setShowMore] = useState(false);
 
   return (
-    <Descriptor text={!showMore && "More"}>
+    <Descriptor text={!showMore && "More"} className="rounded-full">
       <div className="h-full aspect-square">
         <button className="h-full w-full  p-2 rounded-full hover:bg-slate-800 text-gray-500 hover:text-white" 
             onClick={(e) => {e.stopPropagation(); setShowMore(val => !val)}}>

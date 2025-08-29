@@ -77,7 +77,11 @@ export default function GroupPage({}) {
                   <SmartLink to={`/post?g=${encodeURIComponent(groupname)}`} className="button inline-block">Post on group</SmartLink>
                   }
                 </div>
-                {group.owner && <SettingsButton to={`/g/${encodeURIComponent(group.name)}/settings`} />}
+                {group.owner && 
+                <div className="flex items-center">
+                  <div className="w-0 overflow-hidden"><div className="button">I</div></div>
+                  <SettingsButton to={`/g/${encodeURIComponent(group.name)}/settings`} />
+                </div>}
               </div>
               <div className="flex gap-8 mt-2 mb-8 underline-offset-2 [&>*:hover]:underline">
                 <SmartLink to={`/g/${encodeURIComponent(group.name)}/members`} className="group/members">

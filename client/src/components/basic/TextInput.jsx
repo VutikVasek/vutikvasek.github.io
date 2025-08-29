@@ -90,7 +90,7 @@ export default function TextInput({text, setText, setDBMentions, setDBGroups,
               destroy={() => setGroups(prev => prev.filter((_, i) => i !== index))}
               onEnter={(e) => { e.preventDefault(); textareaRef.current?.focus() }} />
         ))}
-        <button onClick={addGroup} className="text-slate-300 ml-2">Add group</button>
+        <button onClick={addGroup} className="text-slate-300 ml-2 hover:bg-slate-900 p-2 rounded-md">Add group</button>
       </div>
       }
       <div className="flex mb-2">
@@ -100,7 +100,7 @@ export default function TextInput({text, setText, setDBMentions, setDBGroups,
               } key={index} destroy={() => setMentions(prev => prev.filter((_, i) => i !== index))}
               onEnter={(e) => { e.preventDefault(); textareaRef.current?.focus() }} />
         ))}
-        <button onClick={addMention} className="text-slate-300 ml-2">Add mention</button>
+        <button onClick={addMention} className="text-slate-300 ml-2 hover:bg-slate-900 p-2 rounded-md">Add mention</button>
       </div>
       <div className="flex gap-4">
         <textarea
