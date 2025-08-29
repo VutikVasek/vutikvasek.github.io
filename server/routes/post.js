@@ -11,12 +11,16 @@ import Notification from '../models/Notification.js';
 import Follow from '../models/Follow.js';
 import Group from '../models/Group.js';
 import { notify, userValidFor } from './group.js';
+import { validatePost } from '../../validate.js';
 
 const router = express.Router();
 
 // Post
 router.post('/', verifyToken, async (req, res) => {
   try {
+    const validated = validatePost(req.body.text);
+    if (validated) return res.status(400).json({ message: validated });
+
     const user = await User.findById(req.user._id);
     user.postTimes = getTimes(user.postTimes);
     if (user.postTimes.length > 30) return res.status(400).json({message: "You can only post up to 30 times per half an hour."})

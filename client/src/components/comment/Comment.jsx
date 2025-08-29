@@ -1,7 +1,7 @@
 import { FaCommentMedical, FaHeart, FaRegHeart, FaReply } from "react-icons/fa";
 import { useRef, useState } from "react";
 import { formatRelativeTime } from "../../tools/time";
-import { validateComment } from "../../tools/validate";
+import { validateComment } from '^/validate';
 import CommentThread from "./CommentThread";
 import More from "../basic/More";
 import DeleteButton from "../basic/DeleteButton";

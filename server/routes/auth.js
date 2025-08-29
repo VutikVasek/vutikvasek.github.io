@@ -7,6 +7,7 @@ import crypto from 'crypto';
 import User from '../models/User.js';
 import { OAuth2Client } from 'google-auth-library';
 import { getVerificationEmail, sendEmail } from '../tools/mailer.js';
+import { isValidEmail, validatePassword, validateUsername } from '../../validate.js';
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // import { sendVerificationEmail } from '../middleware/mailer.js';import nodemailer from 'nodemailer';
 
@@ -16,6 +17,14 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Signup
 router.post('/signup', async (req, res) => {
   const { username, email, password } = req.body;
+  
+  const validatedUsername = validateUsername(username);
+  if (validatedUsername) return res.status(400).json({ message: validatedUsername });
+
+  if (!isValidEmail(email)) return res.status(400).json({ message: "Please enter a valid email" });
+
+  const validatedPassword = validatePassword(password);
+  if (validatedPassword) return res.status(400).json({ message: validatedPassword });
 
   const correctedEmail = email.toLowerCase();
 

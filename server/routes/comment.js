@@ -8,6 +8,7 @@ import { NotificationContext, NotificationType } from '../../shared.js';
 import User from '../models/User.js';
 import { formatComment } from '../tools/formater.js';
 import mongoose from 'mongoose';
+import { validateComment } from '../../validate.js';
 
 const router = express.Router();
 
@@ -16,6 +17,9 @@ router.post('/', verifyToken, async (req, res) => {
   try {
     const parentId = req.body.parent;
     if (!mongoose.Types.ObjectId.isValid(parentId)) return res.status(400).json({message: "Invalid parent"});
+
+    const validated = validateComment(req.body.text);
+    if (validated) return res.status(400).json({ message: validated });
 
     const user = await User.findById(req.user._id);
     user.commentTimes = getTimes(user.commentTimes);

@@ -8,6 +8,7 @@ import Follow from '../models/Follow.js';
 import Notification from '../models/Notification.js';
 import fs from 'fs/promises';
 import Group from '../models/Group.js';
+import { isValidEmail, validateBio, validatePassword, validateUsername } from '../../validate.js';
 
 const router = express.Router();
 
@@ -46,6 +47,9 @@ router.patch('/notifications', verifyToken, async (req, res) => {
 
 // Change username
 router.patch('/changeusername', verifyToken, async (req, res) => {
+  const validated = validateUsername(req.body.newUsername);
+  if (validated) return res.status(400).json({ message: validated });
+
   const regex = new RegExp(`^${req.body.newUsername}$`, 'i');
 
   const existing = await User.findOne({ username: regex });
@@ -69,6 +73,9 @@ router.patch('/changeusername', verifyToken, async (req, res) => {
 router.patch('/changepassword', verifyToken, async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
+  const validated = validatePassword(newPassword);
+  if (validated) return res.status(400).json({ message: validated });
+
   const user = await User.findById(req.user._id);
 
   if (!user) {
@@ -88,6 +95,9 @@ router.patch('/changepassword', verifyToken, async (req, res) => {
 // Change email
 router.patch('/changeemail', verifyToken, async (req, res) => {
   const { email, password } = req.body;
+
+  if (!isValidEmail(email)) return res.status(400).json({ message: "Please enter a valid email" });
+
   const existing = await User.findOne({ email });
   if (existing) {
     const itsme = await User.findOne({ email, _id: req.user._id });
@@ -121,6 +131,9 @@ router.patch('/changeemail', verifyToken, async (req, res) => {
 
 // Update bio
 router.patch('/changebio', verifyToken, async (req, res) => {
+  const validated = validateBio(req.body.bio);
+  if (validated) return res.status(400).json({ message: validated });
+
   try {
     await User.findByIdAndUpdate(req.user._id, {bio: req.body.bio});
     return res.json({ message: 'Bio updated' });

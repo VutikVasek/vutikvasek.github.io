@@ -9,11 +9,19 @@ import Post from '../models/Post.js';
 import Notification from '../models/Notification.js';
 import { GroupNotification, NotificationType } from '../../shared.js';
 import { formatPost } from '../tools/formater.js';
+import { validateDescription, validateGroupName } from '../../validate.js';
 
 const router = express.Router();
 
 router.post('/', verifyToken, async (req, res) => {
   const { name, description, isPrivate, requestJoin, everyoneCanPost } = req.body;
+
+  const validatedName = validateGroupName(name);
+  if (validatedName) return res.status(400).json({ message: validatedName });
+  
+  const validatedDes = validateDescription(description);
+  if (validatedDes) return res.status(400).json({ message: validatedDes });
+  
   const userId = req.user._id;
   try {
     const ownedGroups = await Group.countDocuments({ owner: userId });
@@ -84,6 +92,13 @@ router.post('/:groupId/update', verifyToken, async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(groupId)) return res.status(400).json({message: "Invalid group id"});
   const { name, description, isPrivate, requestJoin, everyoneCanPost } = req.body;
   const userId = req.user._id;
+
+  const validatedName = validateGroupName(name);
+  if (validatedName) return res.status(400).json({ message: validatedName });
+  
+  const validatedDes = validateDescription(description);
+  if (validatedDes) return res.status(400).json({ message: validatedDes });
+
   try {
     const group = await Group.findById(groupId);
     if (!group) return res.status(404).json({ message: "We didn't find a group with the name " + groupname });

@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useParams, useSearchParams } from "react-router-dom"
 import Post from "../components/post/Post";
 import CommentThread from "../components/comment/CommentThread";
-import { validateComment } from "../tools/validate";
+import { validateComment } from '^/validate';
 import Sorter from "../components/basic/Sorter";
-import MediaSelector from "@/components/media/MediaSelector";
 import TextInput from "@/components/basic/TextInput";
 import { Helmet } from "react-helmet-async";
 const API = import.meta.env.VITE_API_BASE_URL;

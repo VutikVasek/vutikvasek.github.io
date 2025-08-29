@@ -3,6 +3,7 @@ import { useAppContext } from "@/context/AppContext";
 import { useNavigate } from "react-router-dom";
 import ProfilePicture from "../media/ProfilePicture";
 import { useEffect, useState } from "react";
+import { validateDescription, validateGroupName } from '^/validate';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function GroupSettings({ group }) {
@@ -19,6 +20,12 @@ export default function GroupSettings({ group }) {
 
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+
+    const verifiedName = validateGroupName(data.name);
+    if (verifiedName) return showErrorToast(verifiedName);
+
+    const verifiedDescription = validateDescription(data.description);
+    if (verifiedDescription) return showErrorToast(verifiedDescription);
     
     const res = await fetch(`${API}/group${group ? `/${encodeURIComponent(group._id)}/update` : ""}`, {
       method: 'POST',
@@ -76,11 +83,13 @@ export default function GroupSettings({ group }) {
           <div className="flex flex-col justify-end gap-4">
             <div className="flex gap-4 items-center">
               <p>Name:</p>
-              <input type="text" name="name" id="name" className="textfield p-2 rounded-[0.25rem]" defaultValue={group?.name ?? ''} placeholder="Group name" required />
+              <input type="text" name="name" id="name" className="textfield p-2 rounded-[0.25rem]" maxLength={32} defaultValue={group?.name ?? ''} 
+                  placeholder="Group name" required />
             </div>
             <div className="flex gap-4 items-center">
               <p>Description:</p>
-              <input type="text" name="description" id="description" className="textfield p-2 rounded-[0.25rem]" maxLength={100} defaultValue={group?.description ?? ''} placeholder="Grroup description" />
+              <input type="text" name="description" id="description" className="textfield p-2 rounded-[0.25rem]" maxLength={100} 
+                  defaultValue={group?.description ?? ''} placeholder="Group description" />
             </div>
           </div>
         </div>

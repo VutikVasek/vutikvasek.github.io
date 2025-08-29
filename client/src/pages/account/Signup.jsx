@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GoogleLoginButton from '../../components/auth/GoogleLogin';
-import { validatePassword, validateUsername } from '../../tools/validate';
+import { validatePassword, validateUsername } from '^/validate';
 import PasswordInput from '@/components/auth/PasswordInput';
 import { Helmet } from 'react-helmet-async';
 const API = import.meta.env.VITE_API_BASE_URL;

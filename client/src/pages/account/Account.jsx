@@ -10,6 +10,7 @@ import { PiSignIn, PiSignInBold } from 'react-icons/pi';
 import ProfilePicture from '@/components/media/ProfilePicture';
 import ProfilePictureUpload from '@/components/media/ProfilePictureUpload';
 import { Helmet } from 'react-helmet-async';
+import { validateBio } from '^/validate';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Account() {
@@ -50,6 +51,9 @@ export default function Account() {
   }
 
   const handleUpdateBio = async () => {
+    const validated = validateBio(bio);
+    if (validated) return setBioError(validated);
+    
     const res = await fetch(`${API}/account/changebio`, {
       method: 'PATCH',
       headers: { 
