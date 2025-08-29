@@ -24,7 +24,7 @@ export default function Credentials() {
   const [oldPassword, setOldPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   
-  const { logout } = useAuth();
+  const { logout, setUsername } = useAuth();
   const navigate = useNavigate();
 
   const loadAccountInfo = async () => {
@@ -68,8 +68,8 @@ export default function Credentials() {
     if (res.ok) {
       setChangingUsername(false);
       setUsernameError('');
+      setUsername(newUsername)
       setNewUsername('');
-      localStorage.setItem('username', newUsername);
       loadAccountInfo();
     } else {
       setUsernameError(data.message || 'Server Error.');

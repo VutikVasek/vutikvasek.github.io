@@ -25,8 +25,13 @@ export const AuthProvider = ({ children }) => {
     setId(null);
   };
 
+  const setUsername = (username) => {
+    setUser(username);
+    localStorage.setItem('username', username);
+  }
+
   return (
-    <AuthContext.Provider value={{ token, login, logout, isLoggedIn: !!token, user, id }}>
+    <AuthContext.Provider value={{ token, login, logout, isLoggedIn: !!token, user, id, setUsername }}>
       {children}
     </AuthContext.Provider>
   );
