@@ -6,6 +6,7 @@ import fs from 'fs';
 import { verifyToken } from '../middleware/auth.js';
 import Group from '../models/Group.js';
 import mongoose from 'mongoose';
+import User from '../models/User.js';
 
 const router = express.Router();
 
@@ -37,6 +38,9 @@ router.post('/pfp', verifyToken, upload.single('pfp'), async (req, res) => {
 
 router.post('/image', verifyToken, upload.single('image'), async (req, res) => {
   try {
+    const user = await User.findById(req.user._id).select('email');
+    if (user.email !== "vutik.vasek@gmail.com") return res.status(400).json({ message: "You cannot upload images" });
+
     const outputPath = path.join('media', 'image', `${req.body.id + req.body.index}.webp`);
 
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
