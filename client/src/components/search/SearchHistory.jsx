@@ -1,4 +1,4 @@
-import { useAppContext } from "@/context/AppContext"
+import { useAppContext, useSearchHistory } from "@/context/AppContext"
 import ProfilePicture from "../media/ProfilePicture";
 import { Fragment, useEffect, useState } from "react";
 import { IoMdClose } from "react-icons/io";
@@ -6,7 +6,8 @@ import SmartLink from "../basic/SmartLink";
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function SearchHistory({}) {
-  const { searchHistory, deleteFromSearchHistory, clearSearchHistory } = useAppContext();
+  const { deleteFromSearchHistory, clearSearchHistory } = useAppContext();
+  const searchHistory = useSearchHistory();
   const [names, setNames] = useState([]);
 
   const getName = id => names.find(obj => obj.id === id)?.name ?? "<deleted>";

@@ -5,10 +5,13 @@ import JoinButton from "@/components/group/JoinButton";
 import ProfilePicture from "@/components/media/ProfilePicture";
 import Post from "@/components/post/Post";
 import UserList from "@/components/profile/UserList";
+import { allowScroll, disableScroll } from "@/tools/document";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router-dom";
+import Lightbox from "yet-another-react-lightbox";
 const API = import.meta.env.VITE_API_BASE_URL;
+const MEDIA = import.meta.env.VITE_MEDIA_BASE_URL;
 
 export default function GroupPage({}) {
   const { groupname, show } = useParams();
@@ -16,6 +19,7 @@ export default function GroupPage({}) {
   const [deleted, setDeleted] = useState();
   const [date, setDate] = useState('');
   const [pinnedPost, setPinnedPost] = useState();
+  const [openGp, setOpenGp] = useState(false);
 
   const loadGroup = async () => {
     if (groupname == "<deleted>") {
@@ -65,7 +69,18 @@ export default function GroupPage({}) {
       </Helmet>
       <div className="flex flex-col mt-6">
               <div className="flex m-4 gap-8 items-end">
-                <ProfilePicture path="gp" pfp={group._id} className="w-36 self-start" />
+                <div className="flex m-4 gap-8 items-end">
+                  <ProfilePicture path="gp" pfp={group._id} className="w-36 cursor-pointer self-start" onClick={() => { setOpenGp(true); disableScroll() }} />
+                  <div className="hidden">
+                    <Lightbox 
+                      slides={[{ src: `${MEDIA}/gp/${encodeURIComponent(group._id)}.jpeg` }]}
+                      open={openGp}
+                      close={() => { setOpenGp(false); allowScroll() }}
+                      index={0}
+                      controller={{closeOnPullUp: true, closeOnPullDown: true, closeOnBackdropClick: true}}
+                        />
+                  </div>
+                </div>
                 <div className="max-w-[calc(100%-11rem)]">
                   <p className="text-4xl font-semibold break-words">{group.name}</p>
                   <p className="whitespace-pre-wrap mt-1 max-w-max overflow-x-clip break-words">{group.description}</p>

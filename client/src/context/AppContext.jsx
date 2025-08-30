@@ -1,7 +1,8 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useAuth } from './AuthContext';
 
 export const AppContext = createContext();
+export const SearchHistoryContext = createContext();
 
 export const AppProvider = ({children}) => {
   const [toastText, setToastText] = useState('');
@@ -18,9 +19,9 @@ export const AppProvider = ({children}) => {
     setToastReshow(val => !val);
   }
 
-  const [searchHistory, setSearchHistory] = useState(JSON.parse(localStorage.getItem('searches')));
+  const [searchHistory, setSearchHistory] = useState([]);
 
-  const addToSearchHistory = (obj) => {
+  const addToSearchHistory = useCallback((obj) => {
     const idPairs = JSON.parse(localStorage.getItem('searches')) || [];
     if (!idPairs.some(obj => obj.id === id)) idPairs.push({ id, history: [] });
     const history = idPairs.find(obj => obj.id === id)?.history || [];
@@ -29,7 +30,7 @@ export const AppProvider = ({children}) => {
     idPairs.find(obj => obj.id === id).history = newHistory;
     localStorage.setItem('searches', JSON.stringify(idPairs));
     setSearchHistory(newHistory);
-  }
+  }, []);
 
   const deleteFromSearchHistory = (index) => {
     const idPairs = JSON.parse(localStorage.getItem('searches'));
@@ -57,13 +58,22 @@ export const AppProvider = ({children}) => {
     setSearchHistory(history);
   }, [id])
 
+  const value = useMemo(
+    () => ({ 
+      showInfoToast, showErrorToast, toastText, toastColor, toastReshow, 
+        addToSearchHistory, deleteFromSearchHistory, clearSearchHistory
+     }),
+     [toastText, toastColor, toastReshow]
+  );
+
   return (
-    <AppContext.Provider value={{
-        showInfoToast, showErrorToast, toastText, toastColor, toastReshow, 
-        searchHistory, addToSearchHistory, deleteFromSearchHistory, clearSearchHistory}}>
-      { children }
-    </AppContext.Provider>
+    <SearchHistoryContext.Provider value={searchHistory}>
+      <AppContext.Provider value={value}>
+        { children }
+      </AppContext.Provider>
+    </SearchHistoryContext.Provider>
   )
 }
 
 export const useAppContext = () => useContext(AppContext);
+export const useSearchHistory = () => useContext(SearchHistoryContext);

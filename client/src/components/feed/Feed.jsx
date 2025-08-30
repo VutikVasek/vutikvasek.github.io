@@ -17,6 +17,7 @@ export default function Feed({url, reloadState, query, showReplies = false, defa
   const [page, setPage] = useState(1);
   
   const loadPosts = async (reload) => {
+    if (reload) setPage(1);
     // console.log(url + `?page=${reload ? 1 : page}&limit=4&sort=${sort}&time=${timeframe}&${query}`);
     const res = await fetch(url + `?page=${reload ? 1 : encodeURIComponent(page)}&limit=4&sort=${encodeURIComponent(sort)}&time=${encodeURIComponent(timeframe)}&${query}`, {
       method: 'GET',
@@ -30,7 +31,6 @@ export default function Feed({url, reloadState, query, showReplies = false, defa
     if (res.ok) {
       if (reload) {
         setPosts(data.posts);
-        setPage(1);
       } else {
         setPosts((prev) => [...prev, ...data.posts].filter(post => post).filter(
             (post, index, self) => index === self.findIndex(p => p._id === post._id)
@@ -45,7 +45,6 @@ export default function Feed({url, reloadState, query, showReplies = false, defa
   };
   
   useEffect(() => {
-    console.log("will i load?", page);
     if (page != 1)
       loadPosts();
   }, [page]);
@@ -59,9 +58,7 @@ export default function Feed({url, reloadState, query, showReplies = false, defa
 
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver((entries) => {
-      console.log(entries, entries.length, "x");
       if (entries[0].isIntersecting) {
-        console.log("new page", entries[0].target.innerText);
         setPage((prev) => prev + 1);
       }
     });
