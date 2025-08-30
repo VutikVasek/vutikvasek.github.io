@@ -18,10 +18,10 @@ export default function Descriptor({ text, children, offset = "0px", className, 
   }, [hovered])
 
   return (
-    <div className={"flex flex-col items-center w-fit z-40 " + className} {...params} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+    <div className={"flex flex-col items-center w-fit " + className} {...params} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
       {children}
       {show && (
-        <div className="w-0 h-0 overflow-visible flex justify-center">
+        <div className="w-0 h-0 overflow-visible flex justify-center z-40">
           <div className="bg-slate-700 relative w-fit h-fit py-1 px-2 text-sm mt-1 whitespace-nowrap rounded-sm" style={{ top: offset }}>
             {text}
           </div>

@@ -16,7 +16,7 @@ export default function Dropdown({ set, get, close, children}) {
       {show && 
         <div className="w-0 h-0 overflow-visible">
           <FullScreen onClick={() => setShow(false)} />
-          <div className="bg-slate-800 w-fit relative flex flex-col whitespace-nowrap z-50 gap-0 rounded-md">
+          <div className="bg-slate-800 w-fit relative flex flex-col whitespace-nowrap z-30 gap-0 rounded-md">
             {children.map((pair, index) => 
               <Fragment key={index}>
               <button onClick={() => {set(pair[0]), setShow(false)}} 
