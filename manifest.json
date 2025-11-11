@@ -1,0 +1,7 @@
+{
+  "name": "Vutink",
+  "short_name": "Vutink",
+  "background_color": "#0f172b",
+  "theme_color": "#0f172b",
+  "display": "standalone"
+}
