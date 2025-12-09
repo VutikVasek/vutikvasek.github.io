@@ -4,6 +4,7 @@ self.addEventListener("push", event => {
     self.registration.showNotification(data.title || "Vutink notification", {
       body: data.body || data.text || "",
       icon: "/assets/logo_x512.png",
+      badge: "/assets/logo_x512.png",
       data: { url: data.url }
     })
   );
