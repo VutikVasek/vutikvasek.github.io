@@ -1,8 +1,9 @@
 self.addEventListener("push", event => {
   const data = event.data?.json() || {};
+  console.log(data);
   event.waitUntil(
     self.registration.showNotification(data.title || "Vutink notification", {
-      body: data.body || data.text || "",
+      body: data.body || "",
       icon: "/assets/logo_x512.png",
       badge: "/assets/logo_x512.png",
       data: { url: data.url }
